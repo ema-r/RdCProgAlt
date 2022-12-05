@@ -15,7 +15,10 @@ services:
       - node3
     ports:
       - "8080:80"
-      - "443:443"
+      - "8443:443"
+    restart: always
+    volumes:
+      -./nginx/cert:/etc/nginx/certs
     networks:
       - app-network
 
