@@ -18,7 +18,7 @@ services:
       - "8443:443"
     restart: always
     volumes:
-      -./nginx/cert:/etc/nginx/certs
+      - ./nginx/cert:/etc/nginx/certs
     networks:
       - app-network
 
@@ -30,6 +30,7 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
+      
     environment:
       - INSTANCE=node1
     depends_on:
