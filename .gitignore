@@ -1,6 +1,7 @@
 # directories
 server/node_modules
 server/public/uploads
+nginx/cert
 
 # files
 server/config/.env
