@@ -16,6 +16,7 @@ services:
     ports:
       - "8080:80"
       - "8443:443"
+    restart: always
     networks:
       - app-network
     volumes:
@@ -29,6 +30,7 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
+      
     environment:
       - INSTANCE=node1
     depends_on:
