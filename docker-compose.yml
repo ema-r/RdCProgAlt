@@ -15,12 +15,9 @@ services:
       - node3
     ports:
       - "8080:80"
-      - "8443:443"
-    restart: always
+      - "443:443"
     networks:
       - app-network
-    volumes:
-      - ./nginx/cert:/etc/nginx/certs
 
   node1:
     build:
@@ -29,9 +26,7 @@ services:
     volumes:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
-      - /usr/src/app/node_modules  
-    ports:
-      - "5000"
+      - /usr/src/app/node_modules
     environment:
       - INSTANCE=node1
     depends_on:
@@ -47,8 +42,6 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
-    ports:
-      - "5000"
     environment:
       - INSTANCE=node2
     depends_on:
@@ -64,8 +57,6 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
-    ports:
-      - "5000"
     environment:
       - INSTANCE=node3
     depends_on:
@@ -74,7 +65,7 @@ services:
       - app-network
 
   mongo:
-    image: mongo:4.4.6
+    image: mongo
     networks:
       - app-network
 

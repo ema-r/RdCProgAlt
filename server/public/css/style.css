@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital@0;1&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+}
+
+body {
+  height: auto;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+footer {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+footer .container-md span {
+  font-size: 12px;
+}
+
+.col-lg-9 .d-flex {
+  background-image: url("https://images.unsplash.com/photo-1622929610538-fc41bdce80c6?crop=entropy&cs=tinysrgb&fm=jpg&ixlib=rb-1.2.1&q=80&raw_url=true&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 500px !important;
+}
+
+.link-dark {
+  text-decoration: none;
+}
+
+.link-dark:hover {
+  color: rgba(0, 200, 255, 0.85) !important;
+}
+
+.col-lg-4 .picture {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100px;
+  height: 100px;
+}
+
+.col-lg-4:nth-child(1) .picture {
+  background-image: url("../img/profile.jpg");
+}
+
+.col-lg-4:nth-child(2) .picture {
+  background-image: url("../img/profile2.jpg");
+}
+
+.col-lg-4:nth-child(3) .picture {
+  background-image: url("../img/profile3.jpg");
+}
+
+.col-lg-4 .picture:hover {
+  transform: scale(1.05);
+}
+
+main {
+  min-height: 100%;
+}
+
+.img-thumbnails {
+  height: 150px !important;
+  width: 150px !important;
+  border: 1px solid rgb(0, 0, 0);
+}
+
+form textarea {
+  resize: none;
+}
+
+form textarea:focus {
+  background-color: rgba(0, 0, 0, 0.05);
+}
