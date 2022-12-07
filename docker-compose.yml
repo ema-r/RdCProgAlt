@@ -16,11 +16,10 @@ services:
     ports:
       - "8080:80"
       - "8443:443"
-    restart: always
-    volumes:
-      -./nginx/cert:/etc/nginx/certs
     networks:
       - app-network
+    volumes:
+      - ./nginx/cert:/etc/nginx/certs
 
   node1:
     build:
