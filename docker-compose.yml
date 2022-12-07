@@ -29,8 +29,9 @@ services:
     volumes:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
-      - /usr/src/app/node_modules
-      
+      - /usr/src/app/node_modules  
+    ports:
+      - "5000"
     environment:
       - INSTANCE=node1
     depends_on:
@@ -46,6 +47,8 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
+    ports:
+      - "5000"
     environment:
       - INSTANCE=node2
     depends_on:
@@ -61,6 +64,8 @@ services:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
       - /usr/src/app/node_modules
+    ports:
+      - "5000"
     environment:
       - INSTANCE=node3
     depends_on:
