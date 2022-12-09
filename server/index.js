@@ -66,7 +66,7 @@ app.get('/test', (req, res) => {
 app.post('/test', function(req, res) {
 	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
 	console.log(item);
-	var slug = item.split('track/').pop()
+	var slug = item.split('track/').pop() //se vedi questo, git ha pullato correttase vedi questo, git ha pullato correttamentee
 	console.log(slug);
 });
 
