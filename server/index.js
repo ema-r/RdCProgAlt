@@ -62,6 +62,7 @@ app.use("/api-docs", express.static(path.join(__dirname, "/public/docs")));
 app.post('/', function(req, res) {
 	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
 	console.log(item);
+	console.log(test);
 });
 
 /* set connection with mongo */
