@@ -59,7 +59,11 @@ app.get("/", ensureUser, (req, res) => {
 /* get API docs */
 app.use("/api-docs", express.static(path.join(__dirname, "/public/docs")));
 
-app.post('/', function(req, res) {
+app.get('/test', (req, res) => {
+  res.render("test", {title: "test"});
+});
+
+app.post('/test', function(req, res) {
 	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
 	console.log(item);
 	var slug = item.split('track/').pop()
