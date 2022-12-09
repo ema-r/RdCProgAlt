@@ -37,7 +37,7 @@ app.set("view engine", "ejs");
 
 /* set middlewares */
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session(SESSION_OPTIONS));
@@ -58,6 +58,11 @@ app.get("/", ensureUser, (req, res) => {
 
 /* get API docs */
 app.use("/api-docs", express.static(path.join(__dirname, "/public/docs")));
+
+app.post('/', function(req, res) {
+	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
+	console.log(item);
+});
 
 /* set connection with mongo */
 mongoose
