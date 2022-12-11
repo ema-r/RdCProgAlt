@@ -6,3 +6,4 @@ nginx/cert
 # files
 server/config/.env
 server/package-lock.json
+docker-compose.yml
