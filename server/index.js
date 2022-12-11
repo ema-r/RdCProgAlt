@@ -66,8 +66,9 @@ app.get('/test', (req, res) => {
 app.post('/test', function(req, res) {
 	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
 	console.log(item);
-	var slug = item.split('track/').pop() //se vedi questo, git ha pullato correttase vedi questo, git ha pullato correttamentee
+	var slug = item.split('track/').pop();
 	console.log(slug);
+	console.log(findSongs(env.SPOTIFY_OAUTH_TOKEN, slug, 'IT'));
 });
 
 /* set connection with mongo */
@@ -82,3 +83,15 @@ mongoose
   .catch((err) => {
     console.error(err.message);
   });
+
+async function findSongs(token, song_id, market) {
+  var req_url = 'https://api.spotify.com/v1/tracks/' + song_id + '?market=' + market; 
+  let result = await api.request({
+   method: "get",
+   url: req_url,
+   headers: {'Authorization': 'Bearer ' + env.SPOTIFY_OAUTH_TOKEN }
+  }).catch(async function handleError(err) {
+   console.log(err);
+  })
+  return result.data;
+}
