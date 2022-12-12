@@ -55,7 +55,7 @@ app.use("/oauth/google", oauthRoutes);
 
 /* get root path */
 app.get("/", ensureUser, (req, res) => {
-  res.render("index", { title: "Socialify" });
+  res.render("index", { title: "SongLify" });
 });
 
 /* get API docs */
