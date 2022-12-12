@@ -5,9 +5,10 @@ const express = require("express");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const path = require("path");
+const http = require('http');
+const https = require('https');
 
 dotenv = require('dotenv').config();
-console.log(process.env)
 
 const passport = require("./config/passport");
 const { ensureUser } = require("./middlewares/auth");
@@ -69,7 +70,20 @@ app.post('/test', function(req, res) {
 	console.log(item);
 	var slug = item.split('track/').pop();
 	console.log(slug);
-	console.log(findSongs(process.env.SPOTIFY_OAUTH_TOKEN, slug, 'IT'));
+	var new_data='';
+	var api_data_input = {
+		hostname: 'api.spotify.com',
+		port: 443,
+		path: '/v1/tracks' + slug + '?market=' + 'IT',
+		method: 'GET',
+		headers: {
+			'Accept': 'application/json',
+			'Content-type': 'application/json',
+			'Authorization': 'Bearer ' + SPOT_TOKEN
+		}
+	};
+	callFindSongs(new_data, api_data_input);
+	console.log(new_data);
 });
 
 /* set connection with mongo */
@@ -85,14 +99,37 @@ mongoose
     console.error(err.message);
   });
 
-async function findSongs(token, song_id, market) {
-  var req_url = 'https://api.spotify.com/v1/tracks/' + song_id + '?market=' + market; 
-  let result = await app.request({
-   method: "get",
-   url: req_url,
-   headers: {'Authorization': 'Bearer ' + SPOT_TOKEN }
-  }).catch(async function handleError(err) {
-   console.log(err);
-  })
-  return result.data;
+async function callFindSongs(data, api_data) {
+	return await findSongs(data, api_data);
+}
+
+function findSongs(data, api_req_data) {
+//  var req_url = 'https://api.spotify.com/v1/tracks/' + song_id + '?market=' + market; 
+//  let result = await https.request({
+//   method: "get",
+//   url: req_url,
+//   headers: {'Authorization': 'Bearer ' + SPOT_TOKEN }
+//  }).catch(async function handleError(err) {
+//   console.log(err);
+//  })
+//  return result.data;
+  return new Promise((resolve, reject) => {
+	const request = https.request(api_req_data, (result) => {
+  		console.log('statusCode:', result.statusCode);
+		console.log('headers:', result.headers);
+		result.setEncoding('utf8');
+		let responseBody = '';
+
+     		result.on('data', (d) => {
+			responseBody += d;
+  	   	});
+		result.on('end', () => {
+			resolve(JSON.parse(responseBody));
+		});
+  	});
+  	request.on('error', (err) => {
+     		reject(err);
+  	});
+	request.write(data);
+  });
 }
