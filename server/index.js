@@ -74,7 +74,7 @@ app.post('/test', function(req, res) {
 	var api_data_input = {
 		hostname: 'api.spotify.com',
 		port: 443,
-		path: '/v1/tracks' + slug + '?market=' + 'IT',
+		path: '/v1/tracks/' + slug + '?market=' + 'IT',
 		method: 'GET',
 		headers: {
 			'Accept': 'application/json',
