@@ -1,11 +1,13 @@
 const bodyParser = require("body-parser");
 const MongoStore = require("connect-mongo");
 const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
 const express = require("express");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const path = require("path");
+
+dotenv = require('dotenv').config();
+console.log(process.env)
 
 const passport = require("./config/passport");
 const { ensureUser } = require("./middlewares/auth");
@@ -13,11 +15,10 @@ const homepageRoutes = require("./routes/homepage");
 const oauthRoutes = require("./routes/oauth");
 const apiRoutes = require("./routes/post");
 
-dotenv.config({ path: "./config/.env" });
-
 const INSTANCE = process.env.INSTANCE || "";
 const MONGO_URI = process.env.MONGO_URI || "";
 const PORT = process.env.PORT || 3000;
+const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 const SESSION_OPTIONS = {
   cookie: {
     /* cookie's lifetime: 4h */
@@ -68,7 +69,7 @@ app.post('/test', function(req, res) {
 	console.log(item);
 	var slug = item.split('track/').pop();
 	console.log(slug);
-	console.log(findSongs(env.SPOTIFY_OAUTH_TOKEN, slug, 'IT'));
+	console.log(findSongs(process.env.SPOTIFY_OAUTH_TOKEN, slug, 'IT'));
 });
 
 /* set connection with mongo */
@@ -86,10 +87,10 @@ mongoose
 
 async function findSongs(token, song_id, market) {
   var req_url = 'https://api.spotify.com/v1/tracks/' + song_id + '?market=' + market; 
-  let result = await api.request({
+  let result = await app.request({
    method: "get",
    url: req_url,
-   headers: {'Authorization': 'Bearer ' + env.SPOTIFY_OAUTH_TOKEN }
+   headers: {'Authorization': 'Bearer ' + SPOT_TOKEN }
   }).catch(async function handleError(err) {
    console.log(err);
   })
