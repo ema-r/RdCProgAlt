@@ -32,6 +32,18 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
+const spot_auth_options = {
+	url: 'https://accounts.spotify.com/api/token',
+	headers: {
+		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_CLIENT_ID 
+			+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64'))
+	},
+	form: {
+		grant_type: 'client_credentials'
+	},
+	json: true
+};
+
 const app = express();
 
 /* set view engine */
@@ -70,11 +82,11 @@ app.post('/test', function(req, res) {
 	console.log(item);
 	var slug = item.split('track/').pop();
 	console.log(slug);
-	var new_data='';
+	const new_data = '';
 	var api_data_input = {
 		hostname: 'api.spotify.com',
 		port: 443,
-		path: '/v1/tracks' + slug + '?market=' + 'IT',
+		path: '/v1/tracks/' + slug + '?market=' + 'IT',  //TO DO: IMPLEMENTARE GEOAPI
 		method: 'GET',
 		headers: {
 			'Accept': 'application/json',
@@ -116,20 +128,29 @@ function findSongs(data, api_req_data) {
   return new Promise((resolve, reject) => {
 	const request = https.request(api_req_data, (result) => {
   		console.log('statusCode:', result.statusCode);
-		console.log('headers:', result.headers);
 		result.setEncoding('utf8');
 		let responseBody = '';
 
      		result.on('data', (d) => {
+			console.log('receiving data')
 			responseBody += d;
   	   	});
 		result.on('end', () => {
+			console.log('end of data')
 			resolve(JSON.parse(responseBody));
 		});
   	});
   	request.on('error', (err) => {
-     		reject(err);
+     		console.log('errore');
+		reject(err);
   	});
 	request.write(data);
+	request.end();
   });
+}
+
+function refreshToken(option) {
+	var request = https.request(option, (result) => {
+		if (!error && )
+	})
 }
