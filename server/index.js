@@ -32,18 +32,23 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
-const spot_auth_options = {
+const spot_client_auth_options = {
 	url: 'https://accounts.spotify.com/api/token',
+	method: 'POST'
 	headers: {
 		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_CLIENT_ID 
-			+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64'))
+			+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
+		'Content-Type': 'application/x-www-form-urlencoded' 
 	},
 	form: {
 		grant_type: 'client_credentials'
 	},
 	json: true
 };
-
+var spot_client_token_info = {
+	'access_token' : '',
+	'expires_at' : 0
+};
 const app = express();
 
 /* set view engine */
@@ -82,6 +87,9 @@ app.post('/test', function(req, res) {
 	console.log(item);
 	var slug = item.split('track/').pop();
 	console.log(slug);
+
+	getSpotifyToken(spot_client_token_info, spot_client_auth_options);
+
 	const new_data = '';
 	var api_data_input = {
 		hostname: 'api.spotify.com',
@@ -91,9 +99,10 @@ app.post('/test', function(req, res) {
 		headers: {
 			'Accept': 'application/json',
 			'Content-type': 'application/json',
-			'Authorization': 'Bearer ' + SPOT_TOKEN
+			'Authorization': 'Bearer ' + spot_client_token_info.access_token
 		}
 	};
+
 	callFindSongs(new_data, api_data_input);
 	console.log(new_data);
 });
@@ -116,29 +125,25 @@ async function callFindSongs(data, api_data) {
 }
 
 function findSongs(data, api_req_data) {
-//  var req_url = 'https://api.spotify.com/v1/tracks/' + song_id + '?market=' + market; 
-//  let result = await https.request({
-//   method: "get",
-//   url: req_url,
-//   headers: {'Authorization': 'Bearer ' + SPOT_TOKEN }
-//  }).catch(async function handleError(err) {
-//   console.log(err);
-//  })
-//  return result.data;
   return new Promise((resolve, reject) => {
 	const request = https.request(api_req_data, (result) => {
   		console.log('statusCode:', result.statusCode);
-		result.setEncoding('utf8');
-		let responseBody = '';
+		if (result.statusCode < 200 || response.statusCode > 299) {
+			throw new Error('status code: ' + response.statusCode);
+		}
+		else {
+			result.setEncoding('utf8');
+			let responseBody = '';
 
-     		result.on('data', (d) => {
-			console.log('receiving data')
-			responseBody += d;
-  	   	});
-		result.on('end', () => {
-			console.log('end of data')
-			resolve(JSON.parse(responseBody));
-		});
+     			result.on('data', (d) => {
+				console.log('receiving data')
+				responseBody += d;
+	  	   	});
+			result.on('end', () => {
+				console.log('end of data')
+				resolve(JSON.parse(responseBody));
+			});
+		}
   	});
   	request.on('error', (err) => {
      		console.log('errore');
@@ -149,8 +154,43 @@ function findSongs(data, api_req_data) {
   });
 }
 
-function refreshToken(option) {
-	var request = https.request(option, (result) => {
-		if (!error && )
-	})
-}
+//Idea della funzione e' che passato come input le opzioni e il corpo dell'access token
+//(per ora stabilito globalmente) possa aggiornare tutti e 3 i campi: access_token
+//expires_in e refresh_token. Dovrebbe permettere di aggiornare anche token oauth
+//personali e non client semplicemente passando il "body" corretto. Servira' modificare
+//la funzione per questo pero', permettendo di ottenere anche refresh token mancante 
+//in richieste di tipo Client Credentials
+function getSpotifyToken(access_token_data, api_req_data) {
+	var current_time = new Date().getTime()/1000;
+	if ((current_time - access_token_data.expires_at) > 3520){
+		var data = ''
+		var newTokenRequest = https.request(api_req_data, (result) => {
+			if (result.statusCode >= 200 || result.statusCode < 300) {
+				result.setEncoding('utf8');
+				let responseBody = '';
+	
+				result.on('data', (d) => {
+					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] receiving data');
+					responseBody += d;
+				});
+				result.on('end', () => {
+					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] end of data');
+					resolve(JSON.parse(responseBody));
+				});
+			} else {
+				throw new Error('[SPOTIFY_CLIENT_TOKEN_REFRESH] Error: status code: ' result.statusCode)
+			}
+		});
+		newTokenRequest.on('error', (err) => {
+			reject(err);
+		});
+		newTokenRequest.write(data);
+		newTokenRequest.end();
+
+		access_token_data.access_token = data.access_token;
+		access_token_data.expires_at   = current_time+3600;
+	} else {
+		console.log('no need to refresh the client token right now')
+	}
+};
+
