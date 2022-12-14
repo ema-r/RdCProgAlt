@@ -1,22 +1,28 @@
-const bodyParser = require("body-parser");
-const MongoStore = require("connect-mongo");
-const cookieParser = require("cookie-parser");
-const express = require("express");
-const session = require("express-session");
-const mongoose = require("mongoose");
-const path = require("path");
-const http = require('http');
-const https = require('https');
-const cors = require('cors');
-const queryString = require('query-string');
+import bodyParser from "body-parser";
+import * as dotenv from 'dotenv';
+dotenv.config();
+console.log(process.env);
+import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
+import express from "express";
+import session from "express-session";
+import mongoose from "mongoose";
+import path from "path";
+import http from 'http';
+import https from 'https';
+import cors from 'cors';
+import queryString from 'query-string';
+import passport from 'passport';
 
-dotenv = require('dotenv').config();
+//const passport = require("./config/passport");
+//const { ensureUser } = require("./middlewares/auth");
+//const homepageRoutes = require("./routes/homepage");
+//const oauthRoutes = require("./routes/oauth");
+//const apiRoutes = require("./routes/post");
 
-const passport = require("./config/passport");
-const { ensureUser } = require("./middlewares/auth");
-const homepageRoutes = require("./routes/homepage");
-const oauthRoutes = require("./routes/oauth");
-const apiRoutes = require("./routes/post");
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const INSTANCE = process.env.INSTANCE || "";
 const MONGO_URI = process.env.MONGO_URI || "";
@@ -34,9 +40,9 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
-const spot_client_auth_options = {
+var spot_client_auth_options = {
 	url: 'https://accounts.spotify.com/api/token',
-	method: 'POST'
+	method: 'POST',
 	headers: {
 		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_CLIENT_ID 
 			+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
@@ -54,7 +60,7 @@ var spot_client_token_info = {
 
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redir_uri = 'http://localhost:8080/spot/callback'
+const spot_redirect_uri = 'http://localhost:8080/spot/callback';
 
 const app = express();
 
@@ -73,13 +79,13 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
-/* set routes */
-app.use("/api/v1/post", apiRoutes);
-app.use("/homepage", homepageRoutes);
-app.use("/oauth/google", oauthRoutes);
+///* set routes */
+//app.use("/api/v1/post", apiRoutes);
+//app.use("/homepage", homepageRoutes);
+//app.use("/oauth/google", oauthRoutes);
 
 /* get root path */
-app.get("/", ensureUser, (req, res) => {
+app.get("/", (req, res) => {
   res.render("index", { title: "SongLify" });
 });
 
@@ -186,7 +192,7 @@ function getSpotifyToken(access_token_data, api_req_data) {
 					resolve(JSON.parse(responseBody));
 				});
 			} else {
-				throw new Error('[SPOTIFY_CLIENT_TOKEN_REFRESH] Error: status code: ' result.statusCode)
+				throw new Error('[SPOTIFY_CLIENT_TOKEN_REFRESH] Error: status code')
 			}
 		});
 		newTokenRequest.on('error', (err) => {
@@ -221,7 +227,7 @@ var spotStateKey = 'spotify_auth_state';
 
 app.get('/spot/login', function(req, res) {
 	var state = generateRandomString(16);
-	res.cookie(stateKey, state);
+	res.cookie(spotStateKey, state);
 
 	var scope = 'user-read-private user-read-email'; //DA SOSTITUIRE CON SCOPE UTILE OVVIAMENTE
 	res.redirect('https://accounts.spotify.com/authorize?' +
@@ -237,18 +243,18 @@ app.get('/spot/login', function(req, res) {
 app.get('/spot/callback', function(req, res) {
 	var code = req.query.code || null;
 	var state = req.query.state || null;
-	var storedState = req.cookies ? req.cookies[stateKey] : null;
+	var storedState = req.cookies ? req.cookies[spotStateKey] : null;
 
-	if (state === null || state ! storedState) {
+	if (state === null || state !== storedState) {
 		res.redirect('/#' +
 		  queryString.stringify({
 		    error: 'state_mismatch'
 		  }));
 	} else {
-		res.clearCookie(stateKey);
+		res.clearCookie(spotStateKey);
 		var loginAuthOptions = {
 			url: 'https://accounts.spotify.com/api/token',
-			method: 'POST'
+			method: 'POST',
 			form: {
 				code: code,
 				redirect_uri: spot_redirect_uri,
@@ -340,5 +346,5 @@ app.get('/spot/token_refresh', function(req, res) {
 });
 
 
-console.log('in ascolto su 3000');
-app.listen(PORT);
+//console.log('in ascolto su 3000');
+//app.listen(PORT);
