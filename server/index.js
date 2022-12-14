@@ -1,31 +1,31 @@
-import bodyParser from "body-parser";
+import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 dotenv.config();
 console.log(process.env);
-import MongoStore from "connect-mongo";
-import cookieParser from "cookie-parser";
-import express from "express";
-import session from "express-session";
-import mongoose from "mongoose";
-import path from "path";
+import MongoStore from 'connect-mongo';
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import session from 'express-session';
+import mongoose from 'mongoose';
+import path from 'path';
 import http from 'http';
 import https from 'https';
 import cors from 'cors';
 import queryString from 'query-string';
 import passport from 'passport';
 
-//const passport = require("./config/passport");
-//const { ensureUser } = require("./middlewares/auth");
-//const homepageRoutes = require("./routes/homepage");
-//const oauthRoutes = require("./routes/oauth");
-//const apiRoutes = require("./routes/post");
+//const passport = require('./config/passport');
+//const { ensureUser } = require('./middlewares/auth');
+//const homepageRoutes = require('./routes/homepage');
+//const oauthRoutes = require('./routes/oauth');
+//const apiRoutes = require('./routes/post');
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const INSTANCE = process.env.INSTANCE || "";
-const MONGO_URI = process.env.MONGO_URI || "";
+const INSTANCE = process.env.INSTANCE || '';
+const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3000;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 const SESSION_OPTIONS = {
@@ -36,7 +36,7 @@ const SESSION_OPTIONS = {
   },
   resave: false,
   saveUninitialized: true,
-  secret: process.env.SECRET || "",
+  secret: process.env.SECRET || '',
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
@@ -44,8 +44,8 @@ var spot_client_auth_options = {
 	url: 'https://accounts.spotify.com/api/token',
 	method: 'POST',
 	headers: {
-		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_CLIENT_ID 
-			+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
+		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_client_id 
+			+ ':' + process.env.SPOTIFY_client_secret).toString('base64')),
 		'Content-Type': 'application/x-www-form-urlencoded' 
 	},
 	form: {
@@ -58,20 +58,20 @@ var spot_client_token_info = {
 	'expires_at' : 0
 };
 
-const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
+const spot_client_id = process.env.SPOTIFY_client_id;
+const spot_client_sc = process.env.SPOTIFY_client_secret;
 const spot_redirect_uri = 'http://localhost:8080/spot/callback';
 
 const app = express();
 
 /* set view engine */
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 
 /* set middlewares */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(session(SESSION_OPTIONS));
 app.use(cors());
 
@@ -80,20 +80,20 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 ///* set routes */
-//app.use("/api/v1/post", apiRoutes);
-//app.use("/homepage", homepageRoutes);
-//app.use("/oauth/google", oauthRoutes);
+//app.use('/api/v1/post', apiRoutes);
+//app.use('/homepage', homepageRoutes);
+//app.use('/oauth/google', oauthRoutes);
 
 /* get root path */
-app.get("/", (req, res) => {
-  res.render("index", { title: "SongLify" });
+app.get('/', (req, res) => {
+  res.render('index', { title: 'SongLify' });
 });
 
 /* get API docs */
-app.use("/api-docs", express.static(path.join(__dirname, "/public/docs")));
+app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
 app.get('/test', (req, res) => {
-  res.render("test", {title: "test"});
+  res.render('test', {title: 'test'});
 });
 
 app.post('/test', function(req, res) {
@@ -171,7 +171,7 @@ function findSongs(data, api_req_data) {
 //Idea della funzione e' che passato come input le opzioni e il corpo dell'access token
 //(per ora stabilito globalmente) possa aggiornare tutti e 3 i campi: access_token
 //expires_in e refresh_token. Dovrebbe permettere di aggiornare anche token oauth
-//personali e non client semplicemente passando il "body" corretto. Servira' modificare
+//personali e non client semplicemente passando il 'body' corretto. Servira' modificare
 //la funzione per questo pero', permettendo di ottenere anche refresh token mancante 
 //in richieste di tipo Client Credentials
 function getSpotifyToken(access_token_data, api_req_data) {
@@ -212,7 +212,7 @@ function getSpotifyToken(access_token_data, api_req_data) {
 
 //genera stringa randomica di lunghezza specifica utilizzando i caratteri forniti. 
 //Richiesta da spotify per processo oauth user e molto facilmente mossa in un'altro
-//file .js per funzioni "helper"
+//file .js per funzioni 'helper'
 var generateRandomString = function(length) {
 	var text = '';
 	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -256,19 +256,21 @@ app.get('/spot/callback', function(req, res) {
 			url: 'https://accounts.spotify.com/api/token',
 			method: 'POST',
 			form: {
+				client_id: "205591100294-1nhf9lnj12nljmt3pfmbpjqg88qtdlu5.apps.googleusercontent.com",
+				client_secret:"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",
 				code: code,
 				redirect_uri: spot_redirect_uri,
 				grant_type: 'authorization_code'
 			},
 			headers: {
-				'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+				'Authorization': 'Basic ' + client_id + ':' + client_secret,
 			},
 			json: true
 		};
 
 		var req = https.request(loginAuthOptions, (res) => {
 			if (res.statusCode != 200) {
-				console.log("[SPOTIFY LOGIN CALLBACK FUNCTION ]status code non-200 rilevato:",
+				console.log('[SPOTIFY LOGIN CALLBACK FUNCTION ]status code non-200 rilevato:',
 					res.statusCode);
 				res.redirect('/#' +
 					queryString.stringify ({
@@ -289,10 +291,10 @@ app.get('/spot/callback', function(req, res) {
 			var internal_req = https.request(internal_options, (i_res) => {
 				res.setEncoding('utf8');
 				i_res.on('data', function(chunk) {
-					console.log("BODY: " + chunk);
+					console.log('BODY: ' + chunk);
 				});
 			}).on('error', function(e) {
-				console.log("ERRORE " + e.message);
+				console.log('ERRORE ' + e.message);
 			});
 
 			//passaggio token al nostro browser
@@ -303,7 +305,7 @@ app.get('/spot/callback', function(req, res) {
 				}));
 			
 		}).on('error', function(e) {
-			console.log("ERRORE " + e.message)
+			console.log('ERRORE ' + e.message)
 			res.redirect('/#' + 
 				queryString.stringify ({
 					error: 'invalid_token'
@@ -327,7 +329,7 @@ app.get('/spot/token_refresh', function(req, res) {
 
 	var req = https.request(authOptions, (res) => {
 		if (res.stausCode < 200 || res.statusCode > 299) {
-			console.log("status code errato su post request refresh token spotify, abortendo ",
+			console.log('status code errato su post request refresh token spotify, abortendo ',
 				res.tatusCode);
 			return;
 		};
