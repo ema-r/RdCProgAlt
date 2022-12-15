@@ -26,7 +26,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 const SESSION_OPTIONS = {
   cookie: {
@@ -126,8 +126,8 @@ mongoose
   .connect(MONGO_URI)
   .then((result) => {
     console.log(`${INSTANCE} -> ${result.connection.host}`);
-    app.listen(PORT, () => {
-      console.log(`${INSTANCE} -> ${PORT}`);
+    app.listen(3001, () => {
+      console.log(`${INSTANCE} -> ${3001}`);
     });
   })
   .catch((err) => {
@@ -350,5 +350,5 @@ app.get('/spot/token_refresh', function(req, res) {
 });
 
 
-//console.log('in ascolto su 3000');
-//app.listen(PORT);
+console.log('in ascolto su 3000');
+app.listen(3000);
