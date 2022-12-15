@@ -256,19 +256,18 @@ app.get('/spot/callback', function(req, res) {
 			url: 'https://accounts.spotify.com/api/token',
 			method: 'POST',
 			form: {
-				client_id: spot_client_id,
-				client_secret: spot_client_sc,
 				code: code,
 				redirect_uri: spot_redirect_uri,
 				grant_type: 'authorization_code'
 			},
 			headers: {
-				'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc,
+				'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc
 			},
 			json: true
 		};
 
-		var req = https.request(loginAuthOptions, (res) => {
+		var auth_req = https.request(loginAuthOptions, (res) => {
+			console.log(res.headers);
 			if (res.statusCode != 200) {
 				console.log('[SPOTIFY LOGIN CALLBACK FUNCTION ]status code non-200 rilevato:',
 					res.statusCode);
@@ -304,8 +303,9 @@ app.get('/spot/callback', function(req, res) {
 					refresh_token: refresh_token
 				}));
 			
-		}).on('error', function(e) {
-			console.log('ERRORE ' + e.message)
+		});
+		auth_req.on('error', function(e) {
+			console.log('[POST CALLBACK ERRORE NON STATUS CODE] ERRORE ' + e.message)
 			res.redirect('/#' + 
 				queryString.stringify ({
 					error: 'invalid_token'
