@@ -256,8 +256,8 @@ app.get('/spot/callback', function(req, res) {
 			url: 'https://accounts.spotify.com/api/token',
 			method: 'POST',
 			form: {
-				client_id: "205591100294-1nhf9lnj12nljmt3pfmbpjqg88qtdlu5.apps.googleusercontent.com",
-				client_secret:"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",
+				client_id: spot_client_id,
+				client_secret: spot_client_secret,
 				code: code,
 				redirect_uri: spot_redirect_uri,
 				grant_type: 'authorization_code'
