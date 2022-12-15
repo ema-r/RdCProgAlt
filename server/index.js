@@ -58,8 +58,8 @@ var spot_client_token_info = {
 	'expires_at' : 0
 };
 
-const spot_client_id = process.env.SPOTIFY_client_id;
-const spot_client_sc = process.env.SPOTIFY_client_secret;
+const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
+const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
 const spot_redirect_uri = 'http://localhost:8080/spot/callback';
 
 const app = express();
@@ -257,13 +257,13 @@ app.get('/spot/callback', function(req, res) {
 			method: 'POST',
 			form: {
 				client_id: spot_client_id,
-				client_secret: spot_client_secret,
+				client_secret: spot_client_sc,
 				code: code,
 				redirect_uri: spot_redirect_uri,
 				grant_type: 'authorization_code'
 			},
 			headers: {
-				'Authorization': 'Basic ' + client_id + ':' + client_secret,
+				'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc,
 			},
 			json: true
 		};
@@ -319,7 +319,7 @@ app.get('/spot/token_refresh', function(req, res) {
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
 		method: 'POST',
-		headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+		headers: { 'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc },
 		form: {
 			grant_type: 'refresh_token',
 			refresh_token: refresh_token
