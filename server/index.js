@@ -233,7 +233,7 @@ app.get('/spot/login', function(req, res) {
 	res.redirect('https://accounts.spotify.com/authorize?' +
 		queryString.stringify({
 		response_type: 'code',
-		client_id: spot_client_id,
+		client_id: process.env.SPOTIFY_CLIENT_ID,
 		scope: scope,
 		redirect_uri: spot_redirect_uri,
 		state: state
@@ -321,6 +321,8 @@ app.get('/spot/token_refresh', function(req, res) {
 		method: 'POST',
 		headers: { 'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc },
 		form: {
+			client_id: process.env.SPOTIFY_CLIENT_ID,
+			client_secret: process.env.SPOTIFY_CLIENT_SECRET,
 			grant_type: 'refresh_token',
 			refresh_token: refresh_token
 		},
