@@ -235,7 +235,7 @@ app.get('/spot/login', function(req, res) {
 		response_type: 'code',
 		client_id: process.env.SPOTIFY_CLIENT_ID,
 		scope: scope,
-		redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+		redirect_uri: spot_redirect_uri,
 		state: state
 	}));
 });
@@ -254,12 +254,12 @@ app.get('/spot/callback', function(req, res) {
 		  }));
 	} else {
 		res.clearCookie(spotStateKey);
-		var loginAuthOptions = {
+		var authOptions = {
 			url: 'https://accounts.spotify.com/api/token',
 			method: 'POST',
 			form: {
 				code: code,
-				redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+				redirect_uri: spot_redirect_uri,
 				grant_type: 'authorization_code'
 			},
 			headers: {
