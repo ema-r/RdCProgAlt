@@ -12,6 +12,7 @@ import https from 'https';
 import cors from 'cors';
 import queryString from 'query-string';
 import passport from 'passport';
+import superagent from 'superagent';
 
 //const passport = require('./config/passport');
 //const { ensureUser } = require('./middlewares/auth');
@@ -262,57 +263,39 @@ app.get('/spot/callback', function(req, res) {
 				grant_type: 'authorization_code'
 			},
 			headers: {
-				'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')),
+				'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')), //utilizza new Buffer() se non parte cosi
 				'Content-Type': 'application/x-www-form-urlencoded' 
 			},
 			json: true
 		};
-		console.log(loginAuthOptions);
-		var auth_req = https.request(loginAuthOptions, (res) => {
-			if (res.statusCode != 200) {
-				console.log('[SPOTIFY LOGIN CALLBACK FUNCTION ]status code non-200 rilevato:',
-					res.statusCode);
-				res.redirect('/#' +
-					queryString.stringify ({
+
+		superagent.post(authOptions, function(error, response, body) {
+			if (!error && response.statusCode === 200) {
+				var access_token = body.access_token,
+					refresh_token = body.refresh_token;
+				var options = {
+					url: 'https://api.spotify.com/v1/me',
+					headers: { 'Authorization': 'Bearer ' + access_token }, //controlla non manca qualche pezzo
+					json: true
+				};
+
+				request.get(options, function(error, response, body) {
+					console.log(body);
+				});
+
+				res.redirect('/#' + //QUESTO REDIRECT VA MODIFICATO OVVIAMENTE
+					queryString.stringify({
+						access_token: access_token,
+						refresh_token: refresh_token
+					}));
+			} else {
+				res.redirect('/#' + 
+					queryString.stringify({
 						error: 'invalid_token'
 					}));
-				return;
-			};
-			var access_token = body.access_token,
-				refresh_token = body.refresh_token;
-
-			var internal_options = {
-				url: 'https://api.spotify.com/v1/me',
-				method: 'GET',
-				headers: { 'Authorization': 'Bearer '+ access_token },
-				json: true
-			};
-			
-			var internal_req = https.request(internal_options, (i_res) => {
-				res.setEncoding('utf8');
-				i_res.on('data', function(chunk) {
-					console.log('BODY: ' + chunk);
-				});
-			}).on('error', function(e) {
-				console.log('ERRORE ' + e.message);
-			});
-
-			//passaggio token al nostro browser
-			res.redirect('/#' +
-				queryString.stringify ({
-					access_token: access_token,
-					refresh_token: refresh_token
-				}));
-			
+			}
 		});
-		auth_req.on('error', function(e) {
-			console.log('[POST CALLBACK ERRORE NON STATUS CODE] ERRORE ' + e.message)
-			res.redirect('/#' + 
-				queryString.stringify ({
-					error: 'invalid_token'
-				}));
-		});
-	};
+	}
 });
 
 app.get('/spot/token_refresh', function(req, res) {
