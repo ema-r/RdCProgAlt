@@ -1,7 +1,6 @@
 import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 dotenv.config();
-console.log(process.env);
 import MongoStore from 'connect-mongo';
 import cookieParser from 'cookie-parser';
 import express from 'express';
@@ -242,7 +241,9 @@ app.get('/spot/login', function(req, res) {
 
 app.get('/spot/callback', function(req, res) {
 	var code = req.query.code || null;
+	console.log(code);
 	var state = req.query.state || null;
+	console.log(state);
 	var storedState = req.cookies ? req.cookies[spotStateKey] : null;
 
 	if (state === null || state !== storedState) {
@@ -261,13 +262,13 @@ app.get('/spot/callback', function(req, res) {
 				grant_type: 'authorization_code'
 			},
 			headers: {
-				'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc
+				'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')),
+				'Content-Type': 'application/x-www-form-urlencoded' 
 			},
 			json: true
 		};
-
+		console.log(loginAuthOptions);
 		var auth_req = https.request(loginAuthOptions, (res) => {
-			console.log(res.headers);
 			if (res.statusCode != 200) {
 				console.log('[SPOTIFY LOGIN CALLBACK FUNCTION ]status code non-200 rilevato:',
 					res.statusCode);
@@ -319,7 +320,7 @@ app.get('/spot/token_refresh', function(req, res) {
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
 		method: 'POST',
-		headers: { 'Authorization': 'Basic ' + spot_client_id + ':' + spot_client_sc },
+		headers: { 'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')) },
 		form: {
 			client_id: process.env.SPOTIFY_CLIENT_ID,
 			client_secret: process.env.SPOTIFY_CLIENT_SECRET,
