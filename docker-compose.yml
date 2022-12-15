@@ -18,6 +18,8 @@ services:
       - "8443:443"
     networks:
       - app-network
+    volumes:
+      - ./certs:/etc/nginx/certs
 
   node1:
     build:
@@ -65,7 +67,7 @@ services:
       - app-network
 
   mongo:
-    image: mongo
+    image: mongo:4.4.6
     networks:
       - app-network
 

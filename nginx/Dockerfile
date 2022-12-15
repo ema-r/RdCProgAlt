@@ -1,9 +1,8 @@
 FROM nginx:latest
 
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY cert/nginx.crt /etc/nginx/nginx.crt
-COPY cert/nginx.key /etc/nginx/nginx.key
-COPY cert/dhparam.pem /etc/nginx/ssl/dhparam.pem
+COPY cert/nginx-selfsigned.crt /etc/nginx/nginx-selfsigned.crt
+COPY cert/nginx-selfsigned.key /etc/nginx/nginx-selfsigned.key
 
 EXPOSE 80
 EXPOSE 443
