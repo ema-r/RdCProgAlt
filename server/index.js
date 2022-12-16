@@ -60,7 +60,7 @@ var spot_client_token_info = {
 
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'https://localhost:8443/spot/callback';
+const spot_redirect_uri = 'localhost:3000/users/code';
 
 const app = express();
 
