@@ -153,7 +153,7 @@ app.get('/token', async function (req, res, next) {
 
 	let base_url = 'https://accounts.spotify.com'
 	let authentication_url = '/authorize'
-	let client_id = '&client_id="Your_client_id'
+	let client_id = '&client_id=process.env.SPOTIFY_CLIENT_ID'
 	let response_type = '?response_type=code'
 	let redirect_uri = '&redirect_uri=https://localhost:8443/spot/callback'
 	let state = '&state=34fFs29kd09'
