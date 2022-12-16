@@ -67,7 +67,7 @@ services:
       - app-network
 
   mongo:
-    image: mongo:4.4.6
+    image: mongo
     networks:
       - app-network
 
