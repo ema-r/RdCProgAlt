@@ -60,7 +60,7 @@ var spot_client_token_info = {
 
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'http://localhost:8080/spot/callback';
+const spot_redirect_uri = 'https://localhost:8443/spot/callback';
 
 const app = express();
 
@@ -117,118 +117,23 @@ app.post('/test', function(req, res) {
 		}
 	};
 
-	callFindSongs(new_data, api_data_input);
-	console.log(new_data);
 });
-
-/* set connection with mongo */
-mongoose
-  .connect(MONGO_URI)
-  .then((result) => {
-    console.log(`${INSTANCE} -> ${result.connection.host}`);
-    app.listen(3001, () => {
-      console.log(`${INSTANCE} -> ${3001}`);
-    });
-  })
-  .catch((err) => {
-    console.error(err.message);
-  });
-
-async function callFindSongs(data, api_data) {
-	return await findSongs(data, api_data);
-}
-
-function findSongs(data, api_req_data) {
-  return new Promise((resolve, reject) => {
-	const request = https.request(api_req_data, (result) => {
-  		console.log('statusCode:', result.statusCode);
-		if (result.statusCode < 200 || response.statusCode > 299) {
-			throw new Error('status code: ' + response.statusCode);
-		}
-		else {
-			result.setEncoding('utf8');
-			let responseBody = '';
-
-     			result.on('data', (d) => {
-				console.log('receiving data')
-				responseBody += d;
-	  	   	});
-			result.on('end', () => {w
-				console.log('end of data')
-				resolve(JSON.parse(responseBody));
-			});
-		}
-  	});
-  	request.on('error', (err) => {
-     		console.log('errore');
-		reject(err);
-  	});
-	request.write(data);
-	request.end();
-  });
-}
-
-//Idea della funzione e' che passato come input le opzioni e il corpo dell'access token
-//(per ora stabilito globalmente) possa aggiornare tutti e 3 i campi: access_token
-//expires_in e refresh_token. Dovrebbe permettere di aggiornare anche token oauth
-//personali e non client semplicemente passando il 'body' corretto. Servira' modificare
-//la funzione per questo pero', permettendo di ottenere anche refresh token mancante 
-//in richieste di tipo Client Credentials
-function getSpotifyToken(access_token_data, api_req_data) {
-	var current_time = new Date().getTime()/1000;
-	if ((current_time - access_token_data.expires_at) > 3520){
-		var data = ''
-		var newTokenRequest = https.request(api_req_data, (result) => {
-			if (result.statusCode >= 200 || result.statusCode < 300) {
-				result.setEncoding('utf8');
-				let responseBody = '';
-	
-				result.on('data', (d) => {
-					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] receiving data');
-					responseBody += d;
-				});
-				result.on('end', () => {
-					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] end of data');
-					resolve(JSON.parse(responseBody));
-				});
-			} else {
-				throw new Error('[SPOTIFY_CLIENT_TOKEN_REFRESH] Error: status code')
-			}
-		});
-		newTokenRequest.on('error', (err) => {
-			reject(err);
-		});
-		newTokenRequest.write(data);
-		newTokenRequest.end();
-
-		access_token_data.access_token = data.access_token;
-		access_token_data.expires_at   = current_time+3600;
-	} else {
-		console.log('no need to refresh the client token right now')
-	}
-};
-
-//SPOTIFY OAUTH, PROBABILMENTE DA MUOVERE IN UN NUOVO FILE AUSILIARIO
-
-//genera stringa randomica di lunghezza specifica utilizzando i caratteri forniti. 
-//Richiesta da spotify per processo oauth user e molto facilmente mossa in un'altro
-//file .js per funzioni 'helper'
-var generateRandomString = function(length) {
-	var text = '';
-	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	
-	for (var i = 0; i < length; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-};
-
 var spotStateKey = 'spotify_auth_state';
 
+
 app.get('/spot/login', function(req, res) {
+	var generateRandomString = function(length) {
+		var text = '';
+		var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		
+		for (var i = 0; i < length; i++) {
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		return text;
+	};
 	var state = generateRandomString(16);
 	res.cookie(spotStateKey, state);
-
+	var spotStateKey = 'spotify_auth_state';
 	var scope = 'user-read-private user-read-email'; //DA SOSTITUIRE CON SCOPE UTILE OVVIAMENTE
 	res.redirect('https://accounts.spotify.com/authorize?' +
 		queryString.stringify({
@@ -240,100 +145,85 @@ app.get('/spot/login', function(req, res) {
 	}));
 });
 
-app.get('/spot/callback', function(req, res) {
-	var code = req.query.code || null;
-	console.log(code);
-	var state = req.query.state || null;
-	console.log(state);
-	var storedState = req.cookies ? req.cookies[spotStateKey] : null;
 
-	if (state === null || state !== storedState) {
-		res.redirect('/#' +
-		  queryString.stringify({
-		    error: 'state_mismatch'
-		  }));
-	} else {
-		res.clearCookie(spotStateKey);
-		var authOptions = {
-			url: 'https://accounts.spotify.com/api/token',
-			method: 'POST',
-			form: {
-				code: code,
-				redirect_uri: spot_redirect_uri,
-				grant_type: 'authorization_code'
-			},
-			headers: {
-				'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')), //utilizza new Buffer() se non parte cosi
-				'Content-Type': 'application/x-www-form-urlencoded' 
-			},
-			json: true
-		};
 
-		superagent.post(authOptions, function(error, response, body) {
-			if (!error && response.statusCode === 200) {
-				var access_token = body.access_token,
-					refresh_token = body.refresh_token;
-				var options = {
-					url: 'https://api.spotify.com/v1/me',
-					headers: { 'Authorization': 'Bearer ' + access_token }, //controlla non manca qualche pezzo
-					json: true
-				};
 
-				request.get(options, function(error, response, body) {
-					console.log(body);
-				});
+app.get('/token', async function (req, res, next) {
 
-				res.redirect('/#' + //QUESTO REDIRECT VA MODIFICATO OVVIAMENTE
-					queryString.stringify({
-						access_token: access_token,
-						refresh_token: refresh_token
-					}));
-			} else {
-				res.redirect('/#' + 
-					queryString.stringify({
-						error: 'invalid_token'
-					}));
-			}
-		});
-	}
+
+	let base_url = 'https://accounts.spotify.com'
+	let authentication_url = '/authorize'
+	let client_id = '&client_id="Your_client_id'
+	let response_type = '?response_type=code'
+	let redirect_uri = '&redirect_uri=https://localhost:8443/spot/callback'
+	let state = '&state=34fFs29kd09'
+	let scope = '&scope=user-read-private user-read-email playlist-modify-public playlist-modify-private playlist-read-collaborative playlist-read-private'
+  
+  
+	let code_request_url = base_url + authentication_url + response_type + client_id + scope + redirect_uri + state
+  
+  
+	let response = await api.get(code_request_url).catch(err => { console.log(err) })
+	console.log(response)
+  
+  
+  
+	res.redirect(code_request_url)
+  
+  
+  });
+
+
+  app.get(['/spot/callback', '/:'], async function (req, res) {
+	let code = req.query.code
+	let token_base_url = 'https://accounts.spotify.com/api/token'
+	let grant_type = 'authorization_code'
+	let redirect_uri = 'https://localhost:8443/spot/callback'
+  
+  
+  
+	let access_token = await api.request({
+	  url: token_base_url,
+	  method: 'post',
+	  params: {
+		'grant_type': grant_type,
+		'code': code,
+		'redirect_uri': redirect_uri,
+	  },
+  
+  
+	  headers:
+	  {
+		'content-type': 'application/x-www-form-urlencoded',
+		'authorization': 'Basic ' + process.env.SPOTIFY_CLIENT_SECRET
+	  }
+  
+  
+  
+	}).catch(err => console.log(err))
+  
+  
+  
+	let username = await api.request({
+	  url: 'https://api.spotify.com/v1/me',
+	  method: 'get',
+  
+  
+	  headers:
+	  {
+		'content-type': 'application/x-www-form-urlencoded',
+		'authorization': 'Bearer ' + access_token.data.access_token
+	  }
+	}).catch(err => console.log(err))
+  
+  
+	res.cookie('session_user', username.data.id)
+	res.cookie('access_token', access_token.data.access_token)
+	res.cookie('refresh_token', access_token.data.refresh_token)
+	res.render('index', { title: "Spotify Themes App" })
+  
+  
 });
-
-app.get('/spot/token_refresh', function(req, res) {
-	var refresh_token = req.query.refresh_token;
-	var authOptions = {
-		url: 'https://accounts.spotify.com/api/token',
-		method: 'POST',
-		headers: { 'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')) },
-
-		form: {
-			client_id: process.env.SPOTIFY_CLIENT_ID,
-			client_secret: process.env.SPOTIFY_CLIENT_SECRET,
-			grant_type: 'refresh_token',
-			refresh_token: refresh_token
-		},
-		json: true
-	};
-
-	var req = https.request(authOptions, (res) => {
-		if (res.stausCode < 200 || res.statusCode > 299) {
-			console.log('status code errato su post request refresh token spotify, abortendo ',
-				res.tatusCode);
-			return;
-		};
-		res.setEncoding('utf8');
-		res.on('data', function (chunk) {
-			console.log('BODY: ' + chunk);
-		});
-	});
-	req.on('error', function(e) {
-		console.log('errore refresh token: ' + e.message);
-	});
-
-	req.write('data\n');
-	req.write('data\n');
-	req.end();
-});
-
 
 console.log('in ascolto su 3000');
 app.listen(3000);
