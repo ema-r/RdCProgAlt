@@ -60,7 +60,7 @@ var spot_client_token_info = {
 
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'http://localhost:8080/spot/callback';
+const spot_redirect_uri = 'https://localhost:8443/spot/callback';
 
 const app = express();
 
@@ -342,26 +342,19 @@ app.listen(3000);
 //passport spotify
 
 
-app.get('/oauth/google', passport.authenticate('spotify'));
+app.get('/oauth/spot', passport.authenticate('spotify'));
 
 app.get(
-  '/oauth/google/callback',
-  passport.authenticate('spotify', { failureRedirect: '/login' }),
+  '/oauth/spot/callback',
+  passport.authenticate('spotify', { failureRedirect: '/#error' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/');
+    res.redirect('/oauth/spot/info');
   }
 );
 
-app.get(
-	'/oauth/google',
-	passport.authenticate('spotify', {
-	  scope: ['user-read-email', 'user-read-private']
-	})
-  );
-
   app.get(
-	'/oauth/google',
+	'/oauth/spot/info',
 	passport.authenticate('spotify', {
 	  scope: ['user-read-email', 'user-read-private'],
 	  showDialog: true
