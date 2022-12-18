@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const SpotifyStrategy = require("passport-spotify").Strategy;
+const SpotifyStrategy = require('passport-spotify').Strategy;
 
 const { sendWelcomeMail } = require("../middlewares/mailer");
 
@@ -63,7 +63,7 @@ module.exports = passport;
 //guida nuova
 
 
-const SpotifyStrategy = require('passport-spotify').Strategy;
+
 passport.use(
   new SpotifyStrategy(
     {

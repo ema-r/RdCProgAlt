@@ -1,28 +1,27 @@
-import bodyParser from 'body-parser';
-import * as dotenv from 'dotenv';
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 dotenv.config();
-import MongoStore from 'connect-mongo';
-import cookieParser from 'cookie-parser';
-import express from 'express';
-import session from 'express-session';
-import mongoose from 'mongoose';
-import path from 'path';
-import http from 'http';
-import https from 'https';
-import cors from 'cors';
-import queryString from 'query-string';
-import passport from 'passport';
-import superagent from 'superagent';
+const MongoStore = require('connect-mongo');
+const express = require('express');
+const session = require('express-session');
+const mongoose = require('mongoose');
+const path = require('path');
+const http = require('http');
+const https = require('https');
+const cors = require('cors');
+const superagent = require('superagent');
+const passport = require("passport");
+const cookieParser = require("cookie-parser");
 
-//const passport = require('./config/passport');
+
 //const { ensureUser } = require('./middlewares/auth');
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
+//import { dirname } from 'path';
+//import { fileURLToPath } from 'url';
+//const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -79,7 +78,10 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
-require('./config/passport')(app);
+//import passportConfig from "../config/passport.js";
+
+//passportConfig(passport);
+
 
 ///* set routes */
 //app.use('/api/v1/post', apiRoutes);
