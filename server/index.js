@@ -79,6 +79,8 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
+require('./config/passport')(app);
+
 ///* set routes */
 //app.use('/api/v1/post', apiRoutes);
 //app.use('/homepage', homepageRoutes);
