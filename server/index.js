@@ -10,12 +10,12 @@ const http = require('http');
 const https = require('https');
 const cors = require('cors');
 const superagent = require('superagent');
-const passport = require("passport");
+const passport = require('passport');
+require('./passport.js')
 const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
+const { ensureUser } = require('./middlewares/auth');
 
-
-//const { ensureUser } = require('./middlewares/auth');
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
@@ -257,11 +257,11 @@ app.listen(3000);
 //passport spotify
 
 
-app.get('/spot', passport.authenticate('SpotifyStrategy'));
+app.get('/spot', passport.authenticate('spotify'));
 
 app.get(
   '/spot/callback',
-  passport.authenticate('SpotifyStrategy', { failureRedirect: '/#error' }),
+  passport.authenticate('spotify', { failureRedirect: '/#error' }),
   function(req, res) {
     // Successful authentication, redirect home.
     res.redirect('/spot/info');
@@ -270,7 +270,7 @@ app.get(
 
   app.get(
 	'/spot/info',
-	passport.authenticate('SpotifyStrategy', {
+	passport.authenticate('spotify', {
 	  scope: ['user-read-email', 'user-read-private'],
 	  showDialog: true
 	})
