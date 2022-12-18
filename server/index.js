@@ -19,6 +19,7 @@ const { ensureUser } = require('./middlewares/auth');
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
+const passportConfig = require('./config/passport');
 
 //import { dirname } from 'path';
 //import { fileURLToPath } from 'url';
