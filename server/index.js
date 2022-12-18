@@ -19,7 +19,6 @@ const { ensureUser } = require('./middlewares/auth');
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
-const passportConfig = require('./config/passport');
 
 //import { dirname } from 'path';
 //import { fileURLToPath } from 'url';
@@ -79,6 +78,8 @@ app.use(cors());
 /* initialize passport */
 app.use(passport.initialize());
 app.use(passport.session());
+require("./config/passport")(passport);
+
 
 //import passportConfig from "../config/passport.js";
 
