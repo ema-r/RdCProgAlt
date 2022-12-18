@@ -12,7 +12,7 @@ import https from 'https';
 import cors from 'cors';
 import queryString from 'query-string';
 import passport from 'passport';
-import superagent from 'superagent';
+import axios from 'axios';
 
 //const passport = require('./config/passport');
 //const { ensureUser } = require('./middlewares/auth');
@@ -92,35 +92,6 @@ app.get('/', (req, res) => {
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
-app.get('/test', (req, res) => {
-  res.render('test', {title: 'test'});
-});
-
-app.post('/test', function(req, res) {
-	var item = req.body.formUrl; //TO DO: INPUT SANITIZATION
-	console.log(item);
-	var slug = item.split('track/').pop();
-	console.log(slug);
-
-	getSpotifyToken(spot_client_token_info, spot_client_auth_options);
-
-	const new_data = '';
-	var api_data_input = {
-		hostname: 'api.spotify.com',
-		port: 443,
-		path: '/v1/tracks/' + slug + '?market=' + 'IT',  //TO DO: IMPLEMENTARE GEOAPI
-		method: 'GET',
-		headers: {
-			'Accept': 'application/json',
-			'Content-type': 'application/json',
-			'Authorization': 'Bearer ' + spot_client_token_info.access_token
-		}
-	};
-
-	callFindSongs(new_data, api_data_input);
-	console.log(new_data);
-});
-
 /* set connection with mongo */
 mongoose
   .connect(MONGO_URI)
@@ -133,80 +104,68 @@ mongoose
   .catch((err) => {
     console.error(err.message);
   });
+//GOOGLE OAUTH
 
-async function callFindSongs(data, api_data) {
-	return await findSongs(data, api_data);
-}
-
-function findSongs(data, api_req_data) {
-  return new Promise((resolve, reject) => {
-	const request = https.request(api_req_data, (result) => {
-  		console.log('statusCode:', result.statusCode);
-		if (result.statusCode < 200 || response.statusCode > 299) {
-			throw new Error('status code: ' + response.statusCode);
-		}
-		else {
-			result.setEncoding('utf8');
-			let responseBody = '';
-
-     			result.on('data', (d) => {
-				console.log('receiving data')
-				responseBody += d;
-	  	   	});
-			result.on('end', () => {w
-				console.log('end of data')
-				resolve(JSON.parse(responseBody));
-			});
-		}
-  	});
-  	request.on('error', (err) => {
-     		console.log('errore');
-		reject(err);
-  	});
-	request.write(data);
-	request.end();
-  });
-}
-
-//Idea della funzione e' che passato come input le opzioni e il corpo dell'access token
-//(per ora stabilito globalmente) possa aggiornare tutti e 3 i campi: access_token
-//expires_in e refresh_token. Dovrebbe permettere di aggiornare anche token oauth
-//personali e non client semplicemente passando il 'body' corretto. Servira' modificare
-//la funzione per questo pero', permettendo di ottenere anche refresh token mancante 
-//in richieste di tipo Client Credentials
-function getSpotifyToken(access_token_data, api_req_data) {
-	var current_time = new Date().getTime()/1000;
-	if ((current_time - access_token_data.expires_at) > 3520){
-		var data = ''
-		var newTokenRequest = https.request(api_req_data, (result) => {
-			if (result.statusCode >= 200 || result.statusCode < 300) {
-				result.setEncoding('utf8');
-				let responseBody = '';
-	
-				result.on('data', (d) => {
-					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] receiving data');
-					responseBody += d;
-				});
-				result.on('end', () => {
-					console.log('[SPOTIFY_CLIENT_TOKEN_REFRESH] end of data');
-					resolve(JSON.parse(responseBody));
-				});
-			} else {
-				throw new Error('[SPOTIFY_CLIENT_TOKEN_REFRESH] Error: status code')
-			}
-		});
-		newTokenRequest.on('error', (err) => {
-			reject(err);
-		});
-		newTokenRequest.write(data);
-		newTokenRequest.end();
-
-		access_token_data.access_token = data.access_token;
-		access_token_data.expires_at   = current_time+3600;
-	} else {
-		console.log('no need to refresh the client token right now')
+function getGoogleOAuthURL() {
+	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
+	const options = {
+		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
+		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
+		access_type: 'offline',
+		response_type: 'code',
+		prompt: 'consent',
+		scope: [
+			'https://www.googleapis.com/auth/userinfo.profile',
+			'https://www.googleapis.com/auth/userinfo.email',
+		].join(" "),
 	}
-};
+
+	const querystr = new URLSearchParams(options);
+
+	const retUrl = rootUrl+querystr.toString();
+	console.log(retUrl);
+
+	return retUrl;
+}
+
+async function handlerGoogleOAuth(code) {
+	const {id_token, access_token} = await getGoogleOAuthToken({code});
+	console.log({id_token, access_token});
+}
+
+async function getGoogleOAuthToken(code) {
+	const rootUrl = "https://oauth2.googleapis.com/token?";
+	const options = {
+		code,
+		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
+		client_secret: process.env.GOOGLE_CLIENT_SECRET.toString(),
+		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
+		grant_type: 'authorization_code',
+	};
+
+	try {
+		const res = await axios.post(rootUrl, queryString.stringify(options), {
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+		});
+		return res.data
+	} catch(error) {
+		console.log(error, 'fallimento fetch token');
+		throw new Error(error.message);
+	}
+}
+
+app.get('/googlelogin', (req, res) => {
+	res.render('googlelogin');
+});
+app.get('/googlelogin/init', (req, res) => {
+	res.redirect(getGoogleOAuthURL());
+});
+app.get('/oauth/google/login', (req, res) => {
+	const code = req.query.code.toString();
+	handlerGoogleOAuth(code);
+});
 
 //SPOTIFY OAUTH, PROBABILMENTE DA MUOVERE IN UN NUOVO FILE AUSILIARIO
 
@@ -223,116 +182,6 @@ var generateRandomString = function(length) {
 	return text;
 };
 
-var spotStateKey = 'spotify_auth_state';
-
-app.get('/spot/login', function(req, res) {
-	var state = generateRandomString(16);
-	res.cookie(spotStateKey, state);
-
-	var scope = 'user-read-private user-read-email'; //DA SOSTITUIRE CON SCOPE UTILE OVVIAMENTE
-	res.redirect('https://accounts.spotify.com/authorize?' +
-		queryString.stringify({
-		response_type: 'code',
-		client_id: process.env.SPOTIFY_CLIENT_ID,
-		scope: scope,
-		redirect_uri: spot_redirect_uri,
-		state: state
-	}));
-});
-
-app.get('/spot/callback', function(req, res) {
-	var code = req.query.code || null;
-	console.log(code);
-	var state = req.query.state || null;
-	console.log(state);
-	var storedState = req.cookies ? req.cookies[spotStateKey] : null;
-
-	if (state === null || state !== storedState) {
-		res.redirect('/#' +
-		  queryString.stringify({
-		    error: 'state_mismatch'
-		  }));
-	} else {
-		res.clearCookie(spotStateKey);
-		var authOptions = {
-			url: 'https://accounts.spotify.com/api/token',
-			method: 'POST',
-			form: {
-				code: code,
-				redirect_uri: spot_redirect_uri,
-				grant_type: 'authorization_code'
-			},
-			headers: {
-				'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')), //utilizza new Buffer() se non parte cosi
-				'Content-Type': 'application/x-www-form-urlencoded' 
-			},
-			json: true
-		};
-
-		superagent.post(authOptions, function(error, response, body) {
-			if (!error && response.statusCode === 200) {
-				var access_token = body.access_token,
-					refresh_token = body.refresh_token;
-				var options = {
-					url: 'https://api.spotify.com/v1/me',
-					headers: { 'Authorization': 'Bearer ' + access_token }, //controlla non manca qualche pezzo
-					json: true
-				};
-
-				request.get(options, function(error, response, body) {
-					console.log(body);
-				});
-
-				res.redirect('/#' + //QUESTO REDIRECT VA MODIFICATO OVVIAMENTE
-					queryString.stringify({
-						access_token: access_token,
-						refresh_token: refresh_token
-					}));
-			} else {
-				res.redirect('/#' + 
-					queryString.stringify({
-						error: 'invalid_token'
-					}));
-			}
-		});
-	}
-});
-
-app.get('/spot/token_refresh', function(req, res) {
-	var refresh_token = req.query.refresh_token;
-	var authOptions = {
-		url: 'https://accounts.spotify.com/api/token',
-		method: 'POST',
-		headers: { 'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')) },
-
-		form: {
-			client_id: process.env.SPOTIFY_CLIENT_ID,
-			client_secret: process.env.SPOTIFY_CLIENT_SECRET,
-			grant_type: 'refresh_token',
-			refresh_token: refresh_token
-		},
-		json: true
-	};
-
-	var req = https.request(authOptions, (res) => {
-		if (res.stausCode < 200 || res.statusCode > 299) {
-			console.log('status code errato su post request refresh token spotify, abortendo ',
-				res.tatusCode);
-			return;
-		};
-		res.setEncoding('utf8');
-		res.on('data', function (chunk) {
-			console.log('BODY: ' + chunk);
-		});
-	});
-	req.on('error', function(e) {
-		console.log('errore refresh token: ' + e.message);
-	});
-
-	req.write('data\n');
-	req.write('data\n');
-	req.end();
-});
 
 
 console.log('in ascolto su 3000');
