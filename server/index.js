@@ -12,6 +12,7 @@ const cors = require('cors');
 const superagent = require('superagent');
 const passport = require("passport");
 const cookieParser = require("cookie-parser");
+const { dirname } = require('path');
 
 
 //const { ensureUser } = require('./middlewares/auth');
@@ -256,11 +257,11 @@ app.listen(3000);
 //passport spotify
 
 
-app.get('/spot', passport.authenticate('spotify'));
+app.get('/spot', passport.authenticate('SpotifyStrategy'));
 
 app.get(
   '/spot/callback',
-  passport.authenticate('spotify', { failureRedirect: '/#error' }),
+  passport.authenticate('SpotifyStrategy', { failureRedirect: '/#error' }),
   function(req, res) {
     // Successful authentication, redirect home.
     res.redirect('/spot/info');
@@ -269,7 +270,7 @@ app.get(
 
   app.get(
 	'/spot/info',
-	passport.authenticate('spotify', {
+	passport.authenticate('SpotifyStrategy', {
 	  scope: ['user-read-email', 'user-read-private'],
 	  showDialog: true
 	})
