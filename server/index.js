@@ -256,19 +256,19 @@ app.listen(3000);
 //passport spotify
 
 
-app.get('/oauth/spot', passport.authenticate('spotify'));
+app.get('/spot', passport.authenticate('spotify'));
 
 app.get(
-  '/oauth/spot/callback',
+  '/spot/callback',
   passport.authenticate('spotify', { failureRedirect: '/#error' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/oauth/spot/info');
+    res.redirect('/spot/info');
   }
 );
 
   app.get(
-	'/oauth/spot/info',
+	'/spot/info',
 	passport.authenticate('spotify', {
 	  scope: ['user-read-email', 'user-read-private'],
 	  showDialog: true
