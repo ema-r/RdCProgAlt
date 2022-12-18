@@ -337,3 +337,33 @@ app.get('/spot/token_refresh', function(req, res) {
 
 console.log('in ascolto su 3000');
 app.listen(3000);
+
+
+//passport spotify
+
+
+app.get('/oauth/google', passport.authenticate('spotify'));
+
+app.get(
+  '/oauth/google/callback',
+  passport.authenticate('spotify', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  }
+);
+
+app.get(
+	'/oauth/google',
+	passport.authenticate('spotify', {
+	  scope: ['user-read-email', 'user-read-private']
+	})
+  );
+
+  app.get(
+	'/oauth/google',
+	passport.authenticate('spotify', {
+	  scope: ['user-read-email', 'user-read-private'],
+	  showDialog: true
+	})
+  );

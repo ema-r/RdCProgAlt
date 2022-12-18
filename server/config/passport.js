@@ -56,3 +56,24 @@ passport.deserializeUser(async (user, done) => {
 });
 
 module.exports = passport;
+
+
+
+//guida nuova
+
+
+const SpotifyStrategy = require('passport-spotify').Strategy;
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      callbackURL: 'http://localhost:8080/oauth/google/callback'
+    },
+    function(accessToken, refreshToken, expires_in, profile, done) {
+      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
+        return done(err, user);
+      });
+    }
+  )
+);
