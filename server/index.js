@@ -9,13 +9,12 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 const cors = require('cors');
-const superagent = require('superagent');
 const passport = require('passport');
-require('./passport.js')
+const spotify = require('passport-spotify');
 const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
 const { ensureUser } = require('./middlewares/auth');
-
+const mailer = require('nodemailer');
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
@@ -58,11 +57,31 @@ var spot_client_token_info = {
 	'expires_at' : 0
 };
 
+
+
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
 const spot_redirect_uri = 'https://localhost:8443/spot/callback';
 
 const app = express();
+
+
+const SpotifyStrategy = require('passport-spotify').Strategy;
+
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      callbackURL: 'https://localhost:8443/auth/spotify/callback'
+    },
+    function(accessToken, refreshToken, expires_in, profile, done) {
+      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
+        return done(err, user);
+      });
+    }
+  )
+);
 
 /* set view engine */
 app.set('view engine', 'ejs');
@@ -78,7 +97,7 @@ app.use(cors());
 /* initialize passport */
 app.use(passport.initialize());
 app.use(passport.session());
-require("./config/passport")(passport);
+
 
 
 //import passportConfig from "../config/passport.js";
