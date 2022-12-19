@@ -1,6 +1,6 @@
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config()
 const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
@@ -9,19 +9,15 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 const cors = require('cors');
-const passport = require('passport');
+const passport = require('./config/passport');
 const spotify = require('passport-spotify');
 const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
-const { ensureUser } = require('./middlewares/auth');
 const mailer = require('nodemailer');
-//const homepageRoutes = require('./routes/homepage');
-//const oauthRoutes = require('./routes/oauth');
-//const apiRoutes = require('./routes/post');
+const spotifyAuth = require('./middlewares/spotify-auth');
+const {URL} = require('url');
 
-//import { dirname } from 'path';
-//import { fileURLToPath } from 'url';
-//const __dirname = dirname(fileURLToPath(import.meta.url));
+// const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -70,7 +66,7 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'https://localhost:8443/spot/callback'
+      callbackURL: 'https://localhost:8443/'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
 	    process.nextTick(function () {
@@ -83,9 +79,7 @@ passport.use(
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
 const spot_redirect_uri = 'https://localhost:8443/spot/callback';
-
 const app = express();
-
 
 
 
@@ -104,17 +98,6 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
-//import passportConfig from "../config/passport.js";
-
-//passportConfig(passport);
-
-
-///* set routes */
-//app.use('/api/v1/post', apiRoutes);
-//app.use('/homepage', homepageRoutes);
-//app.use('/oauth/google', oauthRoutes);
 
 /* get root path */
 app.get('/', (req, res) => {
@@ -302,3 +285,16 @@ app.get(
 	  showDialog: true
 	})
   );
+
+ 
+  const client_id = process.env.SPOTIFY_CLIENT_ID;
+  const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+  
+  const port = new URL(redirect_uri).port;
+  
+  app.use(express.static(path.join(__dirname, 'public')))
+   .use(cors())
+   .use(spotifyAuth({client_id, client_secret, redirect_uri}));
+  
+  app.listen(port, () => console.log(`Listening on ${port}`));
+  
