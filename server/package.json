@@ -27,6 +27,7 @@
     "express-session": "^1.17.3",
     "googleapis": "^100.0.0",
     "mongoose": "^6.3.3",
+    "mongoose-findorcreate": "^3.0.0",
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.5",
     "passport": "^0.6.0",
