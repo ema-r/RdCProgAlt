@@ -67,13 +67,22 @@ const app = express();
 
 
 const SpotifyStrategy = require('passport-spotify').Strategy;
+const User=require('./models/User')
+passport.serializeUser(function(user, done) {
+	done(null, user);
+   });
+   
+   
+   passport.deserializeUser(function(user, done) {
+	done(null, user);
+   });
 
 passport.use(
   new SpotifyStrategy(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'https://localhost:8443/auth/spotify/callback'
+      callbackURL: 'https://localhost:8443/spot/callback'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
       User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
@@ -239,7 +248,7 @@ app.get('/spot/token_refresh', function(req, res) {
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
 		method: 'POST',
-		headers: { 'Authorization': 'Basic ' + (Buffer.from(spot_client_id + ':' + spot_client_sc).toString('base64')) },
+		headers: { 'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')) },
 
 		form: {
 			client_id: process.env.SPOTIFY_CLIENT_ID,
