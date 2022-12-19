@@ -13,6 +13,7 @@ import cors from 'cors';
 import queryString from 'query-string';
 import passport from 'passport';
 import axios from 'axios';
+import jwt from 'jsonwebtoken'
 
 //const passport = require('./config/passport');
 //const { ensureUser } = require('./middlewares/auth');
@@ -40,30 +41,8 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
-var spot_client_auth_options = {
-	url: 'https://accounts.spotify.com/api/token',
-	method: 'POST',
-	headers: {
-		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_client_id 
-			+ ':' + process.env.SPOTIFY_client_secret).toString('base64')),
-		'Content-Type': 'application/x-www-form-urlencoded' 
-	},
-	form: {
-		grant_type: 'client_credentials'
-	},
-	json: true
-};
-var spot_client_token_info = {
-	'access_token' : '',
-	'expires_at' : 0
-};
-
-const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'http://localhost:8080/spot/callback';
-
 const app = express();
-
+//
 /* set view engine */
 app.set('view engine', 'ejs');
 
@@ -78,11 +57,6 @@ app.use(cors());
 /* initialize passport */
 app.use(passport.initialize());
 app.use(passport.session());
-
-///* set routes */
-//app.use('/api/v1/post', apiRoutes);
-//app.use('/homepage', homepageRoutes);
-//app.use('/oauth/google', oauthRoutes);
 
 /* get root path */
 app.get('/', (req, res) => {
@@ -105,6 +79,15 @@ mongoose
     console.error(err.message);
   });
 //GOOGLE OAUTH
+//POSSIBILE MODULO ESTERNO INIZIO
+
+//interface googleTokensFormat {
+//	access_token: string;
+//	expires_in: Number;
+//	refresh_token: string;
+//	scope: string;
+//	id_token: string;
+//}
 
 function getGoogleOAuthURL() {
 	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
@@ -129,12 +112,22 @@ function getGoogleOAuthURL() {
 }
 
 async function handlerGoogleOAuth(code) {
-	const {id_token, access_token} = await getGoogleOAuthToken({code});
-	console.log({id_token, access_token});
+	return new Promise(res => {
+		setTimeout(() => {
+			const {id_token, access_token} = await getGoogleOAuthToken(code);
+			console.log('[HANDLER]: '+ id_token);
+			console.log('[HANDLER]: '+ access_token);
+			var data = {
+				id_token: id_token,
+				access_token: access_token
+			}	
+			res(data);
+		}, 2000);
+	})
 }
 
 async function getGoogleOAuthToken(code) {
-	const rootUrl = "https://oauth2.googleapis.com/token?";
+	const rootUrl = "https://oauth2.googleapis.com/token";
 	const options = {
 		code,
 		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
@@ -156,15 +149,44 @@ async function getGoogleOAuthToken(code) {
 	}
 }
 
+async function getGoogleUser({id_token, access_token}) {
+	try {
+		const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token='+access_token, {
+			headers: {
+				Authorization: 'Bearer '+id_token
+			}
+		})
+		return res.data
+	} catch(error) {
+		console.log(error, "ERRORE RITORNO DATI UTENTE");
+		throw new Error(error.message);
+	}
+}
+//possibile modulo esterno FINE
 app.get('/googlelogin', (req, res) => {
 	res.render('googlelogin');
 });
 app.get('/googlelogin/init', (req, res) => {
 	res.redirect(getGoogleOAuthURL());
 });
-app.get('/oauth/google/login', (req, res) => {
-	const code = req.query.code.toString();
-	handlerGoogleOAuth(code);
+
+//Redirige qui dopo aver accettato login e scope
+app.get('/oauth/google/login', async (req, res) => {
+	const code = req.query.code;
+	console.log('[CALLBACK] code: '+code)
+	var tokens = await handlerGoogleOAuth(code);
+
+	const id_token = tokens.id_token;
+	const access_token = tokens.access_token;
+
+	console.log("[CALLBACK] "+id_token);
+	console.log("[CALLBACK] "+access_token);
+
+
+//	const googleUser1 = jwt.decode(id_token);
+//	const googleUser2 = getGoogleUser({id_token, access_token})
+//	console.log("google user decodeato: "+googleUser1);
+//	console.log("google user trovato: "+googleUser2);
 });
 
 //SPOTIFY OAUTH, PROBABILMENTE DA MUOVERE IN UN NUOVO FILE AUSILIARIO

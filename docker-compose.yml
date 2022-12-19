@@ -7,10 +7,8 @@ services:
       dockerfile: Dockerfile
     links:
       - node1:node1
-      - node2:node2
     depends_on:
       - node1
-      - node2
     ports:
       - "8080:80"
       - "8443:443"
@@ -29,21 +27,6 @@ services:
       - /usr/src/app/node_modules
     environment:
       - INSTANCE=node1
-    depends_on:
-      - mongo
-    networks:
-      - app-network
-
-  node2:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    volumes:
-      - ./server:/usr/src/app
-      - ./server/public/uploads:/usr/src/app/public/uploads
-      - /usr/src/app/node_modules
-    environment:
-      - INSTANCE=node2
     depends_on:
       - mongo
     networks:
