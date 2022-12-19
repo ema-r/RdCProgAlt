@@ -15,7 +15,6 @@ const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
 const { ensureUser } = require('./middlewares/auth');
 const mailer = require('nodemailer');
-const findOrCreate = require("mongoose-findorcreate");
 //const homepageRoutes = require('./routes/homepage');
 //const oauthRoutes = require('./routes/oauth');
 //const apiRoutes = require('./routes/post');
@@ -58,25 +57,13 @@ var spot_client_token_info = {
 	'expires_at' : 0
 };
 
-
-
-const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'https://localhost:8443/spot/callback';
-
-const app = express();
-
-
 const SpotifyStrategy = require('passport-spotify').Strategy;
-const User=require('./models/User')
 passport.serializeUser(function(user, done) {
 	done(null, user);
-   });
-   
-   
-   passport.deserializeUser(function(user, done) {
-	done(null, user);
-   });
+});
+passport.deserializeUser(function(obj, done) {
+	done(null, obj);
+});
 
 passport.use(
   new SpotifyStrategy(
@@ -86,12 +73,21 @@ passport.use(
       callbackURL: 'https://localhost:8443/spot/callback'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
-      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
-        return done(err, user);
-      });
+	    process.nextTick(function () {
+		return done(null, profile);
+	    });
     }
   )
 );
+
+const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
+const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
+const spot_redirect_uri = 'https://localhost:8443/spot/callback';
+
+const app = express();
+
+
+
 
 /* set view engine */
 app.set('view engine', 'ejs');
