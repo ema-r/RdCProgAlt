@@ -1,6 +1,7 @@
+require('dotenv').config()
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-require('dotenv').config()
+
 const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
@@ -9,7 +10,7 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 const cors = require('cors');
-const passport = require('./config/passport');
+const passport = require('passport');
 const spotify = require('passport-spotify');
 const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
@@ -289,7 +290,8 @@ app.get(
  
   const client_id = process.env.SPOTIFY_CLIENT_ID;
   const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-  
+  const redirect_uri = 'https://localhost:8443/spot/callback';
+
   const port = new URL(redirect_uri).port;
   
   app.use(express.static(path.join(__dirname, 'public')))

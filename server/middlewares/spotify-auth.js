@@ -19,7 +19,7 @@ module.exports = function(options = {}) {
     });
   };
 
-  const app = express.app();
+  const app = express();
 
   app.get('/login', (req, res) => {
     const url = new URL(SPOTIFY_AUTHORIZE_ENDPOINT);
