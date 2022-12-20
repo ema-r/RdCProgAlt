@@ -5,6 +5,7 @@ const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
+var User = mongoose.model("User");
 const path = require('path');
 const http = require('http');
 const https = require('https');
@@ -51,16 +52,35 @@ passport.deserializeUser(function(obj, done) {
 
 var spotify_access_token = ''
 
+passport.serializeUser(function(user, done) {
+	var query = { spotifyID: user.id };
+	var update = { $set: {
+		spotifyID: user.id,
+		name = user.displayName,
+		avatarUrl: user._json.avatar_url,
+		profile: user._json
+	}};
+	var options = { new: true, upsert: true };
+	User.findOneAndUpdate(query, update, options, function(err, u) {
+		return done(err, u);
+	});
+});
+
+passport.deserializeUser(function(id, done) {
+	User.find({ "spotifyID": id}, function(err, user) {
+		done(err, user);
+	});
+});
+
 passport.use(
   new SpotifyStrategy(
     {
-      clientID: process.env.SPOTIFY_CLIENT_ID,
+	    clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       callbackURL: 'https://localhost:8443/'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
 	    process.nextTick(function () {
-		spotify_access_token = accessToken;
 		return done(null, profile);
 	    });
     }
@@ -110,7 +130,6 @@ mongoose
     console.error(err.message);
   }
 );
-
 
 app.get('/spot', passport.authenticate('spotify'));
 
