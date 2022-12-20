@@ -162,24 +162,46 @@ async function getPlaylist(options) {
 	}
 }
 //new begin /form
-app.post('/form', async function findSongs(token, search_query) {
-  let result = await https.request({
-      method: "get",
-      url: "https://api.spotify.com/v1/search",
-      headers: { 'Authorization': 'Bearer ' + token },
-      params: { 'q': search_query, 'type': 'track' }
-  }).catch(async function handleError(err) {
-      console.log(err)
-      let refreshed_token = await refreshToken(username)
-      let result_new = await findSongs(username, refreshed_token, search_query)
-      console.log(result_new)
-      return result_new.data.tracks
-    })
-
-  console.log(JSON.Stringify(result.data.tracks));
-  return result.data.tracks
-
+app.post('/form', async (req, res) {
+  var item = (req.body.formUrl2).split('tracks/').pop();
+  const req_options = {
+	  song_id: item,
+	  market: 'IT' //placeholder
+	  access_token: token
+  }
+//  let result = await https.request({
+//      method: "get",
+//      url: "https://api.spotify.com/v1/search",
+//      headers: { 'Authorization': 'Bearer ' + token },
+//      params: { 'q': search_query, 'type': 'track' }
+//  }).catch(async function handleError(err) {
+//      console.log(err)
+//      let refreshed_token = await refreshToken(username)
+//      let result_new = await findSongs(username, refreshed_token, search_query)
+//      console.log(result_new)
+//      return result_new.data.tracks
+//    })
+  const result = await getSong(options)	
+  
+  console.log(JSON.Stringify(result));
 });
+
+async function getSong(options) {
+	const rootUrl = 'https://api.spotify.com/v1/tracks/'+options.song_id+'?market'+options.market
+	try {
+		const res = await axios.get(rootUrl, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer '+options.access_token
+			}
+		})
+		return res.data;
+	} catch(error) {
+		console.log('errore richiesta canzone: '+error);
+		throw new Error(error.message);
+	}
+}
 //new end
 
 app.listen(port, () => console.log(`Listening on ${port}`));
