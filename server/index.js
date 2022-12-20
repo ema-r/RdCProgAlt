@@ -16,6 +16,7 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const spotifyAuth = require('./middlewares/spotify-auth');
 const {URL} = require('url');
+const axios = require('axios');
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirect_uri = 'https://localhost:8443/spot/callback';
@@ -40,24 +41,6 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
-var spot_client_auth_options = {
-	url: 'https://accounts.spotify.com/api/token',
-	method: 'POST',
-	headers: {
-		'Authorization': 'Basic ' + (new Buffer(process.env.SPOTIFY_client_id 
-			+ ':' + process.env.SPOTIFY_client_secret).toString('base64')),
-		'Content-Type': 'application/x-www-form-urlencoded' 
-	},
-	form: {
-		grant_type: 'client_credentials'
-	},
-	json: true
-};
-var spot_client_token_info = {
-	'access_token' : '',
-	'expires_at' : 0
-};
-
 const SpotifyStrategy = require('passport-spotify').Strategy;
 passport.serializeUser(function(user, done) {
 	done(null, user);
@@ -65,6 +48,8 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(obj, done) {
 	done(null, obj);
 });
+
+var spotify_access_token = ''
 
 passport.use(
   new SpotifyStrategy(
@@ -75,6 +60,7 @@ passport.use(
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
 	    process.nextTick(function () {
+		spotify_access_token = accessToken;
 		return done(null, profile);
 	    });
     }
@@ -144,6 +130,37 @@ app.get(
 	})
 );
 
+app.get('/spot/get_playlist', (req, res) => {
+	res.render('get_playlist', {title: 'Get playlist'});
+})
+
+app.post('/spot/get_playlist', async (req, res) => {
+	var item = req.body.formUrl;
+	var slug = item.split('playlist/').pop();
+
+	const req_options = {
+		playlist_id: slug,
+		market: 'IT', //placeholder
+		access_token: spotify_access_token
+	}
+	const playlistInfo = await getPlaylist(req_options);
+}) 
+
+async function getPlaylist(options) {
+	const rootUrl = 'https://api.spotify.com/v1/playlists/'+options.playlist_id+'?market='+options.market
+	try {
+		const res = await axios.get(rootUrl, {
+			headers: {
+				'Content-Type: application/json',
+				'Authorization: Bearer '+options.access_token
+			}
+		});
+		return res.data
+	} catch(error) {
+		console.log('errore fetch playlist: '+error);
+		throw new Error(error.message)
+	}
+}
 
 app.listen(port, () => console.log(`Listening on ${port}`));
 
