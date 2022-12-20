@@ -5,7 +5,6 @@ const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
-var User = mongoose.model("User");
 const path = require('path');
 const http = require('http');
 const https = require('https');
@@ -49,6 +48,21 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(obj, done) {
 	done(null, obj);
 });
+
+/* set connection with mongo */
+mongoose
+  .connect(MONGO_URI)
+  .then((result) => {
+    console.log(`${INSTANCE} -> ${result.connection.host}`);
+    app.listen(3001, () => {
+      console.log(`${INSTANCE} -> ${3001}`);
+    });
+  })
+  .catch((err) => {
+    console.error(err.message);
+  }
+);
+
 
 passport.use(
   new SpotifyStrategy(
@@ -95,19 +109,6 @@ app.get('/', (req, res) => {
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
-/* set connection with mongo */
-mongoose
-  .connect(MONGO_URI)
-  .then((result) => {
-    console.log(`${INSTANCE} -> ${result.connection.host}`);
-    app.listen(3001, () => {
-      console.log(`${INSTANCE} -> ${3001}`);
-    });
-  })
-  .catch((err) => {
-    console.error(err.message);
-  }
-);
 
 app.get('/spot', passport.authenticate('spotify'));
 
