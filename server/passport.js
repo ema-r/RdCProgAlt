@@ -1,11 +1,12 @@
 const dotenv = require('dotenv');
 const passport = require('passport');
+require('dotenv').config()
+
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const SpotifyStrategy = require('passport-spotify').Strategy;
-require('dotenv').config()
+
 const User = require("./models/User");
 
-//dotenv.config({ path: '../config/.env' });
 
 passport.use(
   new GoogleStrategy(
@@ -55,12 +56,6 @@ passport.deserializeUser(async (user, done) => {
 });
 
 module.exports = passport;
-
-
-
-//guida nuova
-
-
 
 passport.use(
   new SpotifyStrategy(

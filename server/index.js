@@ -1,7 +1,6 @@
 require('dotenv').config()
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-
 const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
@@ -17,8 +16,6 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const spotifyAuth = require('./middlewares/spotify-auth');
 const {URL} = require('url');
-
-// const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -81,12 +78,13 @@ const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
 const spot_redirect_uri = 'https://localhost:8443/spot/callback';
 const app = express();
-
-
-
+app.use(express.static(path.join(__dirname, '/public/css')));
+app.use(express.static(__dirname + 'public'));
+app.use(express.static('public'));
+app.use('/static', express.static(path.join(__dirname, 'public')))
+app.use('/static', express.static(path.join(__dirname, '/views/partials')));
 /* set view engine */
 app.set('view engine', 'ejs');
-
 /* set middlewares */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -94,7 +92,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session(SESSION_OPTIONS));
 app.use(cors());
-
+app.use(express.static('public'));
 /* initialize passport */
 app.use(passport.initialize());
 app.use(passport.session());
@@ -184,12 +182,6 @@ function findSongs(data, api_req_data) {
   });
 }
 
-//Idea della funzione e' che passato come input le opzioni e il corpo dell'access token
-//(per ora stabilito globalmente) possa aggiornare tutti e 3 i campi: access_token
-//expires_in e refresh_token. Dovrebbe permettere di aggiornare anche token oauth
-//personali e non client semplicemente passando il 'body' corretto. Servira' modificare
-//la funzione per questo pero', permettendo di ottenere anche refresh token mancante 
-//in richieste di tipo Client Credentials
 function getSpotifyToken(access_token_data, api_req_data) {
 	var current_time = new Date().getTime()/1000;
 	if ((current_time - access_token_data.expires_at) > 3520){
@@ -260,14 +252,6 @@ app.get('/spot/token_refresh', function(req, res) {
 	req.end();
 });
 
-
-console.log('in ascolto su 3000');
-app.listen(3000);
-
-
-//passport spotify
-
-
 app.get('/spot', passport.authenticate('spotify'));
 
 app.get(
@@ -299,4 +283,7 @@ app.get(
    .use(spotifyAuth({client_id, client_secret, redirect_uri}));
   
   app.listen(port, () => console.log(`Listening on ${port}`));
-  
+
+
+console.log('in ascolto su 3000');
+app.listen(3000);
