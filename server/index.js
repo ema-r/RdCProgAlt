@@ -81,14 +81,6 @@ mongoose
 //GOOGLE OAUTH
 //POSSIBILE MODULO ESTERNO INIZIO
 
-//interface googleTokensFormat {
-//	access_token: string;
-//	expires_in: Number;
-//	refresh_token: string;
-//	scope: string;
-//	id_token: string;
-//}
-
 function getGoogleOAuthURL() {
 	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
 	const options = {
@@ -112,18 +104,14 @@ function getGoogleOAuthURL() {
 }
 
 async function handlerGoogleOAuth(code) {
-	return new Promise(res => {
-		setTimeout(() => {
-			const {id_token, access_token} = await getGoogleOAuthToken(code);
-			console.log('[HANDLER]: '+ id_token);
-			console.log('[HANDLER]: '+ access_token);
-			var data = {
-				id_token: id_token,
-				access_token: access_token
-			}	
-			res(data);
-		}, 2000);
-	})
+	const {id_token, access_token} = await getGoogleOAuthToken(code);
+	console.log('[HANDLER]: '+ id_token);
+	console.log('[HANDLER]: '+ access_token);
+	var data = {
+		id_token: id_token,
+		access_token: access_token
+	}	
+	return data;
 }
 
 async function getGoogleOAuthToken(code) {
@@ -183,10 +171,10 @@ app.get('/oauth/google/login', async (req, res) => {
 	console.log("[CALLBACK] "+access_token);
 
 
-//	const googleUser1 = jwt.decode(id_token);
-//	const googleUser2 = getGoogleUser({id_token, access_token})
-//	console.log("google user decodeato: "+googleUser1);
-//	console.log("google user trovato: "+googleUser2);
+	const googleUser2 = await getGoogleUser({id_token, access_token})
+	console.log("google user trovato: "+JSON.stringify(googleUser2));
+
+	res.redirect('/');
 });
 
 //SPOTIFY OAUTH, PROBABILMENTE DA MUOVERE IN UN NUOVO FILE AUSILIARIO
