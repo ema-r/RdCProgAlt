@@ -161,6 +161,29 @@ async function getPlaylist(options) {
 		throw new Error(error.message)
 	}
 }
+//new begin
+app.post(
+  '/form', 
+  passport.authenticate('spotify', async function findSongs(token, search_query) {
+
+  let result = await api.request({
+      method: "get",
+      url: "https://api.spotify.com/v1/search",
+      headers: { 'Authorization': 'Bearer ' + token },
+      params: { 'q': search_query, 'type': 'track' }
+  }).catch(async function handleError(err) {
+      console.log(err)
+      let refreshed_token = await refreshToken(username)
+      let result_new = await findSongs(username, refreshed_token, search_query)
+      console.log(result_new)
+      return result_new.data.tracks
+    })
+
+  console.log(JSON.Stringify(result.data.traks));
+  return result.data.tracks
+
+}));
+//new end
 
 app.listen(port, () => console.log(`Listening on ${port}`));
 
