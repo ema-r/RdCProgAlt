@@ -50,34 +50,12 @@ passport.deserializeUser(function(obj, done) {
 	done(null, obj);
 });
 
-var spotify_access_token = ''
-
-passport.serializeUser(function(user, done) {
-	var query = { spotifyID: user.id };
-	var update = { $set: {
-		spotifyID: user.id,
-		name = user.displayName,
-		avatarUrl: user._json.avatar_url,
-		profile: user._json
-	}};
-	var options = { new: true, upsert: true };
-	User.findOneAndUpdate(query, update, options, function(err, u) {
-		return done(err, u);
-	});
-});
-
-passport.deserializeUser(function(id, done) {
-	User.find({ "spotifyID": id}, function(err, user) {
-		done(err, user);
-	});
-});
-
 passport.use(
   new SpotifyStrategy(
     {
 	    clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'https://localhost:8443/'
+      callbackURL: 'https://localhost:8443/spot/callback'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
 	    process.nextTick(function () {
