@@ -162,14 +162,15 @@ async function getPlaylist(options) {
 	}
 }
 //new begin /form
-app.post('/form', passport.authenticate('spotify'), async (req, res) => {
-  var item = (req.body.formUrl1).split('tracks/').pop();
+app.post('/form', passport.authenticate('spotify', { failureRedirect: '/#error' }),
+ async (req, res) => {
+  console.log("ciao");
+  var item = (req.body.song_url).split('tracks/').pop();
   const req_options = {
 	  song_id: item,
 	  market: 'IT',
 	  access_token: token
   }
-  console.log("ciaos");
   const result = await getSong(options);
   
   console.log(JSON.Stringify(result));
