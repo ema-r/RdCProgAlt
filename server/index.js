@@ -162,26 +162,15 @@ async function getPlaylist(options) {
 	}
 }
 //new begin /form
-app.post('/form', async (req, res) {
-  var item = (req.body.formUrl2).split('tracks/').pop();
+app.post('/form', passport.authenticate('spotify'), async (req, res) => {
+  var item = (req.body.formUrl1).split('tracks/').pop();
   const req_options = {
 	  song_id: item,
-	  market: 'IT' //placeholder
+	  market: 'IT',
 	  access_token: token
   }
-//  let result = await https.request({
-//      method: "get",
-//      url: "https://api.spotify.com/v1/search",
-//      headers: { 'Authorization': 'Bearer ' + token },
-//      params: { 'q': search_query, 'type': 'track' }
-//  }).catch(async function handleError(err) {
-//      console.log(err)
-//      let refreshed_token = await refreshToken(username)
-//      let result_new = await findSongs(username, refreshed_token, search_query)
-//      console.log(result_new)
-//      return result_new.data.tracks
-//    })
-  const result = await getSong(options)	
+  console.log("ciaos");
+  const result = await getSong(options);
   
   console.log(JSON.Stringify(result));
 });
