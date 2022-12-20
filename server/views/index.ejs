@@ -67,8 +67,18 @@
         <input
           id="song_url"
           type="text"
-          name="formUrl"
+          name="formUrl1"
           placeholder="inserisci testo"
+          required />
+        <input type="submit" value="OK" />
+      </form>
+      <form action="/spot/get_playlist" method="post">
+        <label for="playlist_url">Inserisci url playlist: </label>
+        <input
+          id="playlist_url"
+          type="text"
+          name="formUrl2"
+          placeholder="inserisci testo" 
           required />
         <input type="submit" value="OK" />
       </form>

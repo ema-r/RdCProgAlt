@@ -151,8 +151,8 @@ async function getPlaylist(options) {
 	try {
 		const res = await axios.get(rootUrl, {
 			headers: {
-				'Content-Type: application/json',
-				'Authorization: Bearer '+options.access_token
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer'+options.access_token
 			}
 		});
 		return res.data
