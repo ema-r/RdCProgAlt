@@ -69,7 +69,7 @@ passport.use(
     {
 	    clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'https://localhost:8443/spot/callback'
+      callbackURL: 'https://localhost:8443'
     },
     function(accessToken, refreshToken, expires_in, profile, done) {
 	    process.nextTick(function () {
@@ -128,6 +128,8 @@ app.get(
 	})
 );
 
+//new begin /playlist
+
 app.get('/spot/get_playlist', (req, res) => {
 	res.render('get_playlist', {title: 'Get playlist'});
 })
@@ -159,12 +161,9 @@ async function getPlaylist(options) {
 		throw new Error(error.message)
 	}
 }
-//new begin
-app.post(
-  '/form', 
-  passport.authenticate('spotify', async function findSongs(token, search_query) {
-
-  let result = await api.request({
+//new begin /form
+app.post('/form', async function findSongs(token, search_query) {
+  let result = await https.request({
       method: "get",
       url: "https://api.spotify.com/v1/search",
       headers: { 'Authorization': 'Bearer ' + token },
@@ -177,10 +176,10 @@ app.post(
       return result_new.data.tracks
     })
 
-  console.log(JSON.Stringify(result.data.traks));
+  console.log(JSON.Stringify(result.data.tracks));
   return result.data.tracks
 
-}));
+});
 //new end
 
 app.listen(port, () => console.log(`Listening on ${port}`));
