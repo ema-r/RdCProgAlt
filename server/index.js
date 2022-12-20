@@ -114,18 +114,20 @@ app.get('/spot', passport.authenticate('spotify'));
 
 app.get(
   '/spot/callback',
-  passport.authenticate('spotify', { failureRedirect: '/#error' }),
+  passport.session('spotify', { 
+		failureRedirect: '/#error'
+	}),
   function(req, res) {
     res.redirect('/spot/info');
-  }
+	}
 );
 
 app.get(
 	'/spot/info',
 	passport.authenticate('spotify', {
 	  scope: ['user-read-email', 'user-read-private'],
-	  showDialog: true
 	})
+	
 );
 
 //new begin /playlist
@@ -134,65 +136,71 @@ app.get('/spot/get_playlist', (req, res) => {
 	res.render('get_playlist', {title: 'Get playlist'});
 })
 
-app.post('/spot/get_playlist', async (req, res) => {
-	var item = req.body.formUrl;
-	var slug = item.split('playlist/').pop();
-
-	const req_options = {
-		playlist_id: slug,
-		market: 'IT', //placeholder
-		access_token: spotify_access_token
-	}
-	const playlistInfo = await getPlaylist(req_options);
-}) 
-
-async function getPlaylist(options) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+options.playlist_id+'?market='+options.market
-	try {
-		const res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer'+options.access_token
-			}
-		});
-		return res.data
-	} catch(error) {
-		console.log('errore fetch playlist: '+error);
-		throw new Error(error.message)
-	}
-}
+//app.post('/spot/get_playlist', async (req, res) => {
+//	var item = req.body.formUrl;
+//	var slug = item.split('playlist/').pop();
+//
+//	const req_options = {
+//		playlist_id: slug,
+//		market: 'IT', //placeholder
+//		access_token: spotify_access_token
+//	}
+//	const playlistInfo = await getPlaylist(req_options);
+//}) 
+//
+//async function getPlaylist(options) {
+//	const rootUrl = 'https://api.spotify.com/v1/playlists/'+options.playlist_id+'?market='+options.market
+//	try {
+//		const res = await axios.get(rootUrl, {
+//			headers: {
+//				'Content-Type': 'application/json',
+//				'Authorization': 'Bearer'+options.access_token
+//			}
+//		});
+//		return res.data
+//	} catch(error) {
+//		console.log('errore fetch playlist: '+error);
+//		throw new Error(error.message)
+//	}
+//}
 //new begin /form
-app.post('/form', passport.authenticate('spotify', { failureRedirect: '/#error' }),
- async (req, res) => {
-  console.log("ciao");
-  var item = (req.body.song_url).split('tracks/').pop();
-  const req_options = {
-	  song_id: item,
-	  market: 'IT',
-	  access_token: token
-  }
-  const result = await getSong(options);
-  
-  console.log(JSON.Stringify(result));
-});
-
-async function getSong(options) {
-	const rootUrl = 'https://api.spotify.com/v1/tracks/'+options.song_id+'?market'+options.market
-	try {
-		const res = await axios.get(rootUrl, {
+app.post(
+	'/form',
+	passport.session({
+		secret: 'keyboard cat',
+		resave: false,
+		saveUninitialized: false,
+		cookie: { secure: true }
+	
+	}),
+	async function(req, res){
+		var item = (req.body.formUrl1).split('tracks/').pop();
+		const req_options = {
+			song_id: "585JpIId3xIGXDTL8Tg7d4",
+			market: 'IT',
+			access_token: passport.clientID
+		}
+		const result = await getSong(req_options);
+		console.log(JSON.stringify(result));
+	});
+	
+	async function getSong(options) {
+		const rootUrl = 'https://api.spotify.com/v1/tracks/'+options.song_id+'?market'+options.market
+		try {
+			const res = await axios.get(rootUrl, {
 			headers: {
 				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer '+options.access_token
-			}
-		})
-		return res.data;
-	} catch(error) {
-		console.log('errore richiesta canzone: '+error);
-		throw new Error(error.message);
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer '+options.access_token
+				}
+			})
+			return res.data;
+		} catch(error) {
+			console.log('errore richiesta canzone: '+error);
+		}
 	}
-}
-//new end
+	//new end
+		
 
 app.listen(port, () => console.log(`Listening on ${port}`));
 
