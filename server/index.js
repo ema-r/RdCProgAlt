@@ -1,13 +1,11 @@
-require('dotenv').config()
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+require('dotenv').config()
 const MongoStore = require('connect-mongo');
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
-const http = require('http');
-const https = require('https');
 const cors = require('cors');
 const passport = require('passport');
 const spotify = require('passport-spotify');
@@ -17,12 +15,6 @@ const mailer = require('nodemailer');
 const spotifyAuth = require('./middlewares/spotify-auth');
 const {URL} = require('url');
 const axios = require('axios');
-const client_id = process.env.SPOTIFY_CLIENT_ID;
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirect_uri = 'https://localhost:8443/spot/callback';
-const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
-const spot_redirect_uri = 'https://localhost:8443/spot/callback';
 const port = new URL(redirect_uri).port;
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -138,40 +130,6 @@ passport.serializeUser(function(user, cb) {
 
 //GOOGLE OAUTH
 //POSSIBILE MODULO ESTERNO INIZIO
-
-function getGoogleOAuthURL() {
-	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
-	const options = {
-		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
-		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
-		access_type: 'offline',
-		response_type: 'code',
-		prompt: 'consent',
-		scope: [
-			'https://www.googleapis.com/auth/userinfo.profile',
-			'https://www.googleapis.com/auth/userinfo.email',
-		].join(" "),
-	}
-
-	const querystr = new URLSearchParams(options);
-
-	const retUrl = rootUrl+querystr.toString();
-	console.log(retUrl);
-
-	return retUrl;
-}
-
-async function handlerGoogleOAuth(code) {
-	const {id_token, access_token} = await getGoogleOAuthToken(code);
-	console.log('[HANDLER]: '+ id_token);
-	console.log('[HANDLER]: '+ access_token);
-	var data = {
-		id_token: id_token,
-		access_token: access_token
-	}	
-	return data;
-}
-
 async function getGoogleOAuthToken(code) {
 	const rootUrl = "https://oauth2.googleapis.com/token";
 	const options = {
@@ -206,29 +164,38 @@ async function getGoogleUser({id_token, access_token}) {
 		throw new Error(error.message);
 	}
 }
-//possibile modulo esterno FINE
+possibile modulo esterno FINE
+
 app.get('/googlelogin', (req, res) => {
 	res.render('googlelogin');
 });
 app.get('/googlelogin/init', (req, res) => {
-	res.redirect(getGoogleOAuthURL());
+	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
+	const options = {
+		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
+		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
+		access_type: 'offline',
+		response_type: 'code',
+		prompt: 'consent',
+		scope: [
+			'https://www.googleapis.com/auth/userinfo.profile',
+			'https://www.googleapis.com/auth/userinfo.email',
+		].join(" "),
+	}
+
+	const querystr = new URLSearchParams(options);
+	const retUrl = rootUrl+querystr.toString();
+
+	res.redirect(retUrl);
 });
 
 //Redirige qui dopo aver accettato login e scope
 app.get('/oauth/google/login', async (req, res) => {
 	const code = req.query.code;
-	console.log('[CALLBACK] code: '+code)
-	var tokens = await handlerGoogleOAuth(code);
-
-	const id_token = tokens.id_token;
-	const access_token = tokens.access_token;
-
-	console.log("[CALLBACK] "+id_token);
-	console.log("[CALLBACK] "+access_token);
-
-
-	const googleUser2 = await getGoogleUser({id_token, access_token})
-	console.log("google user trovato: "+JSON.stringify(googleUser2));
+	const {id_token, access_token} = await getGoogleOAuthToken(code);
+//	var tokens = await handlerGoogleOAuth(code);
+	const googleUser = await getGoogleUser({id_token, access_token})
+	console.log("google user trovato: "+JSON.stringify(googleUser));
 
 	res.redirect('/');
 });
@@ -298,8 +265,6 @@ async function getSpotifyAccessToken(query) {
 
 
 app.use(passport.authenticate('session'));
-
-
 app.post(
 	'/form',
 	passport.session(),

@@ -5,10 +5,6 @@ services:
     build: 
       context: ./nginx
       dockerfile: Dockerfile
-    links:
-      - node1:node1
-    depends_on:
-      - node1
     ports:
       - "8080:80"
       - "8443:443"
@@ -17,16 +13,32 @@ services:
     volumes:
       - ./certs:/etc/nginx/certs
 
-  node1:
+  node:
     build:
       context: ./server
       dockerfile: Dockerfile
     volumes:
       - ./server:/usr/src/app
       - ./server/public/uploads:/usr/src/app/public/uploads
-      - /usr/src/app/node_modules
+      - ./server/node_modules:/usr/src/app/node_modules
     environment:
-      - INSTANCE=node1
+      - INSTANCE=node
+      - VIRTUAL_HOST=localhost
+      - USE_IP_HASH=1
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  oauth_node:
+    build:
+      context: ./oauth_server
+      dockerfile: Dockerfile
+    volumes:
+      - ./oauth_server:/usr/src/app
+      - ./oauth_server/node_modules:/usr/src/app/node_modules
+    environment:
+      - INSTANCE=oauth_node
     depends_on:
       - mongo
     networks:
