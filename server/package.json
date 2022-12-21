@@ -33,9 +33,14 @@
     "nodemailer": "^6.7.5",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
+    "cors": "^2.8.5",
+    "query-string": "^8.0.2",
+    "axios": "^1.2.1",
+    "jsonwebtoken": "^8.5.1"
     "passport-spotify": "^2.0.0",
     "request-promise": "^4.2.6",
     "request-promise-native": "^1.0.9"
+
   },
   "devDependencies": {
     "axios": "^1.2.1",
