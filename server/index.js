@@ -161,7 +161,7 @@ app.post(
 	
 	async function getSong(req_options) {
 		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market'+ req_options.market
-			const res = await axios.post(rootUrl, {
+			const res = await axios.get(rootUrl, {
 			headers: {
 					'Content-Type': 'application/json',
 					'Authorization': 'Bearer' + req_options.access_token
