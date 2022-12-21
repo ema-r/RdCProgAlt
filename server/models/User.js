@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+module.exports = mongoose.model("User", schema);
 
-const schema = new mongoose.Schema(
+const schemaGoogle = new mongoose.Schema(
   {
     googleId: {
       type: String,
@@ -28,4 +29,14 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", schema);
+
+const schemaSpotify = new mongoose.Schema(
+  {
+    spotifyId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+  },
+    { timestamps: true }
+  );

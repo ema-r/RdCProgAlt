@@ -1,12 +1,12 @@
-const dotenv = require("dotenv");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const dotenv = require('dotenv');
+const passport = require('passport');
+require('dotenv').config()
 
-const { sendWelcomeMail } = require("../middlewares/mailer");
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const SpotifyStrategy = require('passport-spotify').Strategy;
 
-const User = require("../models/User");
+const User = require("./models/User");
 
-dotenv.config({ path: "./config/.env" });
 
 passport.use(
   new GoogleStrategy(
@@ -56,3 +56,18 @@ passport.deserializeUser(async (user, done) => {
 });
 
 module.exports = passport;
+
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET ,
+      callbackURL: "https://localhost:8443/spot/callback"
+    },
+    function(accessToken, refreshToken, expires_in, profile, done) {
+      User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
+        return done(err, user);
+      });
+    }
+  )
+);
