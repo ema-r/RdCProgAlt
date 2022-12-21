@@ -156,7 +156,7 @@ app.post(
 		}
 		const result = await getSong(req_options);
 		console.log("CIAOOOOOOOOOOOOOOOOOOOOOOOOO");
-		//console.log(JSON.stringify(result));
+		console.log(JSON.stringify(result));
 	});
 	
 	async function getSong(req_options) {
@@ -171,7 +171,7 @@ app.post(
 			})
 			return res.data;
 		} catch(error) {
-			console.log('errore richiesta canzone: '+error);
+			await console.log('errore richiesta canzone: '+error);
 		}
 	}
 /*
