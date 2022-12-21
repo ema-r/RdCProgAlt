@@ -168,28 +168,33 @@ app.get('/spot/callback', async function(req, res) {
 		res.redirect('/state_mismatch');
 	} else {
 		res.clearCookie(stateKey);
-		var rootUrl = 'https://accounts.spotify.com/api/token' 
 		var authOptions = {
 			code: code,
 			redirect_uri: 'https://localhost:8443/spot/callback',
 			grant_type: 'authorization_code'
 		}
-		var query = new URLSearchParams(authOptions);
-		try {
-			const axiosRes = await axios.post(rootUrl, query.toString(), { headers: {
-				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
-									+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString())									  .toString('base64')),
-				'Content-Type': 'application/x-www-form-urlencoded'
-				},
-			});
-			console.log('sono qui')
-			console.log(axiosRes.data);
-		} catch(error) {
-			console.log(error, "fallimento fetch token");
-			throw new Error(error.message);
-		}
+		var query = new URLSearchParams(authOptions).toString();
+		data = await getSpotifyAccessToken(query);
+		console.log(JSON.stringify(data));
+		res.redirect('/');
 	}
 });
+
+async function getSpotifyAccessToken(query) {
+	var rootUrl = 'https://accounts.spotify.com/api/token';
+	try {
+		const res = await axios.post(rootUrl, query.toString(), { headers: {
+			'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
+								+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString())									  .toString('base64')),
+			'Content-Type': 'application/x-www-form-urlencoded'
+			},
+		});
+		return res.data;
+	} catch(error) {
+		console.log(error, "fallimento fetch token");
+		throw new Error(error.message);
+	}
+}
 
 app.use(passport.authenticate('session'));
 
