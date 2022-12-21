@@ -52,7 +52,10 @@
 
       <div class="container">
         <div id="login">
-          <a href="http://localhost:8080/spot/callback" class="btn btn-primary">Log in with Spotify</a>
+          <form action="/spot/callback" method="post">
+            <input type="submit" value="Log in con Spotify" 
+                 name="LoginSpotify" id="LoginSpotify" />
+          </form>
         </div>
         <div id="loggedin">
           <div id="user-profile">
@@ -214,6 +217,7 @@
         
               document.getElementById('obtain-new-token').addEventListener('click', () => {
                 const params = new URLSearchParams({refresh_token});
+              
         
                 fetch(`/refresh_token?${params.toString()}`)
                 .then(response => response.json())
@@ -224,6 +228,10 @@
       }, false);
      }
     })();
+
+
+
+
   </script>
 
 </body>

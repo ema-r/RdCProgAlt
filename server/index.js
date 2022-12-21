@@ -41,14 +41,6 @@ const SESSION_OPTIONS = {
   store: MongoStore.create({ mongoUrl: MONGO_URI }),
 };
 
-const SpotifyStrategy = require('passport-spotify').Strategy;
-passport.serializeUser(function(user, done) {
-	done(null, user);
-});
-passport.deserializeUser(function(obj, done) {
-	done(null, obj);
-});
-
 /* set connection with mongo */
 mongoose
   .connect(MONGO_URI)
@@ -64,21 +56,6 @@ mongoose
 );
 
 
-passport.use(
-  new SpotifyStrategy(
-    {
-	    clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'https://localhost:8443'
-    },
-    function(accessToken, refreshToken, expires_in, profile, done) {
-	    process.nextTick(function () {
-		return done(null, profile);
-	    });
-    }
-  )
-);
-
 app.use(express.static(path.join(__dirname, 'public')))
 .use(cors())
 .use(spotifyAuth({client_id, client_secret, redirect_uri}));
@@ -87,9 +64,7 @@ app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
-/* set view engine */
 app.set('view engine', 'ejs');
-/* set middlewares */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -97,9 +72,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session(SESSION_OPTIONS));
 app.use(cors());
 app.use(express.static('public'));
-/* initialize passport */
-app.use(passport.initialize());
-app.use(passport.session());
 
 /* get root path */
 app.get('/', (req, res) => {
@@ -110,17 +82,99 @@ app.get('/', (req, res) => {
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
 
+
+
+/* PASSPORT FUNCTIONS */
+
+const SpotifyStrategy = require('passport-spotify').Strategy;
+passport.serializeUser(function(user, done) {
+	done(null, user);
+});
+passport.deserializeUser(function(obj, done) {
+	done(null, obj);
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.get('/spot', passport.authenticate('spotify'));
 
-app.get(
-  '/spot/callback',
-  passport.session('spotify', { 
-		failureRedirect: '/#error'
-	}),
-  function(req, res) {
-    res.redirect('/spot/info');
-	}
+
+passport.use( new SpotifyStrategy( {
+		clientID: process.env.SPOTIFY_CLIENT_ID,
+    	clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    	callbackURL: 'https://localhost:8443'
+    },
+    function(accessToken, refreshToken, expires_in, profile, done) {
+	    process.nextTick(function () {
+		return done(null, profile);
+	    });
+    }
+  )
 );
+
+app.use(session({
+	secret: 'keyboard cat',
+  	resave: false,
+  	saveUninitialized: false,
+  	cookie: { secure: true }
+}));
+
+passport.serializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, {
+      id: user.id,
+      username: user.username,
+      picture: user.picture
+    });
+  });
+});
+
+passport.deserializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, user);
+  });
+});
+
+app.post('/spot/callback',
+  passport.authenticate('spotify', { failureRedirect: '/login', failureMessage: true }),
+  function(req, res) {
+    res.redirect('/~' + req.user.username);
+});
+
+app.use(passport.authenticate('session'));
+
+
+app.post(
+	'/form',
+	passport.session(),
+	async function(req, res){
+		var item = (req.body.formUrl1).split('tracks/').pop();
+		const req_options = {
+			song_id: "585JpIId3xIGXDTL8Tg7d4",
+			market: 'IT',
+			access_token: "BQAapZC_qxxRwAIt7OljZkfgNz_vveniqx8O1VcZZhgZtkgbmb9bXciYDQeFzVspu1wAakg3ojBLK_lfZV3NhiJ_XiUXdsUbZcNr58WPXSCPM0ZW1rf7zpQFIuI-XjiqUTwJXLSdChh1PCGlQp01PRNg-lK0TbuSlFF1IeIDyDphp8Hrb3MQGe_kb_oxDUkhRFJfayI6L9FmA1cpI3OYNZZuo7m_9H5x1pGQrzifg2b3zqjOJQxKHziTxhHn4nSLXiySahWEsLJJfKZ3mlwd9e5qxoTnh2DO8OhZ73Cgpnvu7HlD8ePKZrak1J5ws"
+		}
+		const result = await getSong(req_options);
+		console.log("CIAOOOOOOOOOOOOOOOOOOOOOOOOO");
+		//console.log(JSON.stringify(result));
+	});
+	
+	async function getSong(req_options) {
+		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market'+ req_options.market
+		try {
+			const res = await axios.get(rootUrl, {
+			headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer' + req_options.access_token
+				}
+			})
+			return res.data;
+		} catch(error) {
+			console.log('errore richiesta canzone: '+error);
+		}
+	}
+/*
 
 app.get(
 	'/spot/info',
@@ -129,6 +183,7 @@ app.get(
 	})
 	
 );
+
 
 //new begin /playlist
 
@@ -164,43 +219,10 @@ app.get('/spot/get_playlist', (req, res) => {
 //	}
 //}
 //new begin /form
-app.post(
-	'/form',
-	passport.session({
-		secret: 'keyboard cat',
-		resave: false,
-		saveUninitialized: false,
-		cookie: { secure: true }
-	
-	}),
-	async function(req, res){
-		var item = (req.body.formUrl1).split('tracks/').pop();
-		const req_options = {
-			song_id: "585JpIId3xIGXDTL8Tg7d4",
-			market: 'IT',
-			access_token: passport.clientID
-		}
-		const result = await getSong(req_options);
-		console.log(JSON.stringify(result));
-	});
-	
-	async function getSong(options) {
-		const rootUrl = 'https://api.spotify.com/v1/tracks/'+options.song_id+'?market'+options.market
-		try {
-			const res = await axios.get(rootUrl, {
-			headers: {
-				'Accept': 'application/json',
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer '+options.access_token
-				}
-			})
-			return res.data;
-		} catch(error) {
-			console.log('errore richiesta canzone: '+error);
-		}
-	}
+
 	//new end
 		
+*/
 
 app.listen(port, () => console.log(`Listening on ${port}`));
 
