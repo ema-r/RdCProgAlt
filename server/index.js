@@ -161,18 +161,18 @@ app.post(
 	
 	async function getSong(req_options) {
 		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market'+ req_options.market
-		try {
-			const res = await axios.get(rootUrl, {
+			const res = await axios.post(rootUrl, {
 			headers: {
-					'Accept': 'application/json',
 					'Content-Type': 'application/json',
 					'Authorization': 'Bearer' + req_options.access_token
 				}
 			})
-			return res.data;
-		} catch(error) {
-			await console.log('errore richiesta canzone: '+error);
-		}
+			.then((response) => {
+				console.log('response',res.data)
+			})
+			.catch((error) => {
+				console.log('errore riciesta canzone: ',error.response)
+			})
 	}
 /*
 
