@@ -150,24 +150,24 @@ app.post(
 	async function(req, res){
 		var item = (req.body.formUrl1).split('tracks/').pop();
 		const req_options = {
-			song_id: item,
+			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
 			market: 'IT',
-			access_token: passport.access_token,
+			access_token: "BQAimzEyCVVqcoLutFdUyyCghpJuXFELWh8MggpkBubIIQpDZlE8tAhJt_A-LkG2xGtQwGnruh4_Occwvs8NKNC8NsTMMo-OMhoYtbEk7Vg92nraXj0QAShMrvQPid934-bWihIp5Ng47UzIVJQIjba8UQ968vknXGyknlK-7spdVrFfv3hgMHDXokWBJaA"
 		}
 		const result = await getSong(req_options);
 		console.log("CIAOOOOOOOOOOOOOOOOOOOOOOOOO");
 		console.log(JSON.stringify(result));
 	});
 	
-	async function getSong(req_options) {
-		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market'+ req_options.market
-			const res = await axios.get(rootUrl, {
+	function getSong(req_options) {
+		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market='+ req_options.market
+			const res = axios.get(rootUrl, {
 			headers: {
 					'Content-Type': 'application/json',
-					'Authorization': 'Bearer' + req_options.access_token
+					'Authorization': 'Bearer ' + req_options.access_token
 				}
 			})
-			.then((response) => {
+			.then((res) => {
 				console.log('response',res.data)
 			})
 			.catch((error) => {
