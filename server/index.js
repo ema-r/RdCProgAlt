@@ -155,8 +155,6 @@ app.post(
 			access_token: "BQAimzEyCVVqcoLutFdUyyCghpJuXFELWh8MggpkBubIIQpDZlE8tAhJt_A-LkG2xGtQwGnruh4_Occwvs8NKNC8NsTMMo-OMhoYtbEk7Vg92nraXj0QAShMrvQPid934-bWihIp5Ng47UzIVJQIjba8UQ968vknXGyknlK-7spdVrFfv3hgMHDXokWBJaA"
 		}
 		const result = await getSong(req_options);
-		console.log("CIAOOOOOOOOOOOOOOOOOOOOOOOOO");
-		console.log(JSON.stringify(result));
 	});
 	
 	function getSong(req_options) {
