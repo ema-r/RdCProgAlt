@@ -23,7 +23,6 @@ const redirect_uri = 'https://localhost:8443/spot/callback';
 const spot_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spot_client_sc = process.env.SPOTIFY_CLIENT_SECRET;
 const spot_redirect_uri = 'https://localhost:8443/spot/callback';
-const app = express();
 const port = new URL(redirect_uri).port;
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -55,7 +54,19 @@ mongoose
   }
 );
 
+var generateRandomString = function(length) {
+	var text = '';
+	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+	for (var i = 0; i < length; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
+}
+
+var stateKey = 'spotify_auth_state'
+
+const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
 .use(cors())
 .use(spotifyAuth({client_id, client_secret, redirect_uri}));
@@ -81,9 +92,6 @@ app.get('/', (req, res) => {
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
-
-
-
 /* PASSPORT FUNCTIONS */
 
 const SpotifyStrategy = require('passport-spotify').Strategy;
@@ -98,9 +106,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.get('/spot', passport.authenticate('spotify'));
 
-
 passport.use( new SpotifyStrategy( {
-		clientID: process.env.SPOTIFY_CLIENT_ID,
+	clientID: process.env.SPOTIFY_CLIENT_ID,
     	clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     	callbackURL: 'https://localhost:8443'
     },
@@ -135,10 +142,53 @@ passport.deserializeUser(function(user, cb) {
   });
 });
 
-app.post('/spot/callback',
-  passport.authenticate('spotify', { failureRedirect: '/login', failureMessage: true }),
-  function(req, res) {
-    res.redirect('/~' + req.user.username);
+app.get('/oauth/spot/login', function(req, res) {
+	var state = generateRandomString(16);
+	res.cookie(stateKey, state);
+
+	var scope = '';
+	var rootUrl = 'https://accounts.spotify.com/authorize?';
+	var options = {
+		client_id: process.env.SPOTIFY_CLIENT_ID,
+		response_type: 'code',
+		redirect_uri: 'https://localhost:8443/spot/callback',
+		state: state
+	}
+	const query = new URLSearchParams(options)
+	const redirUrl = rootUrl+query.toString();
+	res.redirect(redirUrl);
+});
+
+app.get('/spot/callback', async function(req, res) {
+	var code = req.query.code || null;
+	var state = req.query.state || null;
+	var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+	if (state === null || state !== storedState) {
+		res.redirect('/state_mismatch');
+	} else {
+		res.clearCookie(stateKey);
+		var rootUrl = 'https://accounts.spotify.com/api/token' 
+		var authOptions = {
+			code: code,
+			redirect_uri: 'https://localhost:8443/spot/callback',
+			grant_type: 'authorization_code'
+		}
+		var query = new URLSearchParams(authOptions);
+		try {
+			const axiosRes = await axios.post(rootUrl, query.toString(), { headers: {
+				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
+									+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString())									  .toString('base64')),
+				'Content-Type': 'application/x-www-form-urlencoded'
+				},
+			});
+			console.log('sono qui')
+			console.log(axiosRes.data);
+		} catch(error) {
+			console.log(error, "fallimento fetch token");
+			throw new Error(error.message);
+		}
+	}
 });
 
 app.use(passport.authenticate('session'));
@@ -148,11 +198,13 @@ app.post(
 	'/form',
 	passport.session(),
 	async function(req, res){
-		var item = (req.body.formUrl1).split('tracks/').pop();
+		var item = (req.body.formUrl1).split('track/').pop();
+		var access_token = passport.authenticate('spotify', {scope: ['user-read-email']}).access_token;
+		console.log(access_token);
 		const req_options = {
 			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
 			market: 'IT',
-			access_token: "BQAimzEyCVVqcoLutFdUyyCghpJuXFELWh8MggpkBubIIQpDZlE8tAhJt_A-LkG2xGtQwGnruh4_Occwvs8NKNC8NsTMMo-OMhoYtbEk7Vg92nraXj0QAShMrvQPid934-bWihIp5Ng47UzIVJQIjba8UQ968vknXGyknlK-7spdVrFfv3hgMHDXokWBJaA"
+			access_token: access_token
 		}
 		const result = await getSong(req_options);
 	});
