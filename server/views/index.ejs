@@ -13,7 +13,9 @@
   <link href="./css/w3.css" rel="stylesheet" type="text/css">
   <link href="./css/black-theme.css" rel="stylesheet" type="text/css">
   <link href="./css/ajax.css" rel="stylesheet" type="text/css">
-
+  <link href="../public/css/w3.css" rel="stylesheet" type="text/css">
+  <link href="../public/css/black-theme.css" rel="stylesheet" type="text/css">
+  <link href="../public/css/ajax.css" rel="stylesheet" type="text/css">
 </head>
 
 <body id="myPage">
@@ -51,6 +53,13 @@
       <p>SongLify un posto unico per le tue canzoni</p>
 
       <div class="container">
+        <div id="oauth">
+          <form action="/oauth" method="get">
+            <input type="submit" value="Log in con OAuth" 
+                 name="LoginOAuth" id="LoginOAuth" />
+          </form>
+        </div>
+        <br>
         <div id="login">
           <form action="/spot/callback" method="get">
             <input type="submit" value="Log in con Spotify" 

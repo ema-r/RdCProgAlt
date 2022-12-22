@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const MongoStore = require('connect-mongo');
 const express = require('express');
 const sessions = require('express-session');
+const mongoose = require('mongoose');
 const path = require('path');
 const http = require('http');
 const https = require('https');
@@ -14,9 +15,23 @@ const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
 const INSTANCE = process.env.INSTANCE || '';
-const mongoUrl = 'mongodb://mongo:27017'
+const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
+
+/* set connection with mongo */
+mongoose
+  .connect(MONGO_URI)
+  .then((result) => {
+    console.log(`${INSTANCE} -> ${result.connection.host}`);
+    app.listen(3001, () => {
+      console.log(`${INSTANCE} -> ${3001}`);
+    });
+  })
+  .catch((err) => {
+    console.error(err.message);
+  }
+);
 
 var generateRandomString = function(length) {
 	var text = '';
@@ -39,11 +54,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
+
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
-	secret: 'keyboard cat',
-	store: MongoStore.create({mongoUrl}),
-	resave: false,
+	secret: 'keyboardfafgseinvoaubwoubauvhfaibpresjbhswrjnngo',
+  	resave: false,
   	saveUninitialized: false,
   	cookie: { secure: true , maxAge: oneDay}
 }));
@@ -76,7 +91,7 @@ app.get('/oauth', (req,res) => {
 	if (session.userid) {
 		res.send("accesso effettuato <a href=\'/oauth/logout'>logout</a>");
 	} else {
-		res.render('login_form');
+		res.render(href="partials/login_form");
 	}
 });
 
@@ -85,14 +100,17 @@ app.post('/oauth/login', (req, res) => {
 		session = req.session;
 		session.userid=req.body.username;
 		console.log(req.session)
-		res.send(`entrato correttamente <a href=\'/oauth/logout'>logout</a>`);
+		res.render(href="partials/logged_in");
 	}
 	else {
-		res.send('credenziali errate');
+		res.render(href="partials/not_logged_in");
 	}
 
 });
-
+app.post('/oauth/try_logged', (req, res) => {
+	session = req.session;
+	res.redirect("https://localhost:8443");
+});
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();
 	res.redirect('/oauth')
