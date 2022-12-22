@@ -191,7 +191,8 @@ async function getGoogleOAuthToken(code) {
 		return res.data
 	} catch(error) {
 		console.log(error, 'fallimento fetch token');
-});
+};
+
 
 async function getGoogleUser({id_token, access_token}) {
 	try {
