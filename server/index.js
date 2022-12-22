@@ -9,12 +9,9 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 const cors = require('cors');
-const passport = require('passport');
-const spotify = require('passport-spotify');
 const cookieParser = require("cookie-parser");
 const { dirname } = require('path');
 const mailer = require('nodemailer');
-const spotifyAuth = require('./middlewares/spotify-auth');
 const {URL} = require('url');
 const axios = require('axios');
 const client_id = process.env.SPOTIFY_CLIENT_ID;
@@ -69,7 +66,6 @@ var stateKey = 'spotify_auth_state'
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
 .use(cors())
-.use(spotifyAuth({client_id, client_secret, redirect_uri}));
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
@@ -95,47 +91,12 @@ app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
 /* PASSPORT FUNCTIONS */
 
-const SpotifyStrategy = require('passport-spotify').Strategy;
-passport.serializeUser(function(user, done) {
-	done(null, user);
-});
-passport.deserializeUser(function(obj, done) {
-	done(null, obj);
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.get('/spot', passport.authenticate('spotify'));
-
-passport.use( new SpotifyStrategy( {
-	clientID: process.env.SPOTIFY_CLIENT_ID,
-    	clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    	callbackURL: 'https://localhost:8443'
-    },
-    function(accessToken, refreshToken, expires_in, profile, done) {
-	    process.nextTick(function () {
-		return done(null, profile);
-	    });
-    }
-  )
-);
-
 app.use(session({
 	secret: 'keyboard cat',
   	resave: false,
   	saveUninitialized: false,
   	cookie: { secure: true }
 }));
-
-passport.serializeUser(function(user, cb) {
-  process.nextTick(function() {
-    return cb(null, {
-      id: user.id,
-      username: user.username,
-      picture: user.picture
-    });
-  });
-
 //GOOGLE OAUTH
 //POSSIBILE MODULO ESTERNO INIZIO
 
@@ -191,6 +152,7 @@ async function getGoogleOAuthToken(code) {
 		return res.data
 	} catch(error) {
 		console.log(error, 'fallimento fetch token');
+	}
 };
 
 
@@ -236,13 +198,6 @@ app.get('/oauth/google/login', async (req, res) => {
 
 
 //spotufy
-
-passport.deserializeUser(function(user, cb) {
-  process.nextTick(function() {
-    return cb(null, user);
-  });
-});
-
 app.get('/oauth/spot/login', function(req, res) {
 	var state = generateRandomString(16);
 	res.cookie(stateKey, state);
@@ -298,39 +253,39 @@ async function getSpotifyAccessToken(query) {
 }
 
 
-app.use(passport.authenticate('session'));
-
-
-app.post(
-	'/form',
-	passport.session(),
-	async function(req, res){
-		var item = (req.body.formUrl1).split('track/').pop();
-		var access_token = passport.authenticate('spotify', {scope: ['user-read-email']}).access_token;
-		console.log(access_token);
-		const req_options = {
-			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
-			market: 'IT',
-			access_token: access_token
-		}
-		const result = await getSong(req_options);
-	});
-	
-	function getSong(req_options) {
-		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market='+ req_options.market
-			const res = axios.get(rootUrl, {
-			headers: {
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ' + req_options.access_token
-				}
-			})
-			.then((res) => {
-				console.log('response',res.data)
-			})
-			.catch((error) => {
-				console.log('errore riciesta canzone: ',error.response)
-			})
-	}
+//app.use(passport.authenticate('session'));
+//
+//
+//app.post(
+//	'/form',
+//	passport.session(),
+//	async function(req, res){
+//		var item = (req.body.formUrl1).split('track/').pop();
+//		var access_token = passport.authenticate('spotify', {scope: ['user-read-email']}).access_token;
+//		console.log(access_token);
+//		const req_options = {
+//			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
+//			market: 'IT',
+//			access_token: access_token
+//		}
+//		const result = await getSong(req_options);
+//	});
+//	
+//	function getSong(req_options) {
+//		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market='+ req_options.market
+//			const res = axios.get(rootUrl, {
+//			headers: {
+//					'Content-Type': 'application/json',
+//					'Authorization': 'Bearer ' + req_options.access_token
+//				}
+//			})
+//			.then((res) => {
+//				console.log('response',res.data)
+//			})
+//			.catch((error) => {
+//				console.log('errore riciesta canzone: ',error.response)
+//			})
+//	}
 /*
 
 app.get(
