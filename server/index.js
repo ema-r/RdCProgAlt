@@ -47,7 +47,10 @@ var stateKey = 'spotify_auth_state'
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
-.use(cors())
+.use(cors({
+	origin: 'https://localhost:8443',
+	credentials: true
+}))
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
@@ -268,7 +271,7 @@ async function getSpotifyAccessToken(query) {
 								+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString())									  .toString('base64')),
 			'Content-Type': 'application/x-www-form-urlencoded'
 			},
-		});
+		}, { withCredentials: true });
 		return res.data;
 	} catch(error) {
 		console.log(error, "fallimento fetch token");
@@ -294,7 +297,7 @@ app.post('/form', async function(req, res){
 					'Content-Type': 'application/json',
 					'Authorization': 'Bearer ' + req_options.access_token
 				}
-			})
+			}, { withCredentials: true })
 			.then((res) => {
 				console.log('response',res.data)
 			})
