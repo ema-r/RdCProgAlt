@@ -89,7 +89,7 @@ var session;
 app.get('/oauth', (req,res) => {
 	session = req.session;
 	if (session.userid) {
-		res.send("accesso effettuato <a href=\'/oauth/logout'>logout</a>");
+		res.redirect("https://localhost:8443");
 	} else {
 		res.render(href="partials/login_form");
 	}
@@ -107,13 +107,15 @@ app.post('/oauth/login', (req, res) => {
 	}
 
 });
+
 app.post('/oauth/try_logged', (req, res) => {
 	session = req.session;
 	res.redirect("https://localhost:8443");
 });
+
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();
-	res.redirect('/oauth')
+	res.redirect("https://localhost:8443");
 })
 
 /* get API docs */
