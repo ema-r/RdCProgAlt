@@ -19,19 +19,20 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
-/* set connection with mongo */
-mongoose
-  .connect(MONGO_URI)
-  .then((result) => {
-    console.log(`${INSTANCE} -> ${result.connection.host}`);
-    app.listen(3001, () => {
-      console.log(`${INSTANCE} -> ${3001}`);
-    });
-  })
-  .catch((err) => {
-    console.error(err.message);
-  }
-);
+mongoose.connect(MONGO_URI+'/${process.env.MONGO_DB_NAME}?authSource=admin', {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+	useFindAndModify: false,
+	useCreateIndex: true
+});
+
+mongoose.connection
+	.on("open", () => console.log("MONGOOSE UP AND RUNNING"))
+	.on("close", () => console.log("MONGOOSE CONNECTION CLOSED"))
+	.on("error". (error) => {
+		console.log(error);
+		process.exit();
+});
 
 var generateRandomString = function(length) {
 	var text = '';
@@ -57,7 +58,18 @@ app.use(express.static('public'));
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
+	genid: (req) => {
+		return uuidv4()
+	},
 	secret: 'keyboardfafgseinvoaubwoubauvhfaibpresjbhswrjnngo',
+	store: MongoStore.create({
+		client: mongoose.connection.getClient(),
+		dbName: process.env.MONGO_DB_NAME,
+		collectionName: "sessions",
+		stringify: false,
+		autoRemove: "interval",
+		autoRemoveInterval: 1
+	}),
   	resave: false,
   	saveUninitialized: false,
   	cookie: { secure: true , maxAge: oneDay}
@@ -225,7 +237,6 @@ app.get('/oauth/google/login', async (req, res) => {
 
 //spotufy
 app.get('/oauth/spot/login', function(req, res) {
-	if (session.userid) {	
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state);
 
@@ -240,9 +251,6 @@ app.get('/oauth/spot/login', function(req, res) {
 		const query = new URLSearchParams(options)
 		const redirUrl = rootUrl+query.toString();
 		res.redirect(redirUrl);
-	} else {
-		res.render('login_form');
-	}
 });
 
 app.get('/spot/callback', async function(req, res) {
