@@ -266,16 +266,13 @@ app.get('/oauth/spot/login', function(req, res) {
 });
 
 app.get('/spot/callback', async function(req, res) {
-	var code = req.query.code || null;
-	var state = req.query.state || null;
-	var storedState = req.cookies ? req.cookies[stateKey] : null;
-
-	if (state === null || state !== storedState) {
-		res.redirect('/state_mismatch');
+	session = req.session;
+	if (session === null || session.userid) {
+		res.redirect('state_mismatch');
 	} else {
 		res.clearCookie(stateKey);
 		var authOptions = {
-			code: code,
+			code: req.query.code,
 			redirect_uri: 'https://localhost:8443/spot/callback',
 			grant_type: 'authorization_code'
 		}
@@ -304,8 +301,8 @@ async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
 		const res = await axios.post(rootUrl, query.toString(), { headers: {
-			'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
-								+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString())									  .toString('base64')),
+			'Authorization': 'Bearer ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
+								+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString()).toString('base64')),
 			'Content-Type': 'application/x-www-form-urlencoded'
 			},
 		}, { withCredentials: true });
