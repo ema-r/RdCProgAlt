@@ -132,13 +132,15 @@ app.post('/oauth/login', async (req, res) => {
 
 app.post('/oauth/try_logged', (req, res) => {
 	session = req.session;
+	console.log("Loggato con successo")
 	res.redirect("https://localhost:8443");
 });
 
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();
+	console.log("Sloggato con successo");
 	res.redirect("https://localhost:8443");
-})
+});
 
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
@@ -245,7 +247,7 @@ app.get('/oauth/google/login', async (req, res) => {
 });
 
 
-//spotufy
+//spotify
 app.get('/oauth/spot/login', function(req, res) {
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state);
