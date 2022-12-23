@@ -19,17 +19,17 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
-mongoose.connect(MONGO_URI+'/${process.env.MONGO_DB_NAME}?authSource=admin', {
+mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
-	useFindAndModify: false,
-	useCreateIndex: true
+//	useFindAndModify: false,
+//	useCreateIndex: true
 });
 
 mongoose.connection
 	.on("open", () => console.log("MONGOOSE UP AND RUNNING"))
 	.on("close", () => console.log("MONGOOSE CONNECTION CLOSED"))
-	.on("error". (error) => {
+	.on("error", (error) => {
 		console.log(error);
 		process.exit();
 });
@@ -58,19 +58,19 @@ app.use(express.static('public'));
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
-	genid: (req) => {
-		return uuidv4()
-	},
-	secret: 'keyboardfafgseinvoaubwoubauvhfaibpresjbhswrjnngo',
+//	genid: (req) => {
+//		return uuidv4()
+//	},
+	secret: 'keyboard cat',
 	store: MongoStore.create({
-		client: mongoose.connection.getClient(),
+		mongoUrl: MONGO_URI,
 		dbName: process.env.MONGO_DB_NAME,
 		collectionName: "sessions",
 		stringify: false,
 		autoRemove: "interval",
 		autoRemoveInterval: 1
 	}),
-  	resave: false,
+  	resave: true,
   	saveUninitialized: false,
   	cookie: { secure: true , maxAge: oneDay}
 }));
@@ -89,6 +89,8 @@ app.use(express.static('public'));
 
 /* get root path */
 app.get('/', (req, res) => {
+  console.log('REQ.SESSiON', req.session)
+  console.log('SESSION', session)
   res.render('index', { title: 'SongLify' });
 });
 
@@ -107,10 +109,18 @@ app.get('/oauth', (req,res) => {
 	}
 });
 
-app.post('/oauth/login', (req, res) => {
+app.post('/oauth/login', async (req, res) => {
 	if(req.body.username == username && req.body.password == password) {
 		session = req.session;
-		session.userid=req.body.username;
+		session.cookie.userid=req.body.username;
+		await session.save((err) => {
+			if (!err) {
+			console.log('saving session');
+			} else {
+			console.log('errore salvataggio user id :', err)
+			}
+		});
+		console.log('=======OAUTH/LOGIN ')
 		console.log(req.session)
 		res.render(href="partials/logged_in");
 	}
@@ -269,9 +279,21 @@ app.get('/spot/callback', async function(req, res) {
 		}
 		var query = new URLSearchParams(authOptions).toString();
 		data = await getSpotifyAccessToken(query);
-		console.log(JSON.stringify(data));
-		req.session.spot_access_token=data.access_token.toString();
+		console.log(JSON.stringify(data));		
+
+	//	session = req.session;
+		session.cookie.spot_access_token=data.access_token;
+		await session.save((err) => {
+			if (!err) {
+			console.log('saving session');
+			} else {
+			console.log('errore salvataggio access_token:', err)
+			}
+		});
+
+		console.log('=======SPOT/CALLBACK ')
 		console.log(req.session)
+
 		res.redirect('/');
 	}
 });
@@ -294,11 +316,11 @@ async function getSpotifyAccessToken(query) {
 
 app.post('/form', async function(req, res){
 		var item = (req.body.formUrl1).split('track/').pop();
-		console.log(req.session)
+		console.log(session)
 		const req_options = {
 			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
 			market: 'IT',
-			access_token: req.session.spot_access_token
+			access_token: session.cookie.spot_access_token
 		}
 		const result = await getSong(req_options);
 	});
