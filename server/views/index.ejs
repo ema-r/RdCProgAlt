@@ -53,7 +53,7 @@
       <p>SongLify un posto unico per le tue canzoni</p>
 
       <div class="container">
-        <div id="oauth">
+        <div id="oauth" style="display: flex;">
           <form action="/oauth" method="get">
             <input type="submit" value="Log in con OAuth" 
                  name="LoginOAuth" id="LoginOAuth" />
@@ -64,13 +64,13 @@
           </form>
         </div>
         <br>
-        <div id="login">
+        <div id="loginSpotify" onclick = "renderUserProfile()">
           <form action="/spot/callback" method="get">
             <input type="submit" value="Log in con Spotify" 
                  name="LoginSpotify" id="LoginSpotify" />
           </form>
         </div>
-        <div id="loggedin">
+        <div id="loggedinSpotify" >
           <div id="user-profile">
           </div>
           <div id="oauth">
@@ -100,7 +100,7 @@
       </form>
     </div> 
   </div>
-
+  
   <br>
 
   <!-- Contact Container -->
@@ -196,8 +196,8 @@
                 </dl>`;
             }
         
-            const loginBlock = document.getElementById('login');
-            const loggedInBlock = document.getElementById('loggedin')
+            const loginBlock = document.getElementById('loginSpotify');
+            const loggedInBlock = document.getElementById('loggedinSpotify')
             const userProfilePlaceholder = document.getElementById('user-profile');
             const oauthPlaceholder = document.getElementById('oauth');
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -213,7 +213,7 @@
                 oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
         
                 const headers = {
-                  'Authorization': `Bearer ${access_token}`
+                  'Authorization': 'Bearer ' +'${access_token}'
                 };
         
                 fetch('https://api.spotify.com/v1/me', {headers})
