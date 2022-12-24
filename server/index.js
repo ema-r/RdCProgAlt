@@ -19,20 +19,20 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
-mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
+//mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
+//	useNewUrlParser: true,
+//	useUnifiedTopology: true,
 //	useFindAndModify: false,
 //	useCreateIndex: true
-});
-
-mongoose.connection
-	.on("open", () => console.log("MONGOOSE UP AND RUNNING"))
-	.on("close", () => console.log("MONGOOSE CONNECTION CLOSED"))
-	.on("error", (error) => {
-		console.log(error);
-		process.exit();
-});
+//});
+//
+//mongoose.connection
+//	.on("open", () => console.log("MONGOOSE UP AND RUNNING"))
+//	.on("close", () => console.log("MONGOOSE CONNECTION CLOSED"))
+//	.on("error", (error) => {
+//		console.log(error);
+//		process.exit();
+//});
 
 var generateRandomString = function(length) {
 	var text = '';
@@ -48,10 +48,9 @@ var stateKey = 'spotify_auth_state'
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
-.use(cors({
+app.use(cors({
 	origin: 'https://localhost:8443',
-	credentials: true
-}))
+}));
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
@@ -84,8 +83,41 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
 app.use(express.static('public'));
+
+//MONGODB
+const db = require('./models');
+const db.mongoose
+	.connect(MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	})
+	.then(() => {
+		console.log("MONGOOSE, UP AND RUNNING");
+		initialize();
+	})
+	.catch(err => {
+		console.error("ERRORE CONNESSIONE MONGOOSE", err);
+		process.exit();
+	});
+
+function initialize() {
+	UserV2.estimatedDocumentCount((err, count) => {
+		if (!err && count === 0) {
+			new UserV2({
+				uname: "dev"
+				pword: "devpass"
+				api_id: generateRandomString(16);
+				api_sc: generateRandomString(64);
+				spotify_data: new UserV2_spotify_data()
+				youtube_data: new UserV2_google_data()
+			}).save(err => {
+				if (err) { console.log('salvataggio modello dummy fallito:', err) }
+			})
+			console.log('db inizializzato con dummy dev model [NON INTESO PER PRODUCTION]')
+		}
+	});
+}
 
 /* get root path */
 app.get('/', (req, res) => {
