@@ -19,6 +19,9 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
+const controller = require('./controllers/sessioncontr');
+const { functions } = require('./functions');
+
 //mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
 //	useNewUrlParser: true,
 //	useUnifiedTopology: true,
@@ -161,6 +164,10 @@ app.post('/oauth/login', async (req, res) => {
 	}
 
 });
+
+app.post('/oauth/signup', controller.signup);
+
+app.post('/oauth/signin', controller.signin);
 
 app.post('/oauth/try_logged', (req, res) => {
 	session = req.session;
