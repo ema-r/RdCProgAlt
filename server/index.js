@@ -57,7 +57,7 @@ app.use(cors({
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
-
+app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
 //	genid: (req) => {
@@ -89,8 +89,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
 
 //MONGODB
-const db = require('/models/*');
-db.mongoose
+var userModel = require("./models/userv2.model")
+var spotifyModel = require("./models/userv2_spotify_data.model")
+var youtubeModel = require("./models/userv2_youtube_data.model")
+mongoose
 	.connect(MONGO_URI, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true
@@ -105,15 +107,15 @@ db.mongoose
 	});
 
 function initialize() {
-	UserV2.estimatedDocumentCount((err, count) => {
+	userModel.estimatedDocumentCount((err, count) => {
 		if (!err && count === 0) {
-			new UserV2({
+			new userModel({
 				uname: "dev",
 				pword: "devpass",
 				api_id: generateRandomString(16),
 				api_sc: generateRandomString(64),
-				spotify_data: new UserV2_spotify_data(),
-				youtube_data: new UserV2_google_data()
+				spotify_data: new spotifyModel(),
+				youtube_data: new youtubeModel()
 			}).save(err => {
 				if (err) { console.log('salvataggio modello dummy fallito:', err) }
 			})
@@ -165,9 +167,9 @@ app.post('/oauth/login', async (req, res) => {
 
 });
 
-app.post('/oauth/signup', controller.signup);
+//app.post('/oauth/signup', controller.signup);
 
-app.post('/oauth/signin', controller.signin);
+//app.post('/oauth/signin', controller.signin);
 
 app.post('/oauth/try_logged', (req, res) => {
 	session = req.session;
