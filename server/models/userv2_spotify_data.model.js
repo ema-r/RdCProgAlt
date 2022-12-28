@@ -6,7 +6,7 @@ const UserV2_spotify_data = mongoose.model(
 		has_permission: {
 			type:Boolean,
 			default: false
-		}
+		},
 		access_token: String,
 		expires_in: String,
 		refresh_token: String

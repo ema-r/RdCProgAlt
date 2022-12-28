@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config('../.env')
 
-const db = require('../models')
-const UserV2 = db.userv2;
-const UserV2_spotify_data = db.userv2_spotify_data;
-const UserV2_youtube_data = db.userv2_youtube_data;
+//const db = require('/models')
+const UserV2 = require('../models/userv2.model');
+const UserV2_spotify_data = require('../models/userv2_spotify_data.model');
+const UserV2_youtube_data = require('../models/userv2_youtube_data.model');
 
 module.exports = {
-	tokenCheck = (req, res, next) => {
+	tokenCheck(req, res, next) {
 		let token = req.headers["x-access-token"];
 	
 		if (!token) {
@@ -21,9 +21,8 @@ module.exports = {
 			req.user_id = decoded.id;
 			next();
 		});
-	};
-	
-	hasGivenSpotifyPerm = (req, res, next) => {
+	},
+	hasGivenSpotifyPerm(req, res, next) {
 		User.findById(req.user_id).exec((err, user) => {
 			if (err) {
 				res.status(500).send({message: err});
@@ -44,9 +43,8 @@ module.exports = {
 				}
 			)
 		})
-	}
-	
-	hasGivenYoutubePerm = (req, res, next) => {
+	},
+	hasGivenYoutubePerm(req, res, next) {
 		User.findById(req.user_id).exec((err, user) => {
 			if (err) {
 				res.status(500).send({message: err});

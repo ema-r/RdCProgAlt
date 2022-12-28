@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
 const controller = require('./controllers/sessioncontr');
-const { functions } = require('./functions');
+const { functions } = require('./functions/exported');
 
 //mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
 //	useNewUrlParser: true,
@@ -89,8 +89,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
 
 //MONGODB
-const db = require('./models');
-const db.mongoose
+const db = require('/models/*');
+db.mongoose
 	.connect(MONGO_URI, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true
@@ -108,11 +108,11 @@ function initialize() {
 	UserV2.estimatedDocumentCount((err, count) => {
 		if (!err && count === 0) {
 			new UserV2({
-				uname: "dev"
-				pword: "devpass"
-				api_id: generateRandomString(16);
-				api_sc: generateRandomString(64);
-				spotify_data: new UserV2_spotify_data()
+				uname: "dev",
+				pword: "devpass",
+				api_id: generateRandomString(16),
+				api_sc: generateRandomString(64),
+				spotify_data: new UserV2_spotify_data(),
 				youtube_data: new UserV2_google_data()
 			}).save(err => {
 				if (err) { console.log('salvataggio modello dummy fallito:', err) }

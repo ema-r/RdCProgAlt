@@ -1,5 +1,5 @@
-const db = require('/models');
-const UserV2 = db.UserV2;
+//const db = require('/models');
+const UserV2 = require('../models/userv2.model');
 
 preventDuplicateKeyExceptions_uname = (req, res, next) => {
 	UserV2.findOne({uname: req.body.uname}).exec((err, user) => {

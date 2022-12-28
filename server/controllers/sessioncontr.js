@@ -1,20 +1,20 @@
-const db = require('../models');
-const dotenv = require('dotenv').config('../.env')
-const UserV2 = db.userv2;
-const UserV2_spotify_data = db.userv2_spotify_data;
-const UserV2_youtube_data = db.userv2_youtube_data;
+//const db = require('./../models');
+const dotenv = require('dotenv').config('./../.env')
+const UserV2 = require('../models/userv2.model');
+const UserV2_spotify_data = require('../models/userv2_spotify_data.model');
+const UserV2_youtube_data = require('../models/userv2_youtube_data.model');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-	function signup = (req, res) => {	
+	signUp(req, res) {	
 		const user = new UserV2({
 			uname: req.body.uname,
 			pword: req.body.pword,
 			spotify_data: new UserV2_spotify_data({
 				has_permission: false
-			})
+			}),
 			youtube_data: new UserV2_youtube_data({
 				has_permission: false
 			})
@@ -25,13 +25,13 @@ module.exports = {
 				return;
 			}
 		})
-	}
-	function signin = (req,res) => {
+	},
+	signIn(req,res) {
 		UserV2.findOne({
 			uname: req.body.uname
 		}).exec((err, user) => {
 			if (err) {
-				res.status(500).send({message: err})M
+				res.status(500).send({message: err});
 				return;
 			}
 			if (!user) {
@@ -43,7 +43,7 @@ module.exports = {
 			)
 			if (!pwordIsValid) {
 				return res.status(401).send({
-					accessToken: null
+					accessToken: null,
 					message: 'password non valida'
 				});
 			}
@@ -52,7 +52,7 @@ module.exports = {
 			});
 			res.status(200).send({
 				id: user._id,
-				uname = user.uname,
+				uname: user.uname,
 				accessToken: token
 			})
 		})

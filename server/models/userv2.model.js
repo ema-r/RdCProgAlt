@@ -17,7 +17,7 @@ const UserV2 = mongoose.model(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "UserV2_spotify_data",
 			required: true
-		}
+		},
 		youtube_data: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "UserV2_youtube_data",
