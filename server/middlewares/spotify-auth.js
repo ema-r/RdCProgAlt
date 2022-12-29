@@ -8,8 +8,8 @@ const SPOTIFY_TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token';
 const STATE_KEY = 'spotify_auth_state';
 
 module.exports = function(options = {}) {
-  const {client_id, client_secret, redirect_uri} = options;
-  const credentials = new Buffer(`${client_id}:${client_secret}`).toString('base64');
+  const {client_id_spotify, client_secret_spotify, redirect_uri_spotify} = options;
+  const credentials = new Buffer(`${client_id_spotify}:${client_secret_spotify}`).toString('base64');
   const requestToken = function(form) {
     return request.post({
       url: SPOTIFY_TOKEN_ENDPOINT,
@@ -19,15 +19,15 @@ module.exports = function(options = {}) {
     });
   };
 
-  const app = express();
+  const router = express.Router();
 
-  app.get('/login', (req, res) => {
+  router.get('/login/spotify', (req, res) => {
     const url = new URL(SPOTIFY_AUTHORIZE_ENDPOINT);
     const params = new URLSearchParams();
     const state = generateRandomString(16);
 
-    params.append('client_id', client_id);
-    params.append('redirect_uri', redirect_uri);
+    params.append('client_id', client_id_spotify);
+    params.append('redirect_uri', redirect_uri_spotify);
     params.append('response_type', 'code');
     params.append('scope', 'user-read-private user-read-email');
     params.append('state', state);
@@ -38,7 +38,7 @@ module.exports = function(options = {}) {
     res.redirect(url);
   });
 
-  app.get('/callback', cookieParser(), async (req, res) => {
+  router.get('/callback', cookieParser(), async (req, res) => {
     const params = new URLSearchParams();
     const {code, state} = req.query;
     const storedState = req.cookies[STATE_KEY];
@@ -63,7 +63,7 @@ module.exports = function(options = {}) {
     res.redirect(`/#${params}`);
   });
 
-  app.get('/refresh_token', async (req, res) => {
+  router.get('/refresh_token', async (req, res) => {
     const {refresh_token} = req.query;
     let access_token;
 
@@ -77,7 +77,7 @@ module.exports = function(options = {}) {
     res.send({access_token});
   });
 
-  return app;
+  return router;
 }
 
 function generateRandomString(length) {
@@ -89,4 +89,6 @@ function generateRandomString(length) {
   }
 
   return text;
+
+
 }

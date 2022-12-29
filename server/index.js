@@ -14,11 +14,17 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
+const spotifyAuth = require('./middlewares/spotify-auth');
+
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
+
+const client_id_spotify ='ad93b64f98894cd88782a141b4fa6698' ;
+const client_secret_spotify = '4c3816b56e984cdbb90e6840e82039c2';
+const redirect_uri_spotify= 'https://localhost:8443/spot/callback';
 
 
 var generateRandomString = function(length) {
@@ -360,10 +366,11 @@ function getPlaylist(req_options) {
 	})
 }
 
+ app.use(spotifyAuth({client_id_spotify, client_secret_spotify, redirect_uri_spotify}));
 
 //app.post('/spot/get_playlist', async (req, res) => {
 //	var item = req.body.formUrl;
-//	var slug = item.split('playlist/').pop();
+//	var slug = item.split('playlist/').pop();\
 //
 //	const req_options = {
 //		playlist_id: slug,
