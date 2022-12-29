@@ -12,16 +12,8 @@
   
   <link href="./css/w3.css" rel="stylesheet" type="text/css">
   <link href="./css/black-theme.css" rel="stylesheet" type="text/css">
-  <script src="./js/script.js"></script>
-  
 
-  
 </head>
-<style type="text/css">
-  #login, #loggedin {
-    display: none;
-  }
-</style>
 
 <body id="myPage">
   
@@ -55,31 +47,26 @@
       <h2>Il Nostro Lavoro</h2>
       <p>SongLify un posto unico per le tue canzoni</p>
 
-        <div id="oauth" style="display: flex;">
-          <form action="/oauth" method="get">
-            <input type="submit" value="Log in con OAuth" 
-                 name="LoginOAuth" id="LoginOAuth" />
-          </form>
-          <form action="/oauth/logout" method="get">
-            <input type="submit" value="Logout" 
-                 name="LogoutOAuth" id="LogoutOAuth" />
-          </form>
-        </div>
-        
-        <br>
-          <div class="container">
-      <div id="login">
-        <a href="/login/spotify">Log in with Spotify</a>
+      <div id="oauth" style="display: flex;">
+        <form action="/oauth" method="get">
+          <input type="submit" value="Log in con OAuth" 
+            name="LoginOAuth" id="LoginOAuth" />
+        </form>
+        <form action="/oauth/logout" method="get">
+          <input type="submit" value="Logout" 
+            name="LogoutOAuth" id="LogoutOAuth" />
+        </form>
       </div>
-      <div id="loggedin">
-        <div id="user-profile">
-        </div>
-        <div id="oauth">
-        </div>
-        <button id="obtain-new-token">Obtain new token using the refresh token</button>
-      </div>
-    </div>
-        <form action="/form" method="post">
+      <br>
+      <div id="Spotify">
+        <form action='/login/spotify' method="get">
+          <input type="submit" value="Log in con Spotify" 
+            name="LoginSpotify" id="LoginSpotify" />
+        </form>
+      </div>  
+      <br>
+       
+      <form action="/form" method="post">
           <label for="song_url">Inserisci url canzone: </label>
           <br>
           <input
@@ -89,8 +76,8 @@
             placeholder="inserisci testo"
             required />
           <input type="submit" value="OK" />
-        </form>
-        <form action="/spot/get_playlist" method="post">
+      </form>
+      <form action="/spot/get_playlist" method="post">
           <label for="playlist_url">Inserisci url playlist: </label>
           <br>
           <input
@@ -100,10 +87,10 @@
             placeholder="inserisci testo" 
             required />
           <input type="submit" value="OK" />
-        </form>
+      </form>
         
-     </div>
-    </div> 
+    </div>
+    
   </div>
   
   <br>
@@ -141,89 +128,6 @@
       </div>
     </div>
   </div>
-
-  <script>
-    (function() {
-
-      function renderUserProfile({
-        display_name,
-        images,
-        id,
-        email,
-        external_urls,
-        href,
-        country
-      }) {
-        return `<h1>Logged in as ${display_name}</h1>
-          <div>
-            <div><img width="150" src="${images[0].url}"></div>
-            <div>
-              <dl>
-                <dt>Display name</dt><dd>${display_name}</dd>
-                <dt>Id</dt><dd>${id}</dd>
-                <dt>Email</dt><dd>${email}</dd>
-                <dt>Spotify URI</dt><dd><a href="${external_urls.spotify}">${external_urls.spotify}</a></dd>
-                <dt>Link</dt><dd><a href="${href}">${href}</a></dd>
-                <dt>Profile Image</dt><dd><a href="${images[0].url}">${images[0].url}</a></dd>
-                <dt>Country</dt><dd>${country}</dd>
-              </dl>
-            </div>
-          </div>`;
-      }
-
-      function renderOAuth({access_token, refresh_token}) {
-        return `<h2>OAuth Info</h2>
-          <dl>
-            <dt>Access token</dt><dd class="text-overflow">${access_token}</dd>
-            <dt>Refresh token</dt><dd class="text-overflow">${refresh_token}</dd>
-          </dl>`;
-      }
-
-      const loginBlock = document.getElementById('login');
-      const loggedInBlock = document.getElementById('loggedin')
-      const userProfilePlaceholder = document.getElementById('user-profile');
-      const oauthPlaceholder = document.getElementById('oauth');
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-
-      let access_token = hashParams.get('access_token'),
-          refresh_token = hashParams.get('refresh_token'),
-          error = hashParams.get('error');
-
-      if (error) {
-        alert('There was an error during the authentication');
-      } else {
-        if (access_token) {
-          oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
-
-          const headers = {
-            'Authorization': `Bearer ${access_token}`
-          };
-
-          fetch('https://api.spotify.com/v1/me', {headers})
-          .then(response => response.json())
-          .then(response => {
-            userProfilePlaceholder.innerHTML = renderUserProfile(response);
-            loginBlock.style.display = 'none';
-            loggedInBlock.style.display = 'unset';
-          });
-        } else {
-          loginBlock.style.display = 'unset';
-          loggedInBlock.style.display = 'none';
-        }
-
-        document.getElementById('obtain-new-token').addEventListener('click', () => {
-          const params = new URLSearchParams({refresh_token});
-
-          fetch(`/refresh_token?${params.toString()}`)
-          .then(response => response.json())
-          .then(response => {
-            access_token = response.access_token;
-            oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
-          });
-        }, false);
-      }
-    })();
-  </script>
 </body>
 
 

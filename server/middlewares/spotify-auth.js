@@ -35,7 +35,7 @@ module.exports = function(options = {}) {
     url.search = params.toString();
 
     res.cookie(STATE_KEY, state);
-    res.redirect(url);
+    res.render(href="partials/spotify_redirect")
   });
 
   router.get('/callback', cookieParser(), async (req, res) => {
