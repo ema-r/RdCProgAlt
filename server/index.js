@@ -22,9 +22,9 @@ const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
-const client_id_spotify ='ad93b64f98894cd88782a141b4fa6698' ;
-const client_secret_spotify = '4c3816b56e984cdbb90e6840e82039c2';
-const redirect_uri_spotify= 'https://localhost:8443/spot/callback';
+const client_id ='ad93b64f98894cd88782a141b4fa6698' ;
+const client_secret = '4c3816b56e984cdbb90e6840e82039c2';
+const redirect_uri= 'https://localhost:8443/spot/callback';
 
 
 var generateRandomString = function(length) {
@@ -48,7 +48,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
-
+app.use(spotifyAuth({client_id, client_secret, redirect_uri}));
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
 //	genid: (req) => {
@@ -133,6 +133,17 @@ app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();
 	console.log("Sloggato con successo");
 	res.redirect("https://localhost:8443");
+});
+
+app.post('/spotify/try_logged', (req, res) => {
+	session = req.session;
+	console.log("Loggato con successo con Spotify")
+	res.redirect("https://localhost:8443/spotify/recap");
+});
+
+app.get('/spotify/recap', (req,res) => {
+	session = req.session
+	res.render(href="partials/spotify_recap")
 });
 
 /* get API docs */
@@ -242,6 +253,7 @@ app.get('/oauth/google/login', async (req, res) => {
 
 //spotify
 app.get('/oauth/spot/login', function(req, res) {
+		session = req.session;
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state);
 
@@ -259,6 +271,7 @@ app.get('/oauth/spot/login', function(req, res) {
 });
 
 app.get('/spot/callback', async function(req, res) {
+	session = req.session;
     var code = req.query.code || null;
     var state = req.query.state || null;
     var storedState = req.cookies ? req.cookies[stateKey] : null;
@@ -366,7 +379,7 @@ function getPlaylist(req_options) {
 	})
 }
 
- app.use(spotifyAuth({client_id_spotify, client_secret_spotify, redirect_uri_spotify}));
+
 
 //app.post('/spot/get_playlist', async (req, res) => {
 //	var item = req.body.formUrl;

@@ -19,9 +19,10 @@ module.exports = function(options = {}) {
     });
   };
 
-  const router = express.Router();
-
-  router.get('/login/spotify', (req, res) => {
+  const app = express();
+  
+  app.get('/login/spotify', (req, res) => {
+    session = req.session;
     const url = new URL(SPOTIFY_AUTHORIZE_ENDPOINT);
     const params = new URLSearchParams();
     const state = generateRandomString(16);
@@ -38,7 +39,8 @@ module.exports = function(options = {}) {
     res.render(href="partials/spotify_redirect")
   });
 
-  router.get('/callback', cookieParser(), async (req, res) => {
+  app.get('/callback', cookieParser(), async (req, res) => {
+    session = req.session;
     const params = new URLSearchParams();
     const {code, state} = req.query;
     const storedState = req.cookies[STATE_KEY];
@@ -52,9 +54,9 @@ module.exports = function(options = {}) {
         const response = await requestToken({
           grant_type: 'authorization_code', code, redirect_uri
         });
-        const {access_token, refresh_token} = response;
-        params.append('access_token', access_token);
-        params.append('refresh_token', refresh_token);
+        const {access_token2, refresh_token2} = response;
+        params.append('access_token2', access_token2);
+        params.append('refresh_token2', refresh_token2);
       } catch (error) {
         params.append('error', 'invalid_token');
       }
@@ -63,21 +65,23 @@ module.exports = function(options = {}) {
     res.redirect(`/#${params}`);
   });
 
-  router.get('/refresh_token', async (req, res) => {
-    const {refresh_token} = req.query;
-    let access_token;
+  
+
+  app.get('/refresh_token', async (req, res) => {
+    const {refresh_token2} = req.query;
+    let access_token2;
 
     try {
-      const response = await requestToken({grant_type: 'refresh_token', refresh_token});
-      access_token = response.access_token;
+      const response = await requestToken({grant_type: 'refresh_token2', refresh_token2});
+      access_token2 = response.access_token2;
     } catch (error) {
       access_token = null;
     }
 
-    res.send({access_token});
+    res.send({access_token2});
   });
 
-  return router;
+  return app;
 }
 
 function generateRandomString(length) {
@@ -92,3 +96,4 @@ function generateRandomString(length) {
 
 
 }
+
