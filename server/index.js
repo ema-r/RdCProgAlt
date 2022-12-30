@@ -14,12 +14,15 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
+
 
 const controller = require('./controllers/sessioncontr');
 const functions = require('./functions/exported');
@@ -173,6 +176,17 @@ app.get('/oauth/logout', (req, res) => {
 	res.redirect("https://localhost:8443");
 });
 
+app.post('/spotify/try_logged', (req, res) => {
+	session = req.session;
+	console.log("Loggato con successo con Spotify")
+	res.redirect("https://localhost:8443/spotify/recap");
+});
+
+app.get('/spotify/recap', (req,res) => {
+	session = req.session
+	res.render(href="partials/spotify_recap")
+});
+
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 
@@ -280,13 +294,14 @@ app.get('/oauth/google/login', async (req, res) => {
 
 //spotify
 app.get('/oauth/spot/login', function(req, res) {
+		session = req.session;
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state);
 
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
 		var options = {
-			client_id: process.env.SPOTIFY_CLIENT_ID,
+			client_id: process.env.SPOTIFY_CLIENT_ID.toString(),
 			response_type: 'code',
 			redirect_uri: 'https://localhost:8443/spot/callback',
 			state: state
@@ -298,12 +313,16 @@ app.get('/oauth/spot/login', function(req, res) {
 
 app.get('/spot/callback', async function(req, res) {
 	session = req.session;
-	if (session === null || session.userid) {
-		res.redirect('state_mismatch');
-	} else {
+    var code = req.query.code || null;
+    var state = req.query.state || null;
+    var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+    if (state === null || state !== storedState) {
+        res.redirect('/state_mismatch');
+    } else {
 		res.clearCookie(stateKey);
 		var authOptions = {
-			code: req.query.code,
+			code: code,
 			redirect_uri: 'https://localhost:8443/spot/callback',
 			grant_type: 'authorization_code'
 		}
@@ -312,14 +331,14 @@ app.get('/spot/callback', async function(req, res) {
 		console.log(JSON.stringify(data));		
 
 	//	session = req.session;
-		session.cookie.spot_access_token=data.access_token;
-		await session.save((err) => {
-			if (!err) {
-			console.log('saving session');
-			} else {
-			console.log('errore salvataggio access_token:', err)
-			}
-		});
+	//	session.cookie.spot_access_token=data.access_token;
+	//	await session.save((err) => {
+	//		if (!err) {
+	//		console.log('saving session');
+	//		} else {
+	//		console.log('errore salvataggio access_token:', err)
+	//		}
+//		});
 
 		console.log('=======SPOT/CALLBACK ')
 		console.log(req.session)
@@ -331,12 +350,14 @@ app.get('/spot/callback', async function(req, res) {
 async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
-		const res = await axios.post(rootUrl, query.toString(), { headers: {
-			'Authorization': 'Bearer ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
-								+ ':' + process.env.SPOTIFY_CLIENT_SECRET.toString()).toString('base64')),
-			'Content-Type': 'application/x-www-form-urlencoded'
+		const res = await axios.post(rootUrl, query.toString(), { 
+			headers: {
+				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
+				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
+				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-		}, { withCredentials: true });
+		},
+		{ withCredentials: true });
 		return res.data;
 	} catch(error) {
 		console.log(error, "fallimento fetch token");
@@ -345,51 +366,65 @@ async function getSpotifyAccessToken(query) {
 }
 
 app.post('/form', async function(req, res){
-		var item = (req.body.formUrl1).split('track/').pop();
-		console.log(session)
-		const req_options = {
-			song_id: "5C7rx6gH1kKZqDUxEI6n4l",
-			market: 'IT',
-			access_token: session.cookie.spot_access_token
-		}
-		const result = await getSong(req_options);
-	});
-	
-	function getSong(req_options) {
-		const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market='+ req_options.market
-			const res = axios.get(rootUrl, {
-			headers: {
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ' + req_options.access_token
-				}
-			}, { withCredentials: true })
-			.then((res) => {
-				console.log('response',res.data)
-			})
-			.catch((error) => {
-				console.log('errore riciesta canzone: ',error.response)
-			})
+	var item = (req.body.formUrl1).split('track/').pop();
+	const req_options = {
+		song_id: item,
+		market: 'IT',
+		access_token: session.cookie.spot_access_token
 	}
+	const result = await getSong(req_options);
+});
+	
+function getSong(req_options) {
+	const rootUrl = 'https://api.spotify.com/v1/tracks/'+ req_options.song_id+'?market='+ req_options.market
+	const res = axios.get(rootUrl, {
+		headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + req_options.access_token
+			}
+	}, 
+	{ withCredentials: true })
+	.then((res) => {
+		console.log('response',res.data)
+		})
+	.catch((error) => {
+		console.log('errore riciesta canzone: ',error.response)
+	})
+}
 
-
-//app.get(
-//	'/spot/info',
-//	passport.authenticate('spotify', {
-//	  scope: ['user-read-email', 'user-read-private'],
-//	})
-//	
-//);
-
-
-//new begin /playlist
-
-app.get('/spot/get_playlist', (req, res) => {
+app.get('/spot/get_playlist', async function(req, res){
 	res.render('get_playlist', {title: 'Get playlist'});
-})
+	var item = (req.body.formUrl1).split('playlists/').pop();
+	const req_options = {
+		playlist_id: item,
+		market: 'IT',
+		access_token: session.cookie.spot_access_token
+	}
+	const result = await getPlaylist(req_options);
+});
+
+function getPlaylist(req_options) {
+	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'?market='+ req_options.market
+	const res = axios.get(rootUrl, {
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': 'Bearer ' + req_options.access_token
+		}
+	}, 
+	{ withCredentials: true })
+	.then((res) => {
+		console.log('response',res.data)
+	})
+	.catch((error) => {
+		console.log('errore riciesta canzone: ',error.response)
+	})
+}
+
+
 
 //app.post('/spot/get_playlist', async (req, res) => {
 //	var item = req.body.formUrl;
-//	var slug = item.split('playlist/').pop();
+//	var slug = item.split('playlist/').pop();\
 //
 //	const req_options = {
 //		playlist_id: slug,
