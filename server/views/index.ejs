@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="IT">
 
 <head>
   <%- include("./partials/header"); %>
@@ -12,31 +12,27 @@
   
   <link href="./css/w3.css" rel="stylesheet" type="text/css">
   <link href="./css/black-theme.css" rel="stylesheet" type="text/css">
-  <link href="./css/ajax.css" rel="stylesheet" type="text/css">
-  <link href="../public/css/w3.css" rel="stylesheet" type="text/css">
-  <link href="../public/css/black-theme.css" rel="stylesheet" type="text/css">
-  <link href="../public/css/ajax.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body id="myPage">
-
-  <!-- Team Container -->
   
   <div class="w3-container w3-padding-64 w3-center" id="team">
     <h2>Il Team</h2>
-    <p>Studenti Sapienza:</p>
+    <p>Studenti Sapienza: </p>
 
     <div class="w3-row">
+
       <br>
 
      <div class="w3-quarter">
-        <img src="/w3images/avatar1.jpg" alt="Founder" style="width:45%" class="w3-circle w3-hover-opacity">
+        <img src="./uploads/Spotify.jpg" alt="Founder" style="width:45%" class="w3-circle w3-hover-opacity">
         <h3>Andrea M</h3>
         <p>PLACEHOLDER</p>
       </div>
 
       <div class="w3-quarter">
-        <img src="/w3images/avatar2.jpg" alt="Founder" style="width:45%" class="w3-circle w3-hover-opacity">
+        <img src="./uploads/Spotify.jpg" alt="Founder" style="width:45%" class="w3-circle w3-hover-opacity">
         <h3>Emanuele R</h3>
         <p>PLACEHOLDER</p>
       </div>
@@ -44,7 +40,6 @@
     </div>
   </div>
 
-  <!-- Work Row -->
 
   <div class="w3-row-padding w3-padding-64 w3-theme-l1" id="work">
 
@@ -52,58 +47,55 @@
       <h2>Il Nostro Lavoro</h2>
       <p>SongLify un posto unico per le tue canzoni</p>
 
-      <div class="container">
-        <div id="oauth" style="display: flex;">
-          <form action="/oauth" method="get">
-            <input type="submit" value="Log in con OAuth" 
-                 name="LoginOAuth" id="LoginOAuth" />
-          </form>
-          <form action="/oauth/logout" method="get">
-            <input type="submit" value="Logout" 
-                 name="LogoutOAuth" id="LogoutOAuth" />
-          </form>
-        </div>
-        <br>
-        <div id="loginSpotify" onclick = "renderUserProfile()">
-          <form action="/spot/callback" method="get">
-            <input type="submit" value="Log in con Spotify" 
-                 name="LoginSpotify" id="LoginSpotify" />
-          </form>
-        </div>
-        <div id="loggedinSpotify" >
-          <div id="user-profile">
-          </div>
-          <div id="oauth">
-          </div>
-          <button class="btn btn-default" id="obtain-new-token">Ottieni un nuovo token</button>
-        </div>
+      <div id="oauth" style="display: flex;">
+        <form action="/oauth" method="get">
+          <input type="submit" value="Log in con OAuth" 
+            name="LoginOAuth" id="LoginOAuth" />
+        </form>
+        <form action="/oauth/logout" method="get">
+          <input type="submit" value="Logout" 
+            name="LogoutOAuth" id="LogoutOAuth" />
+        </form>
       </div>
+      <br>
+      <div id="Spotify">
+        <form action='/login/spotify' method="get">
+          <input type="submit" value="Log in con Spotify" 
+            name="LoginSpotify" id="LoginSpotify" />
+        </form>
+      </div>  
+      <br>
+       
       <form action="/form" method="post">
-        <label for="song_url">Inserisci url canzone: </label>
-        <input
-          id="song_url"
-          type="text"
-          name="formUrl1"
-          placeholder="inserisci testo"
-          required />
-        <input type="submit" value="OK" />
+          <label for="song_url">Inserisci url canzone: </label>
+          <br>
+          <input
+            id="song_url"
+            type="text"
+            name="formUrl1"
+            placeholder="inserisci testo"
+            required />
+          <input type="submit" value="OK" />
       </form>
       <form action="/spot/get_playlist" method="post">
-        <label for="playlist_url">Inserisci url playlist: </label>
-        <input
-          id="playlist_url"
-          type="text"
-          name="formUrl2"
-          placeholder="inserisci testo" 
-          required />
-        <input type="submit" value="OK" />
+          <label for="playlist_url">Inserisci url playlist: </label>
+          <br>
+          <input
+            id="playlist_url"
+            type="text"
+            name="formUrl2"
+            placeholder="inserisci testo" 
+            required />
+          <input type="submit" value="OK" />
       </form>
-    </div> 
+        
+    </div>
+    
   </div>
   
   <br>
 
-  <!-- Contact Container -->
+
 
   <div class="w3-container w3-padding-64 w3-theme-l5" id="contact">
     <div class="w3-row">
@@ -136,117 +128,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Script -->
-  <script>
-    function w3_open() {
-      var x = document.getElementById("mySidebar");
-      x.style.width = "300px";
-      x.style.paddingTop = "10%";
-      x.style.display = "block";
-    }
-        
-    
-    function w3_close() {
-      document.getElementById("mySidebar").style.display = "none";
-    }
-        
-    function openNav() {
-      var x = document.getElementById("navDemo");
-      if (x.className.indexOf("w3-show") == -1) {
-        x.className += " w3-show";
-      } else { 
-        x.className = x.className.replace(" w3-show", "");
-      }
-    }
-        
-    (function() {
-        
-      function renderUserProfile({
-        display_name,
-        images,
-        id,
-        email,
-        external_urls,
-        href,
-        country
-        }) {
-        return `<h1>Logged in as ${display_name}</h1>
-                <div>
-                  <div><img width="150" src="${images[0].url}"></div>
-                  <div>
-                    <dl>
-                      <dt>Display name</dt><dd>${display_name}</dd>
-                      <dt>Id</dt><dd>${id}</dd>
-                      <dt>Email</dt><dd>${email}</dd>
-                      <dt>Spotify URI</dt><dd><a href="${external_urls.spotify}">${external_urls.spotify}</a></dd>
-                      <dt>Link</dt><dd><a href="${href}">${href}</a></dd>
-                      <dt>Profile Image</dt><dd><a href="${images[0].url}">${images[0].url}</a></dd>
-                      <dt>Country</dt><dd>${country}</dd>
-                    </dl>
-                  </div>
-                </div>`;
-            }
-        
-            function renderOAuth({access_token, refresh_token}) {
-              return `<h2>OAuth Info</h2>
-                <dl>
-                  <dt>Access token</dt><dd class="text-overflow">${access_token}</dd>
-                  <dt>Refresh token</dt><dd class="text-overflow">${refresh_token}</dd>
-                </dl>`;
-            }
-        
-            const loginBlock = document.getElementById('loginSpotify');
-            const loggedInBlock = document.getElementById('loggedinSpotify')
-            const userProfilePlaceholder = document.getElementById('user-profile');
-            const oauthPlaceholder = document.getElementById('oauth');
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        
-            let access_token = hashParams.get('access_token'),
-                refresh_token = hashParams.get('refresh_token'),
-                error = hashParams.get('error');
-        
-            if (error) {
-              alert('There was an error during the authentication');
-            } else {
-              if (access_token) {
-                oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
-        
-                const headers = {
-                  'Authorization': 'Bearer ' +'${access_token}'
-                };
-        
-                fetch('https://api.spotify.com/v1/me', {headers})
-                .then(response => response.json())
-                .then(response => {
-                  userProfilePlaceholder.innerHTML = renderUserProfile(response);
-                  loginBlock.style.display = 'none';
-                  loggedInBlock.style.display = 'unset';
-                });
-              } else {
-                loginBlock.style.display = 'unset';
-                loggedInBlock.style.display = 'none';
-              }
-        
-              document.getElementById('obtain-new-token').addEventListener('click', () => {
-                const params = new URLSearchParams({refresh_token});
-              
-        
-                fetch(`/refresh_token?${params.toString()}`)
-                .then(response => response.json())
-                .then(response => {
-                  access_token = response.access_token;
-                  oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
-        });
-      }, false);
-     }
-    })();
-
-
-
-
-  </script>
-
 </body>
 
 
