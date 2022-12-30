@@ -9,9 +9,9 @@ const bcrypt = require('bcryptjs');
 
 module.exports = {
 	signUp(req, res) {	
-		const user = new UserV2({
+		const userv2 = new UserV2({
 			uname: req.body.uname,
-			pword: req.body.pword,
+			pword: bcrypt.hashSync(req.body.pword, 8),
 			spotify_data: new UserV2_spotify_data({
 				has_permission: false
 			}),
@@ -19,14 +19,22 @@ module.exports = {
 				has_permission: false
 			})
 		})
-		user.save((err, user) => {
+		userv2.save((err, user) => {
 			if (err) {
-				res.status(500).send({message: err});
+				res.status(500).send({message: err, aaaaaaaaa: 'aaaaaaaaaaaaaa'});
 				return;
+			} else {
+				res.status(200).send({
+				message: 'registrazione riuscita',
+				uname: user.uname
+				})
 			}
 		})
 	},
 	signIn(req,res) {
+		UserV2.find({}).exec((err, user) => {
+			console.log(user);
+		})
 		UserV2.findOne({
 			uname: req.body.uname
 		}).exec((err, user) => {

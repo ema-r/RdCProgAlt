@@ -10,7 +10,6 @@ const UserV2 = mongoose.model(
 		pword: String,
 		api_id: {
 			type: String,
-			unique: true
 		},
 		api_sc: String,
 		spotify_data: {

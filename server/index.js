@@ -14,13 +14,15 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
 const controller = require('./controllers/sessioncontr');
-const { functions } = require('./functions/exported');
+const functions = require('./functions/exported');
 
 //mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
 //	useNewUrlParser: true,
@@ -111,7 +113,7 @@ function initialize() {
 		if (!err && count === 0) {
 			new userModel({
 				uname: "dev",
-				pword: "devpass",
+				pword: bcrypt.hashSync('devpass', 8),
 				api_id: generateRandomString(16),
 				api_sc: generateRandomString(64),
 				spotify_data: new spotifyModel(),
@@ -132,48 +134,36 @@ app.get('/', (req, res) => {
 });
 
 //test user var
-const username = 'dev'
-const password = 'devpass'
-
 var session;
 
 app.get('/oauth', (req,res) => {
-	session = req.session;
-	if (session.userid) {
+	console.log(functions)
+	if (functions.jwtfun.tokenCheck === 200) {
 		res.redirect("https://localhost:8443");
 	} else {
 		res.render(href="partials/login_form");
 	}
 });
+app.get('/oauth/signup', (req,res) => {
+	res.render(href="partials/signup_form")
+})
+
+app.post('/oauth/signup', async (req, res) => {
+	controller.signUp(req,res);
+});
 
 app.post('/oauth/login', async (req, res) => {
-	if(req.body.username == username && req.body.password == password) {
-		session = req.session;
-		session.cookie.userid=req.body.username;
-		await session.save((err) => {
-			if (!err) {
-			console.log('saving session');
-			} else {
-			console.log('errore salvataggio user id :', err)
-			}
-		});
-		console.log('=======OAUTH/LOGIN ')
-		console.log(req.session)
-		res.render(href="partials/logged_in");
-	}
-	else {
-		res.render(href="partials/not_logged_in");
-	}
-
+	controller.signIn(req,res);
 });
 
 //app.post('/oauth/signup', controller.signup);
 
 //app.post('/oauth/signin', controller.signin);
 
-app.post('/oauth/try_logged', (req, res) => {
-	session = req.session;
-	console.log("Loggato con successo")
+app.post('/oauth/try_logged',(req, res) => {
+	functions.tokenCheck(req, res);
+	console.log("lol")
+	console.log("lmao")
 	res.redirect("https://localhost:8443");
 });
 
