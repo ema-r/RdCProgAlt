@@ -33,16 +33,10 @@ services:
       - app-network
 
   mongo:
-    image: mongo
+    image: mongo:4.4.6
     networks:
       - app-network
 
-  rabbit:
-    image: rabbitmq
-    networks:
-      - app-network
-
-    
 networks:
   app-network:
     driver: bridge

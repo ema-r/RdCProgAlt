@@ -14,18 +14,33 @@ const { dirname } = require('path');
 const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
-const spotifyAuth = require('./middlewares/spotify-auth');
 
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
-const client_id ='ad93b64f98894cd88782a141b4fa6698' ;
-const client_secret = '4c3816b56e984cdbb90e6840e82039c2';
-const redirect_uri= 'https://localhost:8443/spot/callback';
 
+const controller = require('./controllers/sessioncontr');
+const functions = require('./functions/exported');
+
+//mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
+//	useNewUrlParser: true,
+//	useUnifiedTopology: true,
+//	useFindAndModify: false,
+//	useCreateIndex: true
+//});
+//
+//mongoose.connection
+//	.on("open", () => console.log("MONGOOSE UP AND RUNNING"))
+//	.on("close", () => console.log("MONGOOSE CONNECTION CLOSED"))
+//	.on("error", (error) => {
+//		console.log(error);
+//		process.exit();
+//});
 
 var generateRandomString = function(length) {
 	var text = '';
@@ -41,14 +56,13 @@ var stateKey = 'spotify_auth_state'
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')))
-.use(cors({
+app.use(cors({
 	origin: 'https://localhost:8443',
-	credentials: true
-}))
+}));
 app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
-app.use(spotifyAuth({client_id, client_secret, redirect_uri}));
+app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(sessions({
 //	genid: (req) => {
@@ -77,8 +91,43 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
 app.use(express.static('public'));
+
+//MONGODB
+var userModel = require("./models/userv2.model")
+var spotifyModel = require("./models/userv2_spotify_data.model")
+var youtubeModel = require("./models/userv2_youtube_data.model")
+mongoose
+	.connect(MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	})
+	.then(() => {
+		console.log("MONGOOSE, UP AND RUNNING");
+		initialize();
+	})
+	.catch(err => {
+		console.error("ERRORE CONNESSIONE MONGOOSE", err);
+		process.exit();
+	});
+
+function initialize() {
+	userModel.estimatedDocumentCount((err, count) => {
+		if (!err && count === 0) {
+			new userModel({
+				uname: "dev",
+				pword: bcrypt.hashSync('devpass', 8),
+				api_id: generateRandomString(16),
+				api_sc: generateRandomString(64),
+				spotify_data: new spotifyModel(),
+				youtube_data: new youtubeModel()
+			}).save(err => {
+				if (err) { console.log('salvataggio modello dummy fallito:', err) }
+			})
+			console.log('db inizializzato con dummy dev model [NON INTESO PER PRODUCTION]')
+		}
+	});
+}
 
 /* get root path */
 app.get('/', (req, res) => {
@@ -88,44 +137,36 @@ app.get('/', (req, res) => {
 });
 
 //test user var
-const username = 'dev'
-const password = 'devpass'
-
 var session;
 
 app.get('/oauth', (req,res) => {
-	session = req.session;
-	if (session.userid) {
+	console.log(functions)
+	if (functions.jwtfun.tokenCheck === 200) {
 		res.redirect("https://localhost:8443");
 	} else {
 		res.render(href="partials/login_form");
 	}
 });
+app.get('/oauth/signup', (req,res) => {
+	res.render(href="partials/signup_form")
+})
 
-app.post('/oauth/login', async (req, res) => {
-	if(req.body.username == username && req.body.password == password) {
-		session = req.session;
-		session.cookie.userid=req.body.username;
-		await session.save((err) => {
-			if (!err) {
-			console.log('saving session');
-			} else {
-			console.log('errore salvataggio user id :', err)
-			}
-		});
-		console.log('=======OAUTH/LOGIN ')
-		console.log(req.session)
-		res.render(href="partials/logged_in");
-	}
-	else {
-		res.render(href="partials/not_logged_in");
-	}
-
+app.post('/oauth/signup', async (req, res) => {
+	controller.signUp(req,res);
 });
 
-app.post('/oauth/try_logged', (req, res) => {
-	session = req.session;
-	console.log("Loggato con successo")
+app.post('/oauth/login', async (req, res) => {
+	controller.signIn(req,res);
+});
+
+//app.post('/oauth/signup', controller.signup);
+
+//app.post('/oauth/signin', controller.signin);
+
+app.post('/oauth/try_logged',(req, res) => {
+	functions.tokenCheck(req, res);
+	console.log("lol")
+	console.log("lmao")
 	res.redirect("https://localhost:8443");
 });
 
