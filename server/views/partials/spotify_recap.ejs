@@ -78,10 +78,13 @@
         const oauthPlaceholder = document.getElementById('oauth');
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-        let access_token = "48859814594165986151459159164985819",
-            refresh_token = "213u0749172541509145195159054801454",
+        let access_token = hashParams.get('access_token'),
+            refresh_token = hashParams.get('refresh_token'),
+            error = hashParams.get('error');
 
-
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
           if (access_token) {
             oauthPlaceholder.innerHTML = renderOAuth({access_token, refresh_token});
 
