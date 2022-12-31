@@ -25,8 +25,8 @@ module.exports = {
 		const userv2 = new UserV2({
 			uname: req.body.uname,
 			pword: bcrypt.hashSync(req.body.pword, 8),
-			api_id: generateRandomString(16); //da gestire errore collisione in caso due account con stesso api_id
-			api_sc: bcrypt.hashSync(generateRandomString(32), 8);
+			api_id: generateRandomString(16), //da gestire errore collisione in caso due account con stesso api_id
+			api_sc: bcrypt.hashSync(generateRandomString(32), 8),
 			spotify_data: new UserV2_spotify_data({
 				has_permission: false
 			}),

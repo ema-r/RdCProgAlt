@@ -1,5 +1,5 @@
 const user = require('../models/userv2.model');
-const google_data = require('../models/userv2_google_data.model');
+const google_data = require('../models/userv2_youtube_data.model');
 
 const bcrypt = require('bcryptjs');
 
@@ -8,7 +8,7 @@ module.exports = {
 		google_data.updateOne({
 			id: req.body._id},
 			{$set: { has_permissions: true }},
-			function(err, data) => {
+			function(err, data) {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
@@ -23,7 +23,7 @@ module.exports = {
 			id: req.body._id},
 			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
-			function(err, data) => {
+			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
 				}
@@ -39,7 +39,7 @@ module.exports = {
 		id: req.body._id},
 			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
 				expires_in: req.body.expires_in}},
-			function(err, data) => {
+			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
 				}
