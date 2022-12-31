@@ -42,7 +42,7 @@ const functions = require('./functions/exported');
 //		process.exit();
 //});
 
-var generateRandomString = function(length) {
+var generateRandomString = function(length) { //FUNZIONE VA SPOSTATA IN FUNCTIONS
 	var text = '';
 	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
