@@ -49,9 +49,6 @@ module.exports = {
 		})
 	},
 	signIn(req,res) {
-		UserV2.find({}).exec((err, user) => {
-			console.log(user);
-		})
 		UserV2.findOne({
 			api_id: req.body.api_id
 		}).exec((err, user) => {
@@ -72,7 +69,7 @@ module.exports = {
 					message: 'client secret non valido'
 				});
 			}
-			var token = jwt.sign({ id: user.api_id }, process.env.SECRET, {
+			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn : 3600
 			});
 			res.status(200).send({
@@ -119,5 +116,12 @@ module.exports = {
 			return spotifycontr.initializeTokens(req, res);
 		})
 	}
-
+	getGoogleTokens(req, res) {
+		console.log('funzione da completare');
+		return res.status(500);
+	}
+	getSpotifyTokens(req, res) {
+		UserV2.findOne({id: user_id}).exec
+		return res.status(500); //placeholder
+	}
 }

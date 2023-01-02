@@ -8,7 +8,7 @@ const UserV2_spotify_data = mongoose.model(
 			default: false
 		},
 		access_token: String,
-		expires_in: String,
+		expires_in: int,
 		refresh_token: String
 	})
 );
