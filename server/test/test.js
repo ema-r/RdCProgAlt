@@ -1,14 +1,14 @@
 const expect = require("chai").expect;
 const fetch = require("node-fetch");
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-describe("POST /api/v1/post", () => {
-  it("send bad POST request to http://localhost:8080/api/v1/post", async () => {
-    await fetch("http://localhost:8080/api/v1/post", {
+describe("POST /oauth/login", () => {
+  it("send bad POST request to https://localhost:8443/oauth/login", async () => {
+    await fetch("https://localhost:8443/oauth/login", {
       method: "POST",
       body: JSON.stringify({
-        author: "not-valid-Id",
-        description: "error example",
-        picture: "error picture",
+        uname:"00000",
+        pword: "0000000000000",
       }),
       headers: { "Content-Type": "application/json" },
     })
@@ -20,13 +20,12 @@ describe("POST /api/v1/post", () => {
       });
   });
 
-  it("send POST request to http://localhost:8080/api/v1/post", async () => {
-    await fetch("http://localhost:8080/api/v1/post", {
+  it("send POST request to https://localhost:8443/oauth/login", async () => {
+    await fetch("https://localhost:8443/oauth/login", {
       method: "POST",
       body: JSON.stringify({
-        author: "62854a7d2a2486b3702e0143",
-        description: "example",
-        picture: "picture",
+        uname:"dev",
+        pword: "devpass",
       }),
       headers: { "Content-Type": "application/json" },
     })
@@ -37,72 +36,18 @@ describe("POST /api/v1/post", () => {
         console.error(err.message);
       });
   });
-});
 
-describe("GET /api/v1/post", () => {
-  it("send GET request to http://localhost:8080/api/v1/post", async () => {
-    await fetch("http://localhost:8080/api/v1/post")
-      .then((result) => {
-        expect(result.status).to.equal(200);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
-  });
-});
-
-describe("GET /api/v1/post/62854a7d2a2486b3702e0143", () => {
-  it("send GET request to http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143", async () => {
-    await fetch("http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143")
-      .then((result) => {
-        expect(result.status).to.equal(200);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
-  });
-});
-
-describe("PATCH /api/v1/post/62854a7d2a2486b3702e0143", () => {
-  it("send PATCH request to http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143", async () => {
-    await fetch("http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143", {
+  it("send POST request to https://localhost:8443/oauth/login", async () => {
+    await fetch("https://localhost:8443/oauth/login", {
       method: "POST",
       body: JSON.stringify({
-        author: "62854a7d2a2486b3702e0143",
-        description: "exampleUpdated",
+        uname:"dev",
+        pword: "000000",
       }),
       headers: { "Content-Type": "application/json" },
     })
       .then((result) => {
-        expect(result.status).to.equal(200);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
-  });
-});
-
-describe("DELETE /api/v1/post/", () => {
-  it("send DELETE request to http://localhost:8080/api/v1/post", async () => {
-    await fetch("http://localhost:8080/api/v1/post", {
-      method: "DELETE",
-    })
-      .then((result) => {
-        expect(result.status).to.equal(200);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
-  });
-});
-
-describe("DELETE /api/v1/post/62854a7d2a2486b3702e0143", () => {
-  it("send DELETE request to http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143", async () => {
-    await fetch("http://localhost:8080/api/v1/post/62854a7d2a2486b3702e0143", {
-      method: "DELETE",
-    })
-      .then((result) => {
-        expect(result.status).to.equal(200);
+        expect(result.status).to.equal(401);
       })
       .catch((err) => {
         console.error(err.message);
