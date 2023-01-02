@@ -4,14 +4,29 @@ const UserV2 = require('../models/userv2.model');
 const UserV2_spotify_data = require('../models/userv2_spotify_data.model');
 const UserV2_youtube_data = require('../models/userv2_youtube_data.model');
 
+const googlecontr = require('./googlecontr');
+const spotifycontr = require('./spotifycontr');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+
+var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
+	var text = '';
+	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+	for (var i = 0; i < length; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
+}
 
 module.exports = {
 	signUp(req, res) {	
 		const userv2 = new UserV2({
 			uname: req.body.uname,
 			pword: bcrypt.hashSync(req.body.pword, 8),
+			api_id: generateRandomString(16), //da gestire errore collisione in caso due account con stesso api_id
+			api_sc: bcrypt.hashSync(generateRandomString(32), 8),
 			spotify_data: new UserV2_spotify_data({
 				has_permission: false
 			}),
@@ -26,7 +41,9 @@ module.exports = {
 			} else {
 				res.status(200).send({
 				message: 'registrazione riuscita',
-				uname: user.uname
+				uname: user.uname,
+				api_id: user.api_id,
+				api_sc: user.api_sc
 				})
 			}
 		})
@@ -36,7 +53,7 @@ module.exports = {
 			console.log(user);
 		})
 		UserV2.findOne({
-			uname: req.body.uname
+			api_id: req.body.api_id
 		}).exec((err, user) => {
 			if (err) {
 				res.status(500).send({message: err});
@@ -46,13 +63,13 @@ module.exports = {
 				return res.status(404).send({message: 'user non trovato'});
 			}
 			var pwordIsValid = bcrypt.compareSync(
-				req.body.pword,
-				user.pword
+				req.body.api_sc,
+				user.api_sc
 			)
 			if (!pwordIsValid) {
 				return res.status(401).send({
 					accessToken: null,
-					message: 'password non valida'
+					message: 'client secret non valido'
 				});
 			}
 			var token = jwt.sign({ id: user.api_id }, process.env.SECRET, {
@@ -61,8 +78,46 @@ module.exports = {
 			res.status(200).send({
 				id: user._id,
 				uname: user.uname,
+				api_id: user.api_id,
 				accessToken: token
 			})
 		})
+	},
+	updateGoogleTokens(req,res) {
+		UserV2.findOne({id: req.body._id}).exec((err,user) => {
+			if (err) {
+				return res.status(500).send({message: err});
+			}
+			if (!user) {
+				return res.status(404).send({message: 'user non trovato'});
+			}
+			req.body._id = user.google_data._id
+			if (req.body.access_token === null) {
+				return googlecontr.updateRefreshToken(req,res);
+			}
+			if (req.body.refresh_token === null) {
+				return googlecontr.updateAccessToken(req,res);
+			}
+			return googlecontr.initializeTokens(req, res);
+		})
+	},
+	updateSpotifyTokens(req,res) {
+		UserV2.findOne({id: req.body._id}).exec((err,user) => {
+			if (err) {
+				return res.status(500).send({message: err});
+			}
+			if (!user) {
+				return res.status(404).send({message: 'user non trovato'});
+			}
+			req.body._id = user.spotify_data._id
+			if (req.body.access_token === null) {
+				return spotifycontr.updateRefreshToken(req,res);
+			}
+			if (req.body.refresh_token === null) {
+				return spotifycontr.updateAccessToken(req,res);
+			}
+			return spotifycontr.initializeTokens(req, res);
+		})
 	}
+
 }
