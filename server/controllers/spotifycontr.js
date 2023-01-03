@@ -54,17 +54,30 @@ module.exports = {
 		updateAccessToken(req,res);
 		updateRefreshToken(req,res);
 	}
-	getAccessToken(req,res) {
-		spotify_data.findOne({id: req.body._id}).exec((err,spotData) => {
+	getAccessToken(perm_id) {
+		spotify_data.findOne({id: perm_id}).exec((err,spotData) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
-			if (!spotData) {
+			if (!spotData || !spotData.access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
 			res.status(200).send({
-				access_token: spotData.token;
+				access_token: spotData.access_token;
 				expires_at: spotData.expires_in;
+			})
+		})
+	}
+	getRefreshToken(perm_id) {
+		spotify_data.findOne({id: perm_id}).exec((err,spotData) => {
+			if (err) {
+				return res.status(500).send({message: err});
+			}
+			if (!spotData || !spotData.access_token) {
+				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
+			}
+			res.status(200).send({
+				refresh_token: spotData.refresh_token;
 			})
 		})
 	}

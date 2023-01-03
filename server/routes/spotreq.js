@@ -1,6 +1,8 @@
 const functions = require('./../functions/exported');
 const userController = require('./../controllers/sessioncontr.js');
 
+const dotenv = require('dotenv').config('./../.env')
+
 module.exports = function(app) {
 	app.use(function(req,res,next) {
 		res.header(
