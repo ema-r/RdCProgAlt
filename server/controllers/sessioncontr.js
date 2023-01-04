@@ -115,11 +115,11 @@ module.exports = {
 			}
 			return spotifycontr.initializeTokens(req, res);
 		})
-	}
+	},
 	getGoogleTokens(req, res) {
 		console.log('funzione da completare');
 		return res.status(500);
-	}
+	},
 	getSpotifyTokens(req, res) {
 		UserV2.findOne({id: user_id}).exec
 		return res.status(500); //placeholder
