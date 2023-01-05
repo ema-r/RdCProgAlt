@@ -1,4 +1,4 @@
-const functions = require('./../functions/exported');
+const functions = require('./../functions/jwtfun');
 const userController = require('./../controllers/sessioncontr.js');
 
 const dotenv = require('dotenv').config('./../.env')

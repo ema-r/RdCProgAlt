@@ -139,6 +139,10 @@ app.get('/', (req, res) => {
 //test user var
 var session;
 
+require('./routes/usermng')(app);
+require('./routes/userreq')(app);
+require('./routes/spotreq')(app);
+
 app.post('/oauth/try_logged',(req, res) => {
 	functions.tokenCheck(req, res);
 	res.redirect("https://localhost:8443");

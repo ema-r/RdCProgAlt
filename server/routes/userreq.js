@@ -1,4 +1,4 @@
-const functions = require('./../functions/exported');
+const functions = require('./../functions/jwtfun');
 const controller = require('./../controllers/sessioncontr');
 
 module.exports = function(app) {
