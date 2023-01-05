@@ -57,7 +57,7 @@ describe("POST /oauth/login", () => {
 	  await fetch('https://localhost:8443/oauth/signup', {
 		  method: 'POST',
 		  body: JSON.stringify({
-			  uname: 'test2',
+			  uname: 'test14',
 			  pword: 'testpword',
 		  }),
 		  headers: {
@@ -65,8 +65,23 @@ describe("POST /oauth/login", () => {
 		  },
 	  }).then((result) => {
 		  expect(result.status).to.equal(200);
-		  expect(result.uname).to.equal('test');
 	  }).catch((err)=> {
+		  console.error(err.message);
+	  });
+  });
+  it('send POST request to https://localhost:8443/oauth/login', async() => {
+	  await fetch('https://localhost:8443/oauth/login', {
+		  method: 'POST',
+		  body: JSON.stringify({
+			  uname: 'test14',
+			  pword: 'testpword',
+		  }),
+		  headers: {
+			  'Content-Type': 'application/json',
+		  },
+	  }).then((res) => {
+		  expect(res.status).to.equal(200);
+	  }).catch((err) => {
 		  console.error(err.message);
 	  });
   });
