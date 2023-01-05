@@ -69,14 +69,29 @@ describe("POST /oauth/login", () => {
 			  'Content-Type':  'application/json',
 		  },
 	  }).then((result) => {
-		  token = result.body.token;
 		  expect(result.status).to.equal(200);
-		  expect(result.uname).to.equal('test');
 	  }).catch((err)=> {
 		  console.error(err.message);
 	  });
   });
 
+  it('send POST request to https://localhost:8443/oauth/login', async() => {
+	  await fetch('https://localhost:8443/oauth/login', {
+		  method: 'POST',
+		  body: JSON.stringify({
+			  uname: 'test14',
+			  pword: 'testpword',
+		  }),
+		  headers: {
+			  'Content-Type': 'application/json',
+		  },
+	  }).then((res) => {
+		  token = result.body.token;
+		  expect(res.status).to.equal(200);
+	  }).catch((err) => {
+		  console.error(err.message);
+	  });
+  });  
   it('dovrebbe accedere a /api/test fornendo un jwt token', (done) => {
 	  chai.request(app)
 	  .get('/api/test')
@@ -86,4 +101,5 @@ describe("POST /oauth/login", () => {
 		  done();
 	  })
   })
+
 });

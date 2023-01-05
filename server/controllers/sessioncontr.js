@@ -22,7 +22,7 @@ var generateRandomString = function(length) {  //va spostata in functions, per o
 
 module.exports = {
 	signUp(req, res) {	
-		const userv2 = new UserV2({
+		var userv2 = new UserV2({
 			uname: req.body.uname,
 			pword: bcrypt.hashSync(req.body.pword, 8),
 			api_id: generateRandomString(16), //da gestire errore collisione in caso due account con stesso api_id
@@ -36,6 +36,7 @@ module.exports = {
 		})
 		userv2.save((err, user) => {
 			if (err) {
+				console.log('triggered AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa', 'errore: '+err)
 				res.status(500).send({message: err, aaaaaaaaa: 'aaaaaaaaaaaaaa'});
 				return;
 			} else {
@@ -50,7 +51,7 @@ module.exports = {
 	},
 	signIn(req,res) {
 		UserV2.findOne({
-			api_id: req.body.api_id
+			uname: req.body.uname
 		}).exec((err, user) => {
 			if (err) {
 				console.log('triggered error')
