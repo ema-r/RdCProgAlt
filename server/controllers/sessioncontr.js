@@ -53,15 +53,18 @@ module.exports = {
 			api_id: req.body.api_id
 		}).exec((err, user) => {
 			if (err) {
+				console.log('triggered error')
 				res.status(500).send({message: err});
 				return;
 			}
 			if (!user) {
-				return res.status(404).send({message: 'user non trovato'});
+				console.log('triggered user non trovato')
+				res.status(404).send({message: 'user non trovato'});
+				return;
 			}
 			var pwordIsValid = bcrypt.compareSync(
-				req.body.api_sc,
-				user.api_sc
+				req.body.pword,
+				user.pword
 			)
 			if (!pwordIsValid) {
 				return res.status(401).send({

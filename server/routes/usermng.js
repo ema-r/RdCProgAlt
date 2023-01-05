@@ -28,6 +28,6 @@ module.exports = function(app) {
 	
 	app.post('/oauth/login', async (req, res) => {
 		controller.signIn(req,res);
-		res.redirect('https://localhost:8443/api/test')
+//		res.redirect('https://localhost:8443/api/test')
 	})
 ;}
