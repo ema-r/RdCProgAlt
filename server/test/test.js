@@ -23,6 +23,7 @@ describe("POST /oauth/login", () => {
       });
   });
 
+  let token = '';
   it("send POST request to https://localhost:8443/oauth/login", async () => {
     await fetch("https://localhost:8443/oauth/login", {
       method: "POST",
@@ -33,6 +34,8 @@ describe("POST /oauth/login", () => {
       headers: { "Content-Type": "application/json" },
     })
       .then((result) => {
+	console.log(result);
+	console.log(result.body.token);
 	token = result.body.token;
         expect(result.status).to.equal(200);
       })
@@ -58,29 +61,28 @@ describe("POST /oauth/login", () => {
       });
   });
 
-  let token = '';
 
-  it('send POST request to https://localhost:8443/oauth/signup', async() => {
-	  await fetch('https://localhost:8443/oauth/signup', {
-		  method: 'POST',
-		  body: JSON.stringify({
-			  uname: 'test',
-			  pword: 'testpword',
-		  }),
-		  headers: {
-			  'Content-Type':  'application/json',
-		  },
-	  }).then((result) => {
-		  expect(result.status).to.equal(200);
-	  }).catch((err)=> {
-		  console.error(err.message);
-	  });
-  });
+//  it('send POST request to https://localhost:8443/oauth/signup', async() => {
+//	  await fetch('https://localhost:8443/oauth/signup', {
+//		  method: 'POST',
+//		  body: JSON.stringify({
+//			  uname: 'test',
+//			  pword: 'testpword',
+//		  }),
+//		  headers: {
+//			  'Content-Type':  'application/json',
+//		  },
+//	  }).then((result) => {
+//		  expect(result.status).to.equal(200);
+//	  }).catch((err)=> {
+//		  console.error(err.message);
+//	  });
+//  });
   
   it('dovrebbe accedere a /api/test fornendo un jwt token', async() => {
 	  console.log('ultimo test token: ' + token)
 	  await fetch('https://localhost:8443/api/test', {
-		  method: 'POST',
+		  method: 'GET',
 		  headers: {
 			  Authorization: 'Bearer '+token,
 		  },

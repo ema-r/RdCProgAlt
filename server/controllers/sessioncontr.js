@@ -77,10 +77,10 @@ module.exports = {
 				expiresIn : 3600
 			});
 			res.status(200).send({
-				id: user._id,
-				uname: user.uname,
-				api_id: user.api_id,
-				accessToken: token
+				'id': user._id,
+				'uname': user.uname,
+				'api_id': user.api_id,
+				'accessToken': token
 			})
 		})
 	},

@@ -19,6 +19,8 @@ module.exports = function(app) {
 		}
 	});
 	app.get('/oauth/signup', (req,res) => {
+		//implem check duplicati. Gia presenti nelle funzioni
+		//vanno solamente aggiunti
 		res.render(href="partials/signup_form")
 	})
 	
@@ -27,7 +29,10 @@ module.exports = function(app) {
 	});
 	
 	app.post('/oauth/login', async (req, res) => {
-		controller.signIn(req,res);
+		await controller.signIn(req,res);
+		var response = JSON.stringify(res);
+		var resp = await JSON.parse(response);
+		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
 	})
 ;}
