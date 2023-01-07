@@ -34,10 +34,9 @@ describe("POST /oauth/login", () => {
       headers: { "Content-Type": "application/json" },
     })
       .then((result) => {
-	console.log(result);
-	console.log(result.body.token);
-	token = result.body.token;
         expect(result.status).to.equal(200);
+	res = JSON.parse(result);
+	console.log(res);
       })
       .catch((err) => {
         console.error(err.message);

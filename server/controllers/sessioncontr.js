@@ -76,7 +76,7 @@ module.exports = {
 			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn : 3600
 			});
-			res.status(200).send({
+			res.status(200).json({
 				'id': user._id,
 				'uname': user.uname,
 				'api_id': user.api_id,

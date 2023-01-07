@@ -30,9 +30,9 @@ module.exports = function(app) {
 	
 	app.post('/oauth/login', async (req, res) => {
 		await controller.signIn(req,res);
-		var response = JSON.stringify(res);
-		var resp = await JSON.parse(response);
-		console.log('oauth login route res: '+response);
+//		var response = JSON.stringify(res);
+//		var resp = await JSON.parse(response);
+//		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
 	})
 ;}
