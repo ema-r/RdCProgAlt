@@ -64,29 +64,29 @@ app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
-app.use(sessions({
-//	genid: (req) => {
-//		return uuidv4()
-//	},
-	secret: 'keyboard cat',
-	store: MongoStore.create({
-		mongoUrl: MONGO_URI,
-		dbName: process.env.MONGO_DB_NAME,
-		collectionName: "sessions",
-		stringify: false,
-		autoRemove: "interval",
-		autoRemoveInterval: 1
-	}),
-  	resave: true,
-  	saveUninitialized: false,
-  	cookie: { secure: true , maxAge: oneDay}
-}));
+//app.use(sessions({
+////	genid: (req) => {
+////		return uuidv4()
+////	},
+//	secret: 'keyboard cat',
+//	store: MongoStore.create({
+//		mongoUrl: MONGO_URI,
+//		dbName: process.env.MONGO_DB_NAME,
+//		collectionName: "sessions",
+//		stringify: false,
+//		autoRemove: "interval",
+//		autoRemoveInterval: 1
+//	}),
+//  	resave: true,
+//  	saveUninitialized: false,
+//  	cookie: { secure: true , maxAge: oneDay}
+//}));
 
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
 app.set('view engine', 'ejs');
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.json())
+//app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -131,8 +131,6 @@ function initialize() {
 
 /* get root path */
 app.get('/', (req, res) => {
-  console.log('REQ.SESSiON', req.session)
-  console.log('SESSION', session)
   res.render('index', { title: 'SongLify' });
 });
 
@@ -142,11 +140,6 @@ var session;
 require('./routes/usermng')(app);
 require('./routes/userreq')(app);
 require('./routes/spotreq')(app);
-
-app.post('/oauth/try_logged',(req, res) => {
-	functions.tokenCheck(req, res);
-	res.redirect("https://localhost:8443");
-});
 
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();

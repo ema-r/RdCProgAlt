@@ -50,6 +50,7 @@ module.exports = {
 		})
 	},
 	signIn(req,res) {
+		var user;
 		UserV2.findOne({
 			uname: req.body.uname
 		}).exec((err, user) => {
@@ -59,7 +60,6 @@ module.exports = {
 				return;
 			}
 			if (!user) {
-				console.log('triggered user non trovato')
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
@@ -76,7 +76,7 @@ module.exports = {
 			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn : 3600
 			});
-			res.status(200).json({
+			res.status(200).send({
 				'id': user._id,
 				'uname': user.uname,
 				'api_id': user.api_id,

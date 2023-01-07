@@ -1,5 +1,6 @@
 const functions = require('./../functions/exported');
 const controller = require('./../controllers/sessioncontr');
+const util = require('node:util');
 
 module.exports = function(app) {
 	app.use(function(req, res, next) {
