@@ -20,7 +20,8 @@ describe("POST /oauth/login", () => {
       })
       .catch((err) => {
         console.error(err.message);
-      });
+      })
+      .done;
   });
 
   let token = '';
@@ -40,7 +41,8 @@ describe("POST /oauth/login", () => {
       })
       .catch((err) => {
         console.error(err.message);
-      });
+      })
+      .done;
   });
 
   it("send POST request to https://localhost:8443/oauth/login", async () => {
@@ -57,7 +59,8 @@ describe("POST /oauth/login", () => {
       })
       .catch((err) => {
         console.error(err.message);
-      });
+      })
+      .done;
   });
 
 
@@ -89,6 +92,7 @@ describe("POST /oauth/login", () => {
 		  expect(res.status).to.equal(200);
 	  }).catch((err) => {
 		  console.error(err.message);
-	  });
+	  })
+    .done;
   });
 });
