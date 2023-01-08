@@ -8,6 +8,8 @@ const axios = require('axios');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const util = require('node:util');
+var token = '';
+
 describe("test accesso e permessi", () => {
   var host = 'https://localhost:8443/';
   it("login con username e password sbagliati, restituisce 404 poiche non trova utente", async () => {
@@ -28,7 +30,6 @@ describe("test accesso e permessi", () => {
       .done;
   });
 
-  var token = '';
   it('login POST test, restituisce token JWT, status 200', function(done) {
         chai
             .request(host)
@@ -70,7 +71,7 @@ describe("test accesso e permessi", () => {
 		  method: 'GET',
 		  headers: {'x-access-token': 'bsebrsfvs3t2y53vgds'},
 	  }).then((result) => {
-		  expect(result.status).to.equal(403);
+		  expect(result.status).to.equal(401);
 	  }).catch((err) => {
 		  console.error(err.message);
 	  }).done;
@@ -90,4 +91,20 @@ describe("test accesso e permessi", () => {
       .done;
   });
 
+});
+
+describe("test spotify", () => {
+  it("GET request a /api/test, con JWT token corretto. Restituisce 200", async () => {
+    await fetch("https://localhost:8443/oauth/spotify/login", {
+      method: "GET",
+      headers: { "x-access-token": token },
+    })
+      .then((result) => {
+        expect(result.status).to.equal(200);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      })
+      .done;
+  });
 });

@@ -3,6 +3,18 @@ const userController = require('./../controllers/sessioncontr.js');
 
 const dotenv = require('dotenv').config('./../.env')
 
+var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
+	var text = '';
+	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+	for (var i = 0; i < length; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
+}
+
+var stateKey = ''
+
 module.exports = function(app) {
 	app.use(function(req,res,next) {
 		res.header(
@@ -13,32 +25,33 @@ module.exports = function(app) {
 	});
 
 	app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
-		session = req.session;
-		var state = generateRandomString(16);
-		res.cookie(stateKey, state);
+//		session = req.session;
+//		var state = generateRandomString(16);
+//		res.cookie(stateKey, state);
 
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
 		var options = {
 			client_id: process.env.SPOTIFY_CLIENT_ID.toString(),
 			response_type: 'code',
-			redirect_uri: 'https://localhost:8443/spot/callback',
-			state: state
+			redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
+//			state: state
 		}
 		const query = new URLSearchParams(options)
 		const redirUrl = rootUrl+query.toString();
+		console.log(redirUrl);
 		res.redirect(redirUrl);
 	});
 
 	app.get('/oauth/spotify/callback', [functions.tokenCheck],  async function(req, res) {
 	    var code = req.query.code || null;
-	    var state = req.query.state || null;
-	    var storedState = req.cookies ? req.cookies[stateKey] : null;
+//	    var state = req.query.state || null;
+//	    var storedState = req.cookies ? req.cookies[stateKey] : null;
 	
 	    if (state === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
-			res.clearCookie(stateKey);
+//			res.clearCookie(stateKey);
 			var authOptions = {
 				code: code,
 				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
