@@ -1,7 +1,7 @@
 const functions = require('./../functions/jwtfun');
 const userController = require('./../controllers/sessioncontr.js');
-
-const dotenv = require('dotenv').config('./../.env')
+const axios = require('axios');
+const dotenv = require('dotenv').config('./../.env');
 
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
@@ -43,12 +43,12 @@ module.exports = function(app) {
 		res.redirect(redirUrl);
 	});
 
-	app.get('/oauth/spotify/callback', [functions.tokenCheck],  async function(req, res) {
+	app.get('/oauth/spotify/callback', async function(req, res) {
 	    var code = req.query.code || null;
 //	    var state = req.query.state || null;
 //	    var storedState = req.cookies ? req.cookies[stateKey] : null;
 	
-	    if (state === null || state !== storedState) {
+	    if (code === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
 //			res.clearCookie(stateKey);
@@ -60,7 +60,13 @@ module.exports = function(app) {
 			var query = new URLSearchParams(authOptions).toString();
 			data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
+			
 			//AGGIUNGI MODIFICA DB QUI	
+		        req.body.access_token = data.access_token;
+		        req.body.expires_in = data.expires_in;
+		    	req.body.refresh_token = data.refresh_token;
+		        spotifyController.updatePermissions(req,res);
+		    	spotifyController.initializeTokens(req,res);
 //			res.redirect('/');
 		}
 	});

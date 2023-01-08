@@ -100,7 +100,7 @@ describe("test spotify", () => {
       headers: { "x-access-token": token },
     })
       .then((result) => {
-        expect(result.status).to.equal(200);
+        expect(result.status).to.equal(302);
       })
       .catch((err) => {
         console.error(err.message);

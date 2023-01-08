@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 	updatePermissions(req, res) {
 		spotify_data.updateOne({
-			id: req.body._id},
+			id: req.body.user_id},
 			{$set: { has_permissions: true }},
 			function(err, data) {
 			if (err) {
@@ -15,12 +15,12 @@ module.exports = {
 			if (!data) {
 				return res.status(404).send({message: 'ERRORE GRAVE: permission field non esistente'});
 			}
-			res.status(200).send({message: 'documento permessi modificato'});
+			next();
 		})
 	},
 	updateAccessToken(req, res) {
 		spotify_data.updateOne({
-			id: req.body._id},
+			id: req.body.data_id},
 			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
@@ -30,15 +30,16 @@ module.exports = {
 				if (!data) {
 					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
 				}
-				res.status(200).send({message: 'access_token e expire_time salvati'});
+				console.log('[SPOTIFY CONTROLLER] access token salvato');
+				next();
 			}
 		)
 	},
 	updateRefreshToken(req,res) {
 		spotify_data.updateOne({
-		id: req.body._id},
-			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
-				expires_in: req.body.expires_in}},
+		id: req.body.data_id}, //cosi trova user invece che dati user, va modificato, conviene
+				       //aggiungere funzione che ottiene id dati da user id
+			{$set: {access_token: bcrypt.hashSync(req.body.refresh_token, 8)},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -46,7 +47,8 @@ module.exports = {
 				if (!data) {
 					return res.status(404).send({message: 'ERRORE GRAVE: refresh_token field non esistente'})
 				}
-				res.status(200).send({message: 'refresh token salvato'});
+				console.log('[SPOTIFY CONTROLLER] refresh token salvato');
+				next();
 			}
 		)
 	},
