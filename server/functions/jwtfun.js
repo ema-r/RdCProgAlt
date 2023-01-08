@@ -14,11 +14,11 @@ module.exports = {
 			return res.status(403).send({message: "Token non fornito"});
 		}
 	
-		jwt.verif(token, config.secret, (err, decoded) => {
+		jwt.verify(token, process.env.SECRET, (err, decoded) => {
 			if (err) {
 				return res.status(401).send({message: "invalid token"})
 			}
-			req.user_id = decoded.id;
+			req.body.user_id = decoded.id;
 			next();
 		});
 	},

@@ -10,7 +10,9 @@ module.exports = function(app) {
 		next();
 	});
 	
-	app.get('/api/test', [functions.tokenCheck], (req, res) => {
+	app.get('/api/test', [functions.tokenCheck], async (req, res) => {
 		console.log('riuscito ad entrare in area riservata ad utenti');
+		console.log('user id test: '+req.body.user_id, 'status code: '+res.statusCode);
+		return;
 	})
 }

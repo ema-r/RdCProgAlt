@@ -41,14 +41,14 @@ module.exports = function(app) {
 			res.clearCookie(stateKey);
 			var authOptions = {
 				code: code,
-				redirect_uri: 'https://localhost:8443/spot/callback',
+				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
 				grant_type: 'authorization_code'
 			}
 			var query = new URLSearchParams(authOptions).toString();
 			data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
-	
-			res.redirect('/');
+			//AGGIUNGI MODIFICA DB QUI	
+//			res.redirect('/');
 		}
 	});
 
