@@ -10,7 +10,7 @@ module.exports = function(app) {
     	);
 		next();
 	});
-	
+	//front end "home" funzioni login
 	app.get('/oauth', (req,res) => {
 		console.log(functions)
 		if (functions.jwtfun.tokenCheck === 200) {
@@ -19,16 +19,35 @@ module.exports = function(app) {
 			res.render(href="partials/login_form");
 		}
 	});
+	//front end iscrizione
 	app.get('/oauth/signup', (req,res) => {
 		//implem check duplicati. Gia presenti nelle funzioni
 		//vanno solamente aggiunti
 		res.render(href="partials/signup_form")
-	})
-	
+	});
+
+	//Riceve richieste creazione account. Necessita un campo uname
+	//(username) e un campo pword (password) per crearlo correttamente
+	//necessario per accedere a /oauth/login, che fornisce token JWT
+	//per utilizzo applicazione. se andato senza problemi restituisce
+	//status 200 e un JSON contenente messaggio di reg riuscita
+	//e nome utente.
 	app.post('/oauth/signup', async (req, res) => {
 		controller.signUp(req,res);
 	});
 	
+	//Riceve richieste JWT token. Il token va salvato da client,
+	//e va mandato in richiesta per la maggior parte delle funzioni
+	//dell'API.
+	//Necessita un campo uname e pword validi e gia presenti nel DB
+	//Se non incontra problemi, restituisce una risposta con status
+	//200 e contenente user id, user uname e l'accesstoken richiesto
+	//rispettivamente in campi user_id, uname e accessToken
+	//
+	//DA RISOLVERE E CANCELLARE PRIMA DI CONSEGNA
+	//Sarebbe buona idea rendere consistente utilizzo camelcase/underscore
+	//in tutto il codice, attualmente utilizziamo entrambi per access token
+	//in modo intermittente
 	app.post('/oauth/login', async (req, res) => {
 		await controller.signIn(req,res);
 //		var response = JSON.stringify(res);

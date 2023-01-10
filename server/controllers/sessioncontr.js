@@ -36,15 +36,15 @@ module.exports = {
 		})
 		userv2.save((err, user) => {
 			if (err) {
-				console.log('triggered AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa', 'errore: '+err)
+				console.log('triggered errore iscrizione, ' + 'errore: '+err)
 				res.status(500).send({message: err, aaaaaaaaa: 'aaaaaaaaaaaaaa'});
 				return;
 			} else {
 				res.status(200).send({
 				message: 'registrazione riuscita',
-				uname: user.uname,
-				api_id: user.api_id,
-				api_sc: user.api_sc
+				uname: user.uname
+				//api_id: user.api_id,
+				//api_sc: user.api_sc
 				})
 			}
 		})
@@ -77,22 +77,22 @@ module.exports = {
 				expiresIn : 3600
 			});
 			res.status(200).send({
-				'id': user._id,
+				'user_id': user._id,
 				'uname': user.uname,
-				'api_id': user.api_id,
+			//	'api_id': user.api_id,
 				'accessToken': token
 			})
 		})
 	},
 	updateGoogleTokens(req,res) {
-		UserV2.findOne({id: req.body._id}).exec((err,user) => {
+		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
-			req.body._id = user.google_data._id
+			req.body.data_id = user.google_data._id
 			if (req.body.access_token === null) {
 				return googlecontr.updateRefreshToken(req,res);
 			}
@@ -103,14 +103,14 @@ module.exports = {
 		})
 	},
 	updateSpotifyTokens(req,res) {
-		UserV2.findOne({id: req.body._id}).exec((err,user) => {
+		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
-			req.body._id = user.spotify_data._id
+			req.body.data_id = user.spotify_data._id
 			if (req.body.access_token === null) {
 				return spotifycontr.updateRefreshToken(req,res);
 			}

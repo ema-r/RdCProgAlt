@@ -1,4 +1,5 @@
 const functions = require('./../functions/jwtfun');
+const spotifyController = require('./../controllers/spotifycontr.js')
 const userController = require('./../controllers/sessioncontr.js');
 const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
@@ -23,7 +24,15 @@ module.exports = function(app) {
 		);
 		next();
 	});
+	
 
+	//AUTORIZZAZIONE ACCESSO SPOTIFY OAUTH
+	//inizializza processo oauth per spotify, collega account SongScrubber a
+	//account spotify, richiede autorizzazioni per accesso a playlist.
+	//Richiede un token jwt valido nella richiesta, fornito da /oauth/login
+	//dopo aver creato un account. Dopo aver effettuato processo, SongScrubber
+	//sara' autorizzato a modificare playlist dell'utente fino a revoca permessi
+	//gestione access token e refresh token automatizzata.
 	app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
 //		session = req.session;
 //		var state = generateRandomString(16);
@@ -43,12 +52,16 @@ module.exports = function(app) {
 		res.redirect(redirUrl);
 	});
 
+	//PATH CALLBACK SPOTIFY OAUTH
+	//utilizzato esclusivamente da oauth spotify. Inizializza scrittura dati
+	//accesso Spotify su DB, permettendo l'accesso ai dati playlist.
 	app.get('/oauth/spotify/callback', async function(req, res) {
 	    var code = req.query.code || null;
 //	    var state = req.query.state || null;
 //	    var storedState = req.cookies ? req.cookies[stateKey] : null;
 	
-	    if (code === null || state !== storedState) {
+	    if (code === null) {
+	   // if (code === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
 //			res.clearCookie(stateKey);
@@ -60,13 +73,14 @@ module.exports = function(app) {
 			var query = new URLSearchParams(authOptions).toString();
 			data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
+		
 			
-			//AGGIUNGI MODIFICA DB QUI	
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
+
 		        spotifyController.updatePermissions(req,res);
-		    	spotifyController.initializeTokens(req,res);
+		    	userController.updateSpotifyTokens(req,res);
 //			res.redirect('/');
 		}
 	});
