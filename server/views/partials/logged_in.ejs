@@ -6,15 +6,25 @@
 </head>
 
 <body >
+  
+  <button type="submit" value="Submit" onclick="StampaDati()">Mostra Dati</button>
 
-  <form action="/oauth/try_logged" method="post">
+  <form action="/" method="get">
     <input type="submit" value="Torna alla Home, sei loggato con Google" 
          name="Logged" id="Logged" />
   </form>
+ 
+<script> 
+  function StampaDati(Dati) {
+    var data = Dati;
+    if (data != null){
+      data = JSON.parse(data);
+    }
+    console.log(data);
+  }
+</script>
 
 </body>
-
-
 
 <footer>
 
