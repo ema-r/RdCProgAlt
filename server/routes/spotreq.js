@@ -25,9 +25,9 @@ module.exports = function(app) {
 	});
 
 	app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
-//		session = req.session;
-//		var state = generateRandomString(16);
-//		res.cookie(stateKey, state);
+		session = req.session;
+		var state = generateRandomString(16);
+		res.cookie(stateKey, state);
 
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
@@ -35,7 +35,7 @@ module.exports = function(app) {
 			client_id: process.env.SPOTIFY_CLIENT_ID.toString(),
 			response_type: 'code',
 			redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
-//			state: state
+			state: state
 		}
 		const query = new URLSearchParams(options)
 		const redirUrl = rootUrl+query.toString();
@@ -43,15 +43,15 @@ module.exports = function(app) {
 		res.redirect(redirUrl);
 	});
 
-	app.get('/oauth/spotify/callback', async function(req, res) {
+	app.get('/oauth/spotify/callback', [functions.tokenCheck], async function(req, res) {
 	    var code = req.query.code || null;
-//	    var state = req.query.state || null;
-//	    var storedState = req.cookies ? req.cookies[stateKey] : null;
+	    var state = req.query.state || null;
+	    var storedState = req.cookies ? req.cookies[stateKey] : null;
 	
 	    if (code === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
-//			res.clearCookie(stateKey);
+			res.clearCookie(stateKey);
 			var authOptions = {
 				code: code,
 				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
@@ -61,7 +61,8 @@ module.exports = function(app) {
 			data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
 			
-			//AGGIUNGI MODIFICA DB QUI	
+			//AGGIUNGI MODIFICA DB QUI
+		    	console.log(req.body.user_id)
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
