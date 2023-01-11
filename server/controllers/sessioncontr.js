@@ -76,12 +76,12 @@ module.exports = {
 			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn : 3600
 			});
-			res.status(200).send({
+			var json_code = {
 				'user_id': user._id,
 				'uname': user.uname,
-			//	'api_id': user.api_id,
 				'accessToken': token
-			})
+			}
+			res.render("./partials/logged_in", {Dati: JSON.stringify(json_code) });
 		})
 	},
 	updateGoogleTokens(req,res) {
