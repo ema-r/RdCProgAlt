@@ -46,7 +46,11 @@ module.exports = function(app) {
 		googleController.updatePermissions(req,res);
 		res.redirect('/');
 	});
-
+	
+	//YOUTUBE SCRUB PLAYLIST
+	app.get('/youtube/scrub_playlist', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
+		return
+	})
 }
 
 function getGoogleOAuthURL() {
