@@ -49,19 +49,46 @@ module.exports = {
 			}
 		})
 	},
-	signIn(req,res) {
-		var user;
-		UserV2.findOne({
-			uname: req.body.uname
-		}).exec((err, user) => {
-			if (err) {
-				console.log('triggered error')
-				res.status(500).send({message: err});
-				return;
-			}
+//	signIn(req,res) {
+//		var user;
+//		UserV2.findOne({
+//			uname: req.body.uname
+//		}).exec((err, user) => {
+//			if (err) {
+//				console.log('triggered error')
+//				res.status(500).send({message: err});
+//				return;
+//			}
+//			if (!user) {
+//				res.status(404).send({message: 'user non trovato'});
+//				return;
+//			}
+//			var pwordIsValid = bcrypt.compareSync(
+//				req.body.pword,
+//				user.pword
+//			)
+//			if (!pwordIsValid) {
+//				return res.status(401).send({
+//					accessToken: null,
+//					message: 'client secret non valido'
+//				});
+//			}
+//			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
+//				expiresIn : 3600
+//			});
+////			return {
+////				'user_id': user._id,
+////				'uname': user.uname,
+////				'accessToken': token
+////			}
+//			return 'test';
+//		})
+//	},
+	async signIn(req,res) {
+		try {
+			var user = await UserV2.findOne({uname: req.body.uname});
 			if (!user) {
 				res.status(404).send({message: 'user non trovato'});
-				return;
 			}
 			var pwordIsValid = bcrypt.compareSync(
 				req.body.pword,
@@ -73,17 +100,17 @@ module.exports = {
 					message: 'client secret non valido'
 				});
 			}
-			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
-				expiresIn : 3600
+			var token = jwt.sign({id: user_id}, process.env.SECRET, {
+				expiresIn: 3600
 			});
-			var json_code = {
-				'user_id': user._id,
-				'uname': user.uname,
-				'accessToken': token
-			}
-			res.render("./partials/logged_in", {Dati: JSON.stringify(json_code) });
-		})
-	},
+			return 'AAAAAAAAAAAAAAAA';
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
+		
+	}
+
 	updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {

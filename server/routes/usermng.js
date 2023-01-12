@@ -49,10 +49,16 @@ module.exports = function(app) {
 	//in tutto il codice, attualmente utilizziamo entrambi per access token
 	//in modo intermittente
 	app.post('/oauth/login', async (req, res) => {
-		await controller.signIn(req,res);
+		var data = await controller.signIn(req,res);
+		console.log(data)
+		console.log(req.body);
+		res.render(href='partials/logged_in');
 //		var response = JSON.stringify(res);
 //		var resp = await JSON.parse(response);
 //		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
 	})
+//	app.get('/oauth/postlogin', (req,res) => {
+//		res.render(href='partials/logged_in')
+//	})
 ;}
