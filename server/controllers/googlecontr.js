@@ -21,7 +21,7 @@ module.exports = {
 	updateAccessToken(req, res) {
 		google_data.updateOne({
 			id: req.body.data_id},
-			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
+			{$set: {access_token: bcrypt.hashSync(req.body.google_access_token, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
@@ -37,7 +37,7 @@ module.exports = {
 	updateRefreshToken(req,res) {
 		google_data.updateOne({
 		id: req.body.data_id},
-			{$set: {refresh_token: bcrypt.hashSync(req.body.access_token, 8)}},
+			{$set: {refresh_token: bcrypt.hashSync(req.body.google_refresh_token, 8)}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -52,7 +52,7 @@ module.exports = {
 	updateIdToken(req,res) {
 		google_data.updateOne({
 		id: req.body.data_id},
-			{$set: {id_token: bcrypt.hashSync(req.body.access_token, 8)}},
+			{$set: {id_token: bcrypt.hashSync(req.body.google_id_token, 8)}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})

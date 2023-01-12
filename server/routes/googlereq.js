@@ -25,19 +25,25 @@ module.exports = function(app) {
 	//db
 	app.get('/oauth/google/login', async (req, res) => {
 		const code = req.query.code;
-		console.log('[CALLBACK] code: '+code)
+		console.log('[GOOGLE CALLBACK ROUTE] code: '+code)
 		var tokens = await handlerGoogleOAuth(code);
 	
 		const id_token = tokens.id_token;
 		const access_token = tokens.access_token;
 	
-		console.log("[CALLBACK] "+id_token);
-		console.log("[CALLBACK] "+access_token);
+		console.log("[GOOGLE CALLBACK ROUTE] "+id_token);
+		console.log("[GOOGLE CALLBACK ROUTE] "+access_token);
 	
+		req.body.google_id_token = id_token;
+		req.body.google_access_token = access_token;
+		updateGoogleTokens(req,res);
 	
+		//solo per test, puo essere tranquillamente rimosso piu avanti
 		const googleUser2 = await getGoogleUser({id_token, access_token})
 		console.log("google user trovato: "+JSON.stringify(googleUser2));
 	
+		//aggiorna permessi nel nostro db
+		googleController.updatePermissions(req,res);
 		res.redirect('/');
 	});
 
