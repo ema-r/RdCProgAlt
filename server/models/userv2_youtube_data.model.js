@@ -9,8 +9,8 @@ const UserV2_youtube_data = mongoose.model(
 		},
 		access_token: String,
 		expires_in: String,
-		refresh_token: String
-
+		refresh_token: String,
+		id_token: String
 	})
 );
 

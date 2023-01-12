@@ -140,6 +140,7 @@ var session;
 require('./routes/usermng')(app);
 require('./routes/userreq')(app);
 require('./routes/spotreq')(app);
+require('./routes/googlereq')(app);
 
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();

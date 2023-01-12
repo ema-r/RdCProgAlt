@@ -121,13 +121,18 @@ module.exports = {
 				return res.status(404).send({message: 'user non trovato'});
 			}
 			req.body.data_id = user.google_data._id
-			if (req.body.access_token === null) {
-				return googlecontr.updateRefreshToken(req,res);
-			}
-			if (req.body.refresh_token === null) {
-				return googlecontr.updateAccessToken(req,res);
-			}
-			return googlecontr.initializeTokens(req, res);
+
+			//attualmente non prendiamo refresh token da google
+			//probabilmente caso di modificare
+//			if (req.body.access_token === null) {
+//				return googlecontr.updateRefreshToken(req,res);
+//			}
+//			if (req.body.refresh_token === null) {
+				googlecontr.updateAccessToken(req,res);
+				googlecontr.updateIdToken(req,res);
+				return;
+//			}
+//			return googlecontr.initializeTokens(req, res);
 		})
 	},
 	updateSpotifyTokens(req,res) {

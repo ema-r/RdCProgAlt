@@ -5,13 +5,24 @@ const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
 
 module.exports = function(app) {
-
-	//possibile modulo esterno FINE
-	app.get('/googlelogin/init',[functions.tokenCheck], (req, res) => {
+	app.use(function(req,res,next) {
+		res.header(
+			'Access-Control-Allow-Headers',
+			'x-access-token, Origin, Content-Type, Accept'
+		);
+		next();
+	});
+	//INIZIALIZZA LOGIN CON GOOGLE
+	//controlla token identita' songscrubber (e ricava user id da esso)
+	//genera oauth url per google e redirige
+	app.get('/googlelogin/init', [functions.tokenCheck], (req, res) => {
 		res.redirect(getGoogleOAuthURL());
 	});
 	
-	//Redirige qui dopo aver accettato login e scope
+	//GOOGLE CALLBACK
+	//Redirige qui dopo aver accettato login e scope.
+	//deve ottenere token di accesso con codice, che poi salva nel nostro
+	//db
 	app.get('/oauth/google/login', async (req, res) => {
 		const code = req.query.code;
 		console.log('[CALLBACK] code: '+code)
