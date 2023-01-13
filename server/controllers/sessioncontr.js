@@ -103,7 +103,7 @@ module.exports = {
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
-			return ;
+			return {accessToken: token, user_id: user._id};
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)

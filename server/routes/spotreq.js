@@ -13,8 +13,8 @@ var generateRandomString = function(length) {  //va spostata in functions, per o
 	}
 	return text;
 }
-
-var stateKey = ''
+var session
+var stateKey = 'KAY'
 
 module.exports = function(app) {
 	app.use(function(req,res,next) {
@@ -33,10 +33,14 @@ module.exports = function(app) {
 	//dopo aver creato un account. Dopo aver effettuato processo, SongScrubber
 	//sara' autorizzato a modificare playlist dell'utente fino a revoca permessi
 	//gestione access token e refresh token automatizzata.
-	app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
-//		session = req.session;
-//		var state = generateRandomString(16);
-//		res.cookie(stateKey, state);
+	//
+	//app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
+	app.get('/oauth/spotify/login', function(req, res) {
+		console.log(res.cookie);
+		console.log(req.cookie);
+		session = req.session;
+		var state = generateRandomString(16);
+		res.cookie(stateKey, state, {httpOnly: false});
 
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
@@ -44,7 +48,7 @@ module.exports = function(app) {
 			client_id: process.env.SPOTIFY_CLIENT_ID.toString(),
 			response_type: 'code',
 			redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
-//			state: state
+			state: state
 		}
 		const query = new URLSearchParams(options)
 		const redirUrl = rootUrl+query.toString();
@@ -57,14 +61,13 @@ module.exports = function(app) {
 	//accesso Spotify su DB, permettendo l'accesso ai dati playlist.
 	app.get('/oauth/spotify/callback', async function(req, res) {
 	    var code = req.query.code || null;
-//	    var state = req.query.state || null;
-//	    var storedState = req.cookies ? req.cookies[stateKey] : null;
+	    var state = req.query.state || null;
+	    var storedState = req.cookies ? req.cookies[stateKey] : null;
 	
-	    if (code === null) {
-	   // if (code === null || state !== storedState) {
+	    if (code === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
-//			res.clearCookie(stateKey);
+			res.clearCookie(stateKey);
 			var authOptions = {
 				code: code,
 				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
@@ -73,8 +76,9 @@ module.exports = function(app) {
 			var query = new URLSearchParams(authOptions).toString();
 			data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
-		
-			
+	
+			req.body.user_id = req.cookies.user_id	
+
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
