@@ -13,14 +13,24 @@
     <input type="submit" value="Torna alla Home, sei loggato con Google" 
          name="Logged" id="Logged" />
   </form>
- 
+  <div id="loggedin">
+    <div id="user-profile">
+    </div>
+    <div id="oauth">
+    </div>
+  </div>
   <script  type='text/javascript'>
     function StampaDati(){
-    var rows =<%-JSON.stringify(Dati)%> ; 
+    var rows =<%-JSON.stringify(Dati)%>  
     console.log(rows);
-    return `<h1>Logged in as ${rows}</h1>
-    <dt>Display name</dt><dd>${rows}</dd>`
+    function renderUserProfile(){
+      return `<h1>Logged in as ${rows}</h1>
+      <dt>Display name</dt><dd>${rows}</dd>`
     }
+    const userProfilePlaceholder = document.getElementById('user-profile');
+    userProfilePlaceholder.innerHTML = renderUserProfile();
+    }
+    
   </script>
 
 </body>
