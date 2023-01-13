@@ -49,41 +49,6 @@ module.exports = {
 			}
 		})
 	},
-//	signIn(req,res) {
-//		var user;
-//		UserV2.findOne({
-//			uname: req.body.uname
-//		}).exec((err, user) => {
-//			if (err) {
-//				console.log('triggered error')
-//				res.status(500).send({message: err});
-//				return;
-//			}
-//			if (!user) {
-//				res.status(404).send({message: 'user non trovato'});
-//				return;
-//			}
-//			var pwordIsValid = bcrypt.compareSync(
-//				req.body.pword,
-//				user.pword
-//			)
-//			if (!pwordIsValid) {
-//				return res.status(401).send({
-//					accessToken: null,
-//					message: 'client secret non valido'
-//				});
-//			}
-//			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
-//				expiresIn : 3600
-//			});
-////			return {
-////				'user_id': user._id,
-////				'uname': user.uname,
-////				'accessToken': token
-////			}
-//			return 'test';
-//		})
-//	},
 	async signIn(req,res) {
 		try {
 			var user = await UserV2.findOne({uname: req.body.uname});
@@ -103,7 +68,12 @@ module.exports = {
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
-			return {accessToken: token, user_id: user._id};
+			return {
+				user_name: req.body.uname,
+				accessToken: token,
+				user_id: user._id,
+				apiSecret: user.api_sc
+			};
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
