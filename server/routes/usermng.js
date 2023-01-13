@@ -51,8 +51,7 @@ module.exports = function(app) {
 	app.post('/oauth/login', async (req, res) => {
 		var data = await controller.signIn(req,res);
 		console.log(data)
-		console.log(req.body);
-		res.render(href='partials/logged_in');
+		res.render(href='partials/logged_in', {Dati: data});
 //		var response = JSON.stringify(res);
 //		var resp = await JSON.parse(response);
 //		console.log('oauth login route res: '+response);

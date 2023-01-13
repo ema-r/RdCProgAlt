@@ -14,15 +14,14 @@
          name="Logged" id="Logged" />
   </form>
  
-<script> 
-  function StampaDati(Dati) {
-    var data = Dati;
-    if (data != null){
-      data = JSON.parse(data);
+  <script  type='text/javascript'>
+    function StampaDati(){
+    var rows =<%-JSON.stringify(Dati)%> ; 
+    console.log(rows);
+    return `<h1>Logged in as ${rows}</h1>
+    <dt>Display name</dt><dd>${rows}</dd>`
     }
-    console.log(data);
-  }
-</script>
+  </script>
 
 </body>
 

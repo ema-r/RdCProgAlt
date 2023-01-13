@@ -100,16 +100,16 @@ module.exports = {
 					message: 'client secret non valido'
 				});
 			}
-			var token = jwt.sign({id: user_id}, process.env.SECRET, {
+			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
-			return 'AAAAAAAAAAAAAAAA';
+			return ;
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
 		}
 		
-	}
+	},
 
 	updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
