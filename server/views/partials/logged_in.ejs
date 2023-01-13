@@ -24,8 +24,10 @@
     var rows =<%-JSON.stringify(Dati)%>  
     console.log(rows);
     function renderUserProfile(){
-      return `<h1>Logged in as ${rows}</h1>
-      <dt>Display name</dt><dd>${rows}</dd>`
+      return `<h1>Loggato come: ${rows.user_name}</h1>
+      <dt>Mostra id</dt><dd>${rows.user_id}</dd>
+      <dt>Mostra access token</dt><dd>${rows.accessToken}</dd>
+      <dt>Mostra api secret</dt><dd>${rows.apiSecret}</dd>`
     }
     const userProfilePlaceholder = document.getElementById('user-profile');
     userProfilePlaceholder.innerHTML = renderUserProfile();
