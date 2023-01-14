@@ -3,6 +3,7 @@ const spotifyController = require('./../controllers/spotifycontr.js')
 const userController = require('./../controllers/sessioncontr.js');
 const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
+const {URLSearchParams} = require('url');
 
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
@@ -74,8 +75,8 @@ module.exports = function(app) {
 				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
 				grant_type: 'authorization_code'
 			}
-//			var query = new URLSearchParams(authOptions).toString();
-			var data = await getSpotifyAccessToken(authOptions);
+			var query = new URLSearchParams(authOptions).toString();
+			var data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
 	
 			req.body.user_id = req.cookies.user_id	
@@ -120,15 +121,9 @@ async function getSong(song_id, access_token) {
 }
 
 async function getSpotifyAccessToken(query) {
-	console.log('[GETSPOTIFYACCESSTOKEN] QUERY: '+query.code);
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
-		const result = await axios.post(rootUrl, { data: {
-			code: query.code,
-			redirect_uri: query.redirect_uri,
-			grant_type: query.grant_type
-
-			},
+		const result = await axios.post(rootUrl, query.toString(), {
 			headers: {
 				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
 				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
