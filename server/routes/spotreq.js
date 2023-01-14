@@ -63,8 +63,9 @@ module.exports = function(app) {
 	    var code = req.query.code || null;
 	    var state = req.query.state || null;
 	    var storedState = req.cookies ? req.cookies[stateKey] : null;
-	
-	    if (code === null || state !== storedState) {
+
+	    console.log('[CALLBACK ROUTE SPOTIFY] CODE: '+code);
+	    if (state === null || state !== storedState) {
 	        res.redirect('/state_mismatch');
 	    } else {
 			res.clearCookie(stateKey);
@@ -73,8 +74,8 @@ module.exports = function(app) {
 				redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
 				grant_type: 'authorization_code'
 			}
-			var query = new URLSearchParams(authOptions).toString();
-			data = await getSpotifyAccessToken(query);
+//			var query = new URLSearchParams(authOptions).toString();
+			var data = await getSpotifyAccessToken(authOptions);
 			console.log(JSON.stringify(data));		
 	
 			req.body.user_id = req.cookies.user_id	
@@ -119,17 +120,22 @@ async function getSong(song_id, access_token) {
 }
 
 async function getSpotifyAccessToken(query) {
+	console.log('[GETSPOTIFYACCESSTOKEN] QUERY: '+query.code);
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
-		const res = await axios.post(rootUrl, query.toString(), { 
+		const result = await axios.post(rootUrl, { data: {
+			code: query.code,
+			redirect_uri: query.redirect_uri,
+			grant_type: query.grant_type
+
+			},
 			headers: {
 				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
 				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-		},
-		{ withCredentials: true });
-		return res.data;
+		});
+		return result.data;
 	} catch(error) {
 		console.log(error, "fallimento fetch token");
 		throw new Error(error.message);
