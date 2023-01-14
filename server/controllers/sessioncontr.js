@@ -91,31 +91,41 @@ module.exports = {
 			}
 			req.body.data_id = user.google_data._id
 			if (req.body.access_token === null) {
-				return googlecontr.updateRefreshToken(req,res);
+				googlecontr.updateRefreshToken(req,res);
+				return;
 			}
 			if (req.body.refresh_token === null) {
-				return googlecontr.updateAccessToken(req,res);
+				googlecontr.updateAccessToken(req,res);
+				return;
 			}
-			return googlecontr.initializeTokens(req, res);
+			googlecontr.updateAccessToken(req,res);
+			googlecontr.updateRefreshToken(req,res);
+			return;
 		})
 	},
-	updateSpotifyTokens(req,res) {
-		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+	async updateSpotifyTokens(req,res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id})
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
 			req.body.data_id = user.spotify_data._id
 			if (req.body.access_token === null) {
-				return spotifycontr.updateRefreshToken(req,res);
+				await spotifycontr.updateRefreshToken(req,res);
+				return;
 			}
 			if (req.body.refresh_token === null) {
-				return spotifycontr.updateAccessToken(req,res);
-			}
-			return spotifycontr.initializeTokens(req, res);
-		})
+				await spotifycontr.updateAccessToken(req,res);
+				return;
+			}	
+			await spotifycontr.updateAccessToken(req,res);
+			await spotifycontr.updateRefreshToken(req,res);
+			return;
+		} catch(error) {
+			console.log(error, 'fallimento save token');
+			throw new Error(error.message)
+
+		}
 	},
 	getGoogleTokens(req, res) {
 		console.log('funzione da completare');

@@ -4,7 +4,7 @@ const spotify_data = require('../models/userv2_spotify_data.model');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-	updatePermissions(req, res) {
+	async updatePermissions(req, res) {
 		spotify_data.updateOne({
 			id: req.body.user_id},
 			{$set: { has_permissions: true }},
@@ -18,7 +18,7 @@ module.exports = {
 			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente')
 		})
 	},
-	updateAccessToken(req, res) {
+	async updateAccessToken(req, res) {
 		spotify_data.updateOne({
 			id: req.body.data_id},
 			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
@@ -34,12 +34,13 @@ module.exports = {
 			}
 		)
 	},
-	updateRefreshToken(req,res) {
+	async updateRefreshToken(req,res) {
+		console.log('sono in updateRefreshToken')
 		spotify_data.updateOne({
-		id: req.body.data_id}, //cosi trova user invece che dati user, va modificato, conviene
-				       //aggiungere funzione che ottiene id dati da user id
-			{$set: {access_token: bcrypt.hashSync(req.body.refresh_token, 8)},
+		id: req.body.data_id},
+			{$set: {refresh_token: bcrypt.hashSync(req.body.refresh_token, 8)}},
 			function(err, data) {
+				console.log('sono in funzione interna updateRefreshToken')
 				if (err) {
 					return res.status(500).send({message: err})
 				}

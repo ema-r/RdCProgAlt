@@ -85,9 +85,10 @@ module.exports = function(app) {
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
 
-		        spotifyController.updatePermissions(req,res);
-		    	userController.updateSpotifyTokens(req,res);
-//			res.redirect('/');
+		        await spotifyController.updatePermissions(req,res);
+		    	await userController.updateSpotifyTokens(req,res);
+		    	console.log('dati correttamente salvati');
+			res.redirect('/');
 		}
 	});
 
