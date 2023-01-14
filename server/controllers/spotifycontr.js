@@ -54,7 +54,7 @@ module.exports = {
 		updateAccessToken(req,res);
 		updateRefreshToken(req,res);
 	},
-	getAccessToken(perm_id) {
+	async getAccessToken(perm_id) {
 		try {
 			var spotData = await spotify_data.findOne({id: perm_id})
 
