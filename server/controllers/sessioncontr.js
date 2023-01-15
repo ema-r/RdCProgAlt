@@ -186,21 +186,17 @@ module.exports = {
 	},
 	async getSpotifyTokens(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
-				if (err) {
-					res.status(500).send({message:err});
-					return;
-				} if (!user) {
-					res.status(404).send({message: 'user non trovato'});
-					return;
-				}
-				req.body.data_id = user.spotify_data._id
-				var accessTokenData = spotifycontr.getAccessToken(req,res);
-				if (isExpired(accessTokenData.expiresAt)) {
-					accessTokenData = refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
-				}
-				return {accessToken: accessTokenData.accessToken}
-				}
+			var user = await UserV2.findOne({id: req.body.user_id})
+			if (!user) {
+				res.status(404).send({message: 'user non trovato'});
+				return;
+			}
+			req.body.data_id = user.spotify_data._id
+			var accessTokenData = spotifycontr.getAccessToken(req,res);
+			if (isExpired(accessTokenData.expiresAt)) {
+				accessTokenData = await refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
+			}
+			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
 			res.status(500).send({message: error});
 		}
