@@ -127,6 +127,18 @@ module.exports = {
 
 		}
 	},
+	getSpotifyData(req, res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id})
+			if (!user) {
+				return res.status(404).send({message: 'user non trovato'});
+			}
+			return user.spotify_data._id;
+		} catch(error) {
+			console.log(error, 'fallimento get token');
+			throw new Error(error.message);
+		}
+	},
 	getGoogleTokens(req, res) {
 		console.log('funzione da completare');
 		return res.status(500);
