@@ -67,7 +67,7 @@ module.exports = {
 			}
 			res.status(200).send({
 				'user_id': user._id,
-				'apiSecret': user.api_sc;
+				'apiSecret': user.api_sc,
 				'username': user.uname,
 			})
 		})
