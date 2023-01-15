@@ -106,7 +106,7 @@ module.exports = {
 				'accessToken': token
 			})
 		})
-	}
+	},
 	updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {
