@@ -59,11 +59,13 @@
       </div>
       <br>
       <div id="Spotify">
-        <form action='/oauth/spotify/login' method="get" onclick="SpotifyLoggato()">
+        <form action='/oauth/spotify/login' method="get">
           <input type="submit" value="Log in con Spotify" 
             name="LoginSpotify" id="LoginSpotify" />
         </form>
       </div>  
+      <div id="SpotifyLoggato">
+      </div>
       <br>
        
       <form action="/form" method="post">
@@ -136,7 +138,7 @@
     function renderSpotfyProfile(){
       return `<h1>Loggato con Spotify</h1>`
     }
-    const spotifyProfilePlaceholder = document.getElementById('Spotify');
+    const spotifyProfilePlaceholder = document.getElementById('SpotifyLoggato');
     spotifyProfilePlaceholder.innerHTML = renderSpotifyProfile();
     }
     
