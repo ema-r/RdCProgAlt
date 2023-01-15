@@ -18,9 +18,9 @@ module.exports = {
 			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente')
 		})
 	},
-	async getPermissions(req,res) {
+	getPermissions(req,res) {
 		try {
-			var spotData = await spotify_data.findOne({id: perm_id})
+			var spotData = spotify_data.findOne({id: req.body.data_id})
 
 			if (!spotData) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});

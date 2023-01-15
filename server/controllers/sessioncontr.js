@@ -127,7 +127,7 @@ module.exports = {
 
 		}
 	},
-	getSpotifyData(req, res) {
+	async getSpotifyData (req, res) {
 		try {
 			var user = await UserV2.findOne({id: req.body.user_id})
 			if (!user) {
