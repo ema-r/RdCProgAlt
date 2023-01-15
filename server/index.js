@@ -65,23 +65,23 @@ app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
-//app.use(sessions({
-////	genid: (req) => {
-////		return uuidv4()
-////	},
-//	secret: 'keyboard cat',
-//	store: MongoStore.create({
-//		mongoUrl: MONGO_URI,
-//		dbName: process.env.MONGO_DB_NAME,
-//		collectionName: "sessions",
-//		stringify: false,
-//		autoRemove: "interval",
-//		autoRemoveInterval: 1
-//	}),
-//  	resave: true,
-//  	saveUninitialized: false,
-//  	cookie: { secure: true , maxAge: oneDay}
-//}));
+app.use(sessions({
+//	genid: (req) => {
+//		return uuidv4()
+//	},
+	secret: 'keyboard cat',
+	store: MongoStore.create({
+		mongoUrl: MONGO_URI,
+		dbName: process.env.MONGO_DB_NAME,
+		collectionName: "sessions",
+		stringify: false,
+		autoRemove: "interval",
+		autoRemoveInterval: 1
+	}),
+  	resave: true,
+  	saveUninitialized: false,
+  	cookie: { secure: true , maxAge: oneDay}
+}));
 
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
@@ -144,6 +144,7 @@ var session;
 require('./routes/usermng')(app);
 require('./routes/userreq')(app);
 require('./routes/spotreq')(app);
+require('./routes/googlereq')(app);
 
 app.get('/oauth/logout', (req, res) => {
 	req.session.destroy();
@@ -170,101 +171,6 @@ app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
 //GOOGLE OAUTH
 //POSSIBILE MODULO ESTERNO INIZIO
 
-function getGoogleOAuthURL() {
-	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
-	const options = {
-		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
-		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
-		access_type: 'offline',
-		response_type: 'code',
-		prompt: 'consent',
-		scope: [
-			'https://www.googleapis.com/auth/userinfo.profile',
-			'https://www.googleapis.com/auth/userinfo.email',
-		].join(" "),
-	}
-
-	const querystr = new URLSearchParams(options);
-
-	const retUrl = rootUrl+querystr.toString();
-	console.log(retUrl);
-
-	return retUrl;
-}
-
-async function handlerGoogleOAuth(code) {
-	const {id_token, access_token} = await getGoogleOAuthToken(code);
-	console.log('[HANDLER]: '+ id_token);
-	console.log('[HANDLER]: '+ access_token);
-	var data = {
-		id_token: id_token,
-		access_token: access_token
-	}	
-	return data;
-}
-
-async function getGoogleOAuthToken(code) {
-	const rootUrl = "https://oauth2.googleapis.com/token";
-	const options = {
-		code,
-		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
-		client_secret: process.env.GOOGLE_CLIENT_SECRET.toString(),
-		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
-		grant_type: 'authorization_code',
-	};
-
-	try {
-		const res = await axios.post(rootUrl, JSON.stringify(options), {
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-		});
-		return res.data
-	} catch(error) {
-		console.log(error, 'fallimento fetch token');
-	}
-};
-
-
-async function getGoogleUser({id_token, access_token}) {
-	try {
-		const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token='+access_token, {
-			headers: {
-				Authorization: 'Bearer '+id_token
-			}
-		})
-		return res.data
-	} catch(error) {
-		console.log(error, "ERRORE RITORNO DATI UTENTE");
-		throw new Error(error.message);
-	}
-}
-//possibile modulo esterno FINE
-app.get('/googlelogin', (req, res) => {
-	res.render('googlelogin');
-});
-app.get('/googlelogin/init', (req, res) => {
-	res.redirect(getGoogleOAuthURL());
-});
-
-//Redirige qui dopo aver accettato login e scope
-app.get('/oauth/google/login', async (req, res) => {
-	const code = req.query.code;
-	console.log('[CALLBACK] code: '+code)
-	var tokens = await handlerGoogleOAuth(code);
-
-	const id_token = tokens.id_token;
-	const access_token = tokens.access_token;
-
-	console.log("[CALLBACK] "+id_token);
-	console.log("[CALLBACK] "+access_token);
-
-
-	const googleUser2 = await getGoogleUser({id_token, access_token})
-	console.log("google user trovato: "+JSON.stringify(googleUser2));
-
-	res.redirect('/');
-});
 
 //app.post('/spot/get_playlist', async (req, res) => {
 //	var item = req.body.formUrl;

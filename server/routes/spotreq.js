@@ -67,6 +67,7 @@ module.exports = function(app) {
 
 	    console.log('[CALLBACK ROUTE SPOTIFY] CODE: '+code);
 	    if (state === null || state !== storedState) {
+
 	        res.redirect('/state_mismatch');
 	    } else {
 			res.clearCookie(stateKey);
@@ -78,7 +79,7 @@ module.exports = function(app) {
 			var query = new URLSearchParams(authOptions).toString();
 			var data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
-	
+
 			req.body.user_id = req.cookies.user_id	
 
 		        req.body.access_token = data.access_token;
@@ -95,11 +96,11 @@ module.exports = function(app) {
 	app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
 		//TODO: rimedia access token da JWT token, refresh se necessario
-		var access_token = getSpotifyToken() //da vedere cosa passare, tutta req sembra piuttosto "grande"
+		var access_token = userController.getSpotifyToken(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
 		const req_options = {
 			playlist_id: req.body.playlist_id,
 			market: 'IT',
-			access_token: session.cookie.spot_access_token
+			access_token: access_token
 		}
 		const result = await getPlaylist(req_options);
 	});

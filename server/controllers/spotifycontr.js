@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = {
 	async updatePermissions(req, res) {
+
 		spotify_data.updateOne({
 			id: req.body.user_id},
 			{$set: { has_permissions: true }},
@@ -34,7 +35,7 @@ module.exports = {
 	async updateAccessToken(req, res) {
 		spotify_data.updateOne({
 			id: req.body.data_id},
-			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
+			{$set: {access_token: bcrypt.hashSync(req.body.accessToken, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
@@ -92,9 +93,7 @@ module.exports = {
 			if (!spotData || !spotData.access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
-			res.status(200).send({
-				refresh_token: spotData.refresh_token,
-			})
+			return {refresh_token: spotData.refresh_token}
 		})
 	}
 }

@@ -27,6 +27,9 @@ module.exports = function(app) {
 		//vanno solamente aggiunti
 		res.render(href="partials/signup_form")
 	});
+	app.post('/oauth/request_token', (req,res) => {
+		controller.requestJWT(req,res);
+	})
 
 	//Riceve richieste creazione account. Necessita un campo uname
 	//(username) e un campo pword (password) per crearlo correttamente

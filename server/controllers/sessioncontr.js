@@ -9,6 +9,7 @@ const spotifycontr = require('./spotifycontr');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const axios = require('axios')
 
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
@@ -21,6 +22,7 @@ var generateRandomString = function(length) {  //va spostata in functions, per o
 }
 
 module.exports = {
+	//Funzione signup FRONTEND
 	signUp(req, res) {	
 		var userv2 = new UserV2({
 			uname: req.body.uname,
@@ -43,7 +45,6 @@ module.exports = {
 				res.status(200).send({
 				message: 'registrazione riuscita',
 				uname: user.uname
-				//api_id: user.api_id,
 				//api_sc: user.api_sc
 				})
 			}
@@ -61,26 +62,47 @@ module.exports = {
 			)
 			if (!pwordIsValid) {
 				return res.status(401).send({
-					accessToken: null,
-					message: 'client secret non valido'
+					message: 'password non valida'
 				});
 			}
-			var token = jwt.sign({id: user._id}, process.env.SECRET, {
+			res.status(200).send({
+				'user_id': user._id,
+				'apiSecret': user.api_sc;
+				'username': user.uname,
+			})
+		})
+	},
+	requestJWT(req,res) {
+		UserV2.findOne({
+			id: req.body.id
+		}).exec((err, user) => {
+			if (err) {
+				console.log('triggered error');
+				res.status(500).send({message: err});
+				return;
+			}
+			if (!user) {
+				res.status(404).send({message: 'user non trovato'});
+				return;
+			}
+			var apiSecretIsValid = bcrypt.compareSync(
+				req.body.api_sc,
+				user.api_sc
+			)
+			if (!apiSecretIsValid) {
+				return res.status(401).send({
+					accessToken: null,
+					message: 'forbidden'
+				});
+			}
+			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn: 3600
 			});
-			return {
-				user_name: req.body.uname,
-				accessToken: token,
-				user_id: user._id,
-				apiSecret: user.api_sc
-			};
-		} catch(error) {
-			console.log(error, 'fallimento sign in');
-			throw new Error(error.message)
-		}
-		
-	},
-
+			res.status(200).send({
+				'accessToken': token
+			})
+		})
+	}
 	updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {
@@ -90,17 +112,19 @@ module.exports = {
 				return res.status(404).send({message: 'user non trovato'});
 			}
 			req.body.data_id = user.google_data._id
-			if (req.body.access_token === null) {
-				googlecontr.updateRefreshToken(req,res);
-				return;
-			}
-			if (req.body.refresh_token === null) {
+
+
+			//attualmente non prendiamo refresh token da google
+			//probabilmente caso di modificare
+//			if (req.body.access_token === null) {
+//				return googlecontr.updateRefreshToken(req,res);
+//			}
+//			if (req.body.refresh_token === null) {
 				googlecontr.updateAccessToken(req,res);
+				googlecontr.updateIdToken(req,res);
 				return;
-			}
-			googlecontr.updateAccessToken(req,res);
-			googlecontr.updateRefreshToken(req,res);
-			return;
+//			}
+//			return googlecontr.initializeTokens(req, res);
 		})
 	},
 	async updateSpotifyTokens(req,res) {
@@ -140,11 +164,78 @@ module.exports = {
 		}
 	},
 	getGoogleTokens(req, res) {
-		console.log('funzione da completare');
-		return res.status(500);
+		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
+			if (err) {
+				res.status(500).send({message:err});
+				return;
+			} if (!user) {
+				res.status(404).send({message: 'user non trovato'});
+				return;
+			}
+			req.body.data_id = user.spotify_data._id
+			var accessTokenData = googlecontr.getAccessToken(req,res);
+			if (isExpired(accessTokenData.expiresAt)) {
+				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
+			}
+			return {accessToken: accessTokenData.accessToken}
+		})
 	},
-	getSpotifyTokens(req, res) {
-		UserV2.findOne({id: user_id}).exec
-		return res.status(500); //placeholder
+	async getSpotifyTokens(req,res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
+				if (err) {
+					res.status(500).send({message:err});
+					return;
+				} if (!user) {
+					res.status(404).send({message: 'user non trovato'});
+					return;
+				}
+				req.body.data_id = user.spotify_data._id
+				var accessTokenData = spotifycontr.getAccessToken(req,res);
+				if (isExpired(accessTokenData.expiresAt)) {
+					accessTokenData = await refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
+				}
+				return {accessToken: accessTokenData.accessToken}
+				}
+		} catch(error) {
+			res.status(500).send({message: error});
+		}
 	}
+}
+
+function isExpired(expirationDate) {
+	if (accessTokenData.expiresAt < new Date().getTime()/1000) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function async refreshSpotifyToken(req,res) {
+	var rootUrl = 'https://accounts.spotify.com/api/token';
+	try {
+		var request = await axios.post(rootURL, { form: {
+				grant_type: 'refresh_token',
+				refresh_token: refreshToken,
+			}
+		}, {
+			headers: {
+				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
+				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+		});
+		
+		req.body.accessToken = request.access_token;
+		req.body.expires_in = request.expires_in;
+		updateSpotifyToken(req,res)
+		return request.access_token;
+	} catch {
+		console.log(error, 'fallimento fetch token');
+		throw new Error(error.message);
+	}
+}
+
+function async refreshGoogleToken(req,res) {
+	return
 }
