@@ -197,7 +197,7 @@ module.exports = {
 				req.body.data_id = user.spotify_data._id
 				var accessTokenData = spotifycontr.getAccessToken(req,res);
 				if (isExpired(accessTokenData.expiresAt)) {
-					accessTokenData = await refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
+					accessTokenData = refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
 				}
 				return {accessToken: accessTokenData.accessToken}
 				}
