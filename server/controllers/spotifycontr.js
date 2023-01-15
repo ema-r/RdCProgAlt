@@ -49,7 +49,7 @@ module.exports = {
 				}
 				console.log('[SPOTIFY CONTROLLER] refresh token salvato');
 			}
-		})
+		)
 	},
 	initializeTokens(req,res) {
 		updateAccessToken(req, res);
