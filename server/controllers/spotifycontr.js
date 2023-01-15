@@ -4,7 +4,8 @@ const spotify_data = require('../models/userv2_spotify_data.model');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-	updatePermissions(req, res, next) {
+	async updatePermissions(req, res) {
+
 		spotify_data.updateOne({
 			id: req.body.user_id},
 			{$set: { has_permissions: true }},
@@ -15,10 +16,23 @@ module.exports = {
 			if (!data) {
 				return res.status(404).send({message: 'ERRORE GRAVE: permission field non esistente'});
 			}
-			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente per utente '+req.body.user_id);
+			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente')
 		})
 	},
-	updateAccessToken(req, res, next) {
+	getPermissions(req,res) {
+		try {
+			var spotData = spotify_data.findOne({id: req.body.data_id})
+
+			if (!spotData) {
+				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
+			}
+			return spotData.has_permissions;
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
+	},
+	async updateAccessToken(req, res) {
 		spotify_data.updateOne({
 			id: req.body.data_id},
 			{$set: {access_token: bcrypt.hashSync(req.body.accessToken, 8),
@@ -34,12 +48,13 @@ module.exports = {
 			}
 		)
 	},
-	updateRefreshToken(req,res) {
+	async updateRefreshToken(req,res) {
+		console.log('sono in updateRefreshToken')
 		spotify_data.updateOne({
-		id: req.body.data_id}, //cosi trova user invece che dati user, va modificato, conviene
-				       //aggiungere funzione che ottiene id dati da user id
-			{$set: {refresh_token: bcrypt.hashSync(req.body.refreshToken, 8)},
+		id: req.body.data_id},
+			{$set: {refresh_token: bcrypt.hashSync(req.body.refresh_token, 8)}},
 			function(err, data) {
+				console.log('sono in funzione interna updateRefreshToken')
 				if (err) {
 					return res.status(500).send({message: err})
 				}
@@ -48,25 +63,27 @@ module.exports = {
 				}
 				console.log('[SPOTIFY CONTROLLER] refresh token salvato');
 			}
-		})
+		)
 	},
 	initializeTokens(req,res) {
-		updateAccessToken(req,res);
+		updateAccessToken(req, res);
 		updateRefreshToken(req,res);
 	},
-	getAccessToken(perm_id) {
-		spotify_data.findOne({id: perm_id}).exec((err,spotData) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+	async getAccessToken(perm_id) {
+		try {
+			var spotData = await spotify_data.findOne({id: perm_id})
+
 			if (!spotData || !spotData.access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
 			return {
-				accessToken: spotData.access_token,
-				expiresAt: spotData.expires_in,
+				access_token: spotData.access_token,
+				expires_at: spotData.expires_in,
 			}
-		})
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
 	},
 	getRefreshToken(perm_id) {
 		spotify_data.findOne({id: perm_id}).exec((err,spotData) => {

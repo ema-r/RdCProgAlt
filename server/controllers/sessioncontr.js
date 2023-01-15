@@ -50,20 +50,11 @@ module.exports = {
 			}
 		})
 	},
-	//funzione signin FRONTEND
-	signIn(req,res) {
-		var user;
-		UserV2.findOne({
-			uname: req.body.uname
-		}).exec((err, user) => {
-			if (err) {
-				console.log('triggered error')
-				res.status(500).send({message: err});
-				return;
-			}
+	async signIn(req,res) {
+		try {
+			var user = await UserV2.findOne({uname: req.body.uname});
 			if (!user) {
 				res.status(404).send({message: 'user non trovato'});
-				return;
 			}
 			var pwordIsValid = bcrypt.compareSync(
 				req.body.pword,
@@ -122,6 +113,7 @@ module.exports = {
 			}
 			req.body.data_id = user.google_data._id
 
+
 			//attualmente non prendiamo refresh token da google
 			//probabilmente caso di modificare
 //			if (req.body.access_token === null) {
@@ -135,23 +127,41 @@ module.exports = {
 //			return googlecontr.initializeTokens(req, res);
 		})
 	},
-	updateSpotifyTokens(req,res) {
-		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+	async updateSpotifyTokens(req,res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id})
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
 			req.body.data_id = user.spotify_data._id
 			if (req.body.access_token === null) {
-				return spotifycontr.updateRefreshToken(req,res);
+				await spotifycontr.updateRefreshToken(req,res);
+				return;
 			}
 			if (req.body.refresh_token === null) {
-				return spotifycontr.updateAccessToken(req,res);
+				await spotifycontr.updateAccessToken(req,res);
+				return;
+			}	
+			await spotifycontr.updateAccessToken(req,res);
+			await spotifycontr.updateRefreshToken(req,res);
+			return;
+		} catch(error) {
+			console.log(error, 'fallimento save token');
+			throw new Error(error.message)
+
+		}
+	},
+	async getSpotifyData (req, res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id})
+			if (!user) {
+				return res.status(404).send({message: 'user non trovato'});
 			}
-			return spotifycontr.initializeTokens(req, res);
-		})
+			return user.spotify_data._id;
+		} catch(error) {
+			console.log(error, 'fallimento get token');
+			throw new Error(error.message);
+		}
 	},
 	getGoogleTokens(req, res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {

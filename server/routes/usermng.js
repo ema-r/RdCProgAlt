@@ -2,6 +2,8 @@ const functions = require('./../functions/exported');
 const controller = require('./../controllers/sessioncontr');
 const util = require('node:util');
 
+var session
+
 module.exports = function(app) {
 	app.use(function(req, res, next) {
     	res.header(
@@ -52,10 +54,18 @@ module.exports = function(app) {
 	//in tutto il codice, attualmente utilizziamo entrambi per access token
 	//in modo intermittente
 	app.post('/oauth/login', async (req, res) => {
-		await controller.signIn(req,res);
+		session = req.session
+		var data = await controller.signIn(req,res);
+		console.log(data)
+		res.cookie(data.user_id);	
+		res.render(href='partials/logged_in', {Dati: data});
+
 //		var response = JSON.stringify(res);
 //		var resp = await JSON.parse(response);
 //		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
 	})
+//	app.get('/oauth/postlogin', (req,res) => {
+//		res.render(href='partials/logged_in')
+//	})
 ;}

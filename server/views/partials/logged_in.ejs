@@ -6,15 +6,36 @@
 </head>
 
 <body >
+  
+  <button type="submit" value="Submit" onclick="StampaDati()">Mostra Dati</button>
 
-  <form action="/oauth/try_logged" method="post">
+  <form action="/" method="get">
     <input type="submit" value="Torna alla Home, sei loggato con Google" 
          name="Logged" id="Logged" />
   </form>
+  <div id="loggedin">
+    <div id="user-profile">
+    </div>
+    <div id="oauth">
+    </div>
+  </div>
+  <script  type='text/javascript'>
+    function StampaDati(){
+    var rows =<%-JSON.stringify(Dati)%>  
+    console.log(rows);
+    function renderUserProfile(){
+      return `<h1>Loggato come: ${rows.user_name}</h1>
+      <dt>Mostra id</dt><dd>${rows.user_id}</dd>
+      <dt>Mostra access token</dt><dd>${rows.accessToken}</dd>
+      <dt>Mostra api secret</dt><dd>${rows.apiSecret}</dd>`
+    }
+    const userProfilePlaceholder = document.getElementById('user-profile');
+    userProfilePlaceholder.innerHTML = renderUserProfile();
+    }
+    
+  </script>
 
 </body>
-
-
 
 <footer>
 

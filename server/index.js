@@ -26,6 +26,7 @@ const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
 const controller = require('./controllers/sessioncontr');
 const functions = require('./functions/exported');
+const spotifyController = require('./controllers/spotifycontr');
 
 //mongoose.connect(MONGO_URI+'/'+process.env.MONGO_DB_NAME+'?authSource=admin', {
 //	useNewUrlParser: true,
@@ -130,8 +131,11 @@ function initialize() {
 }
 
 /* get root path */
-app.get('/', (req, res) => {
-  res.render('index', { title: 'SongLify' });
+app.get('/', async (req, res) => {
+	req.body.data_id = await controller.getSpotifyData(req,res)
+	var SpotifyData = await spotifyController.getPermissions(req,res)
+	console.log(SpotifyData)
+	res.render('index', { title: 'SongLify' });
 });
 
 //test user var

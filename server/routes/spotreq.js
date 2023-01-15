@@ -3,6 +3,7 @@ const spotifyController = require('./../controllers/spotifycontr.js')
 const userController = require('./../controllers/sessioncontr.js');
 const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
+const {URLSearchParams} = require('url');
 
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
@@ -13,8 +14,8 @@ var generateRandomString = function(length) {  //va spostata in functions, per o
 	}
 	return text;
 }
-
-var stateKey = ''
+var session
+var stateKey = 'KAY'
 
 module.exports = function(app) {
 	app.use(function(req,res,next) {
@@ -33,10 +34,14 @@ module.exports = function(app) {
 	//dopo aver creato un account. Dopo aver effettuato processo, SongScrubber
 	//sara' autorizzato a modificare playlist dell'utente fino a revoca permessi
 	//gestione access token e refresh token automatizzata.
-	app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
+	//
+	//app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
+	app.get('/oauth/spotify/login', function(req, res) {
+		console.log(res.cookie);
+		console.log(req.cookie);
 		session = req.session;
 		var state = generateRandomString(16);
-		res.cookie(stateKey, state);
+		res.cookie(stateKey, state, {httpOnly: false});
 
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
@@ -59,9 +64,10 @@ module.exports = function(app) {
 	    var code = req.query.code || null;
 	    var state = req.query.state || null;
 	    var storedState = req.cookies ? req.cookies[stateKey] : null;
-	
-	    if (code === null) {
-	   // if (code === null || state !== storedState) {
+
+	    console.log('[CALLBACK ROUTE SPOTIFY] CODE: '+code);
+	    if (state === null || state !== storedState) {
+
 	        res.redirect('/state_mismatch');
 	    } else {
 			res.clearCookie(stateKey);
@@ -71,19 +77,19 @@ module.exports = function(app) {
 				grant_type: 'authorization_code'
 			}
 			var query = new URLSearchParams(authOptions).toString();
-			data = await getSpotifyAccessToken(query);
+			var data = await getSpotifyAccessToken(query);
 			console.log(JSON.stringify(data));		
-		
-			
-			//AGGIUNGI MODIFICA DB QUI
-		    	console.log(req.body.user_id)
+
+			req.body.user_id = req.cookies.user_id	
+
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
 
-		        spotifyController.updatePermissions(req,res);
-		    	userController.updateSpotifyTokens(req,res);
-//			res.redirect('/');
+		        await spotifyController.updatePermissions(req,res);
+		    	await userController.updateSpotifyTokens(req,res);
+		    	console.log('dati correttamente salvati');
+			res.redirect('/');
 		}
 	});
 
@@ -119,15 +125,14 @@ async function getSong(song_id, access_token) {
 async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
-		const res = await axios.post(rootUrl, query.toString(), { 
+		const result = await axios.post(rootUrl, query.toString(), {
 			headers: {
 				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
 				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-		},
-		{ withCredentials: true });
-		return res.data;
+		});
+		return result.data;
 	} catch(error) {
 		console.log(error, "fallimento fetch token");
 		throw new Error(error.message);
