@@ -65,12 +65,16 @@ module.exports = {
 					message: 'password non valida'
 				});
 			}
-			res.status(200).send({
-				'user_id': user._id,
-				'apiSecret': user.api_sc,
-				'username': user.uname,
-			})
-		})
+			return {
+				user_name: req.body.uname,
+				accessToken: token,
+				user_id: user._id,
+				apiSecret: user.api_sc
+			};
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
 	},
 	requestJWT(req,res) {
 		UserV2.findOne({
