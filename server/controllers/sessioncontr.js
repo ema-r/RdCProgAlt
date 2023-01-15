@@ -211,7 +211,7 @@ function isExpired(expirationDate) {
 	}
 }
 
-function async refreshSpotifyToken(req,res) {
+async function refreshSpotifyToken(req,res) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
 		var request = await axios.post(rootURL, { form: {
@@ -236,6 +236,6 @@ function async refreshSpotifyToken(req,res) {
 	}
 }
 
-function async refreshGoogleToken(req,res) {
+async function refreshGoogleToken(req,res) {
 	return
 }
