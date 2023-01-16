@@ -86,6 +86,9 @@ module.exports = function(app) {
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
 
+		    	req.body.data_id = await userController.getSpotifyData(); //questa chiamata puo essere inclusa in funz
+
+			console.log(req.body.access_token);
 		        await spotifyController.updatePermissions(req,res);
 		    	await userController.updateSpotifyTokens(req,res);
 		    	console.log('dati correttamente salvati');
@@ -94,6 +97,7 @@ module.exports = function(app) {
 	});
 
 	app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
+	//app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
 		//TODO: rimedia access token da JWT token, refresh se necessario
 		var access_token = userController.getSpotifyToken(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
@@ -103,6 +107,7 @@ module.exports = function(app) {
 			access_token: access_token
 		}
 		const result = await getPlaylist(req_options);
+		console.log(JSON.stringify(result));
 	});
 };
 

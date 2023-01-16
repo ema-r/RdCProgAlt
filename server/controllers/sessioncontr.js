@@ -28,7 +28,7 @@ module.exports = {
 			uname: req.body.uname,
 			pword: bcrypt.hashSync(req.body.pword, 8),
 			api_id: generateRandomString(16), //da gestire errore collisione in caso due account con stesso api_id
-			api_sc: bcrypt.hashSync(generateRandomString(32), 8),
+			api_sc: bcrypt.hashSync(generateRandomString(64), 8),
 			spotify_data: new UserV2_spotify_data({
 				has_permission: false
 			}),
@@ -45,7 +45,6 @@ module.exports = {
 				res.status(200).send({
 				message: 'registrazione riuscita',
 				uname: user.uname
-				//api_sc: user.api_sc
 				})
 			}
 		})
@@ -67,7 +66,6 @@ module.exports = {
 			}
 			return {
 				user_name: req.body.uname,
-				accessToken: token,
 				user_id: user._id,
 				apiSecret: user.api_sc
 			};
@@ -76,36 +74,36 @@ module.exports = {
 			throw new Error(error.message)
 		}
 	},
-	requestJWT(req,res) {
-		UserV2.findOne({
-			id: req.body.id
-		}).exec((err, user) => {
-			if (err) {
-				console.log('triggered error');
-				res.status(500).send({message: err});
-				return;
-			}
+	async requestJWT(req,res) {
+		try {
+			var user = UserV2.findOne({id: req.body.user_id})
+			console.log('breakpoint 1')
 			if (!user) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-			var apiSecretIsValid = bcrypt.compareSync(
-				req.body.api_sc,
-				user.api_sc
-			)
+			console.log(req.body.api_sc)
+			console.log(user.api_sc)
+			var apiSecretIsValid = (req.body.api_sc === user.api_sc)
+			console.log('breakpoint 3')
 			if (!apiSecretIsValid) {
 				return res.status(401).send({
 					accessToken: null,
 					message: 'forbidden'
 				});
 			}
+			console.log('breakpoint 4')
 			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn: 3600
 			});
+			console.log('breakout 5');
 			res.status(200).send({
 				'accessToken': token
 			})
-		})
+		} catch(error) {
+			console.log('[SESSION CONTROLLER:REQUEST JWT] triggered error')
+			res.status(500).send({message:error});
+		}
 	},
 	updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {

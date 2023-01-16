@@ -65,23 +65,23 @@ app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
-app.use(sessions({
-//	genid: (req) => {
-//		return uuidv4()
-//	},
-	secret: 'keyboard cat',
-	store: MongoStore.create({
-		mongoUrl: MONGO_URI,
-		dbName: process.env.MONGO_DB_NAME,
-		collectionName: "sessions",
-		stringify: false,
-		autoRemove: "interval",
-		autoRemoveInterval: 1
-	}),
-  	resave: true,
-  	saveUninitialized: false,
-  	cookie: { secure: true , maxAge: oneDay}
-}));
+//app.use(sessions({
+////	genid: (req) => {
+////		return uuidv4()
+////	},
+//	secret: 'keyboard cat',
+//	store: MongoStore.create({
+//		mongoUrl: MONGO_URI,
+//		dbName: process.env.MONGO_DB_NAME,
+//		collectionName: "sessions",
+//		stringify: false,
+//		autoRemove: "interval",
+//		autoRemoveInterval: 1
+//	}),
+//  	resave: true,
+//  	saveUninitialized: false,
+//  	cookie: { secure: true , maxAge: oneDay}
+//}));
 
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
@@ -119,7 +119,7 @@ function initialize() {
 				uname: "dev",
 				pword: bcrypt.hashSync('devpass', 8),
 				api_id: generateRandomString(16),
-				api_sc: generateRandomString(64),
+				api_sc: bcrypt.hashSync(generateRandomString(64),8),
 				spotify_data: new spotifyModel(),
 				youtube_data: new youtubeModel()
 			}).save(err => {

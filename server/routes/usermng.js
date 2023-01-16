@@ -26,7 +26,10 @@ module.exports = function(app) {
 		//implem check duplicati. Gia presenti nelle funzioni
 		//vanno solamente aggiunti
 		res.render(href="partials/signup_form")
-	});
+	});	
+	//Riceve richieste JWT token. Il token va salvato da client,
+	//e va mandato in richiesta per la maggior parte delle funzioni
+	//dell'API.
 	app.post('/oauth/request_token', (req,res) => {
 		controller.requestJWT(req,res);
 	})
@@ -41,9 +44,7 @@ module.exports = function(app) {
 		controller.signUp(req,res);
 	});
 	
-	//Riceve richieste JWT token. Il token va salvato da client,
-	//e va mandato in richiesta per la maggior parte delle funzioni
-	//dell'API.
+
 	//Necessita un campo uname e pword validi e gia presenti nel DB
 	//Se non incontra problemi, restituisce una risposta con status
 	//200 e contenente user id, user uname e l'accesstoken richiesto
@@ -54,7 +55,7 @@ module.exports = function(app) {
 	//in tutto il codice, attualmente utilizziamo entrambi per access token
 	//in modo intermittente
 	app.post('/oauth/login', async (req, res) => {
-		session = req.session
+		//session = req.session
 		var data = await controller.signIn(req,res);
 		console.log(data)
 		res.cookie(data.user_id);	
@@ -64,6 +65,12 @@ module.exports = function(app) {
 //		var resp = await JSON.parse(response);
 //		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
+	})
+	//login bypassando frontend, riceve json dati
+	app.post('/oauth/login/JSON', async (req,res) => {
+		var data = await controller.signIn(req,res);
+		console.log(data);
+		res.send({apiSecret: data.apiSecret, user_id: data.user_id});
 	})
 //	app.get('/oauth/postlogin', (req,res) => {
 //		res.render(href='partials/logged_in')

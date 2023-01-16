@@ -33,9 +33,11 @@ module.exports = {
 		}
 	},
 	async updateAccessToken(req, res) {
+		console.log('[ACCESS TOKEN UPDATE] DATA ID: '+req.body.data_id);
+		console.log('[ACCESS TOKEN UPDATE] ACCESS TOKEN: '+req.body.access_token);
 		spotify_data.updateOne({
 			id: req.body.data_id},
-			{$set: {access_token: bcrypt.hashSync(req.body.accessToken, 8),
+			{$set: {access_token: bcrypt.hashSync(req.body.access_token, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
