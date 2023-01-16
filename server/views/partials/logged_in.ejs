@@ -10,9 +10,24 @@
   <button type="submit" value="Submit" onclick="StampaDati()">Mostra Dati</button>
 
   <form action="/" method="get">
-    <input type="submit" value="Torna alla Home, sei loggato con Google" 
+    <input type="submit" value="Torna alla Home, sei loggato" 
          name="Logged" id="Logged" />
   </form>
+
+  <br>
+
+  <form action="/oauth/google/login" method="get">
+    <input type="submit" value="Accesso con Google" 
+         name="LoggedGoogle" id="LoggedGoogle" />
+  </form>
+
+  <br>
+
+  <form action="/oauth/spotify/login" method="get">
+    <input type="submit" value="Accesso con Spotify" 
+         name="LoggedSpotify" id="LoggedSpotify" />
+  </form>
+  
   <div id="loggedin">
     <div id="user-profile">
     </div>
