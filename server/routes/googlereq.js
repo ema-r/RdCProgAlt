@@ -15,7 +15,10 @@ module.exports = function(app) {
 	//INIZIALIZZA LOGIN CON GOOGLE
 	//controlla token identita' songscrubber (e ricava user id da esso)
 	//genera oauth url per google e redirige
-	app.get('/googlelogin/init', [functions.tokenCheck], (req, res) => {
+	//
+	//REIMPLEMENTARE CHECK AUTENTICAZIONE, CON NUOVA FUNZ TOKEN UTENTE
+	//app.get('/googlelogin/init', [functions.tokenCheck], (req, res) => {
+	app.get('/googlelogin/init', (req, res) => {
 		res.redirect(getGoogleOAuthURL());
 	});
 	

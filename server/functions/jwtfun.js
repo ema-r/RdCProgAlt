@@ -22,6 +22,15 @@ module.exports = {
 			next();
 		});
 	},
+	cookieCheck(req,res,next) {
+		let token = req.cookies.user_id
+
+		if (!token) {
+			return res.status(403).send({message: 'cookie non fornito'});
+		}
+		req.body.user_id = req.cookies.user_id
+		next();
+	},
 	hasGivenSpotifyPerm(req, res, next) {
 		User.findById(req.user_id).exec((err, user) => {
 			if (err) {
