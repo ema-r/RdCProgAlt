@@ -67,7 +67,6 @@ module.exports = {
 			}
 			return {
 				user_name: req.body.uname,
-				accessToken: token,
 				user_id: user._id,
 				apiSecret: user.api_sc
 			};
