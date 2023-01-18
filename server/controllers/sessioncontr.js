@@ -163,7 +163,8 @@ module.exports = {
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
-			return user.spotify_data._id;
+			console.log('[GETSPOTIFYDATA] USER TROVATO: '+user);
+			return user.spotify_data._id.toHexString();
 		} catch(error) {
 			console.log(error, 'fallimento get token');
 			throw new Error(error.message);
@@ -193,6 +194,7 @@ module.exports = {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
+			console.log('[FUNZIONE GET SPOTIFY TOKEN] user trovato: '+user)
 			req.body.data_id = user.spotify_data._id
 			var accessTokenData = spotifycontr.getAccessToken(req,res);
 			if (isExpired(accessTokenData.expiresAt)) {

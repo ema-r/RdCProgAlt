@@ -41,6 +41,10 @@ module.exports = function(app) {
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state, {httpOnly: false});
 
+//		console.log('[SPOTIFY INITIAL SETUP 1] USERID: '+ req.cookie(user_id))	
+//		console.log('[SPOTIFY INITIAL SETUP 2] USERID: '+ req.cookie.user_id)
+		console.log('[SPOTIFY INITIAL SETUP 3] USERID: '+ req.body.user_id)
+
 		var scope = '';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
 		var options = {
@@ -78,6 +82,8 @@ module.exports = function(app) {
 			var data = await getSpotifyAccessToken(query);	
 			req.body.user_id = req.cookies.user_id	
 
+			console.log('[SPOTIFY CALLBACK] USER ID: '+req.body.user_id);
+
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
@@ -103,6 +109,13 @@ module.exports = function(app) {
 		}
 		const result = await getPlaylist(req_options);
 		console.log(JSON.stringify(result));
+	});
+	app.get('/test/test', async function(req,res) {
+		session = req.session
+		req.body.user_id = req.cookies.user_id
+		req.body.data_id = await userController.getSpotifyData(req,res);
+		console.log('[TEST]'+req.body.data_id);
+		console.log('[TEST]'+await spotifyController.getPermissions(req,res));
 	});
 };
 

@@ -112,16 +112,13 @@ mongoose
 		process.exit();
 	});
 
-function initialize() {
+async function initialize() {
 	userModel.estimatedDocumentCount((err, count) => {
 		if (!err && count === 0) {
 			new userModel({
 				uname: "dev",
 				pword: bcrypt.hashSync('devpass', 8),
-				api_id: generateRandomString(16),
-				api_sc: bcrypt.hashSync(generateRandomString(64),8),
-				spotify_data: new spotifyModel(),
-				youtube_data: new youtubeModel()
+				api_sc: bcrypt.hashSync(generateRandomString(64),8)	
 			}).save(err => {
 				if (err) { console.log('salvataggio modello dummy fallito:', err) }
 			})
@@ -152,54 +149,8 @@ app.get('/oauth/logout', (req, res) => {
 	
 });
 
-app.post('/spotify/try_logged', (req, res) => {
-	session = req.session;
-	console.log("Loggato con successo con Spotify")
-	res.redirect("https://localhost:8443/spotify/recap");
-});
-
-app.get('/spotify/recap', (req,res) => {
-	session = req.session
-	res.render(href="partials/spotify_recap")
-});
-
 /* get API docs */
 app.use('/api-docs', express.static(path.join(__dirname, '/public/docs')));
-
-
-
-//GOOGLE OAUTH
-//POSSIBILE MODULO ESTERNO INIZIO
-
-
-//app.post('/spot/get_playlist', async (req, res) => {
-//	var item = req.body.formUrl;
-//	var slug = item.split('playlist/').pop();\
-//
-//	const req_options = {
-//		playlist_id: slug,
-//		market: 'IT', //placeholder
-//		access_token: spotify_access_token
-//	}
-//	const playlistInfo = await getPlaylist(req_options);
-//}) 
-//
-//async function getPlaylist(options) {
-//	const rootUrl = 'https://api.spotify.com/v1/playlists/'+options.playlist_id+'?market='+options.market
-//	try {
-//		const res = await axios.get(rootUrl, {
-//			headers: {
-//				'Content-Type': 'application/json',
-//				'Authorization': 'Bearer'+options.access_token
-//			}
-//		});
-//		return res.data
-//	} catch(error) {
-//		console.log('errore fetch playlist: '+error);
-//		throw new Error(error.message)
-//	}
-//}
-//new begin /form
 
 console.log('in ascolto su 3000');
 app.listen(3000);

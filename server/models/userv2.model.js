@@ -8,21 +8,17 @@ const UserV2 = mongoose.model(
 			unique: true
 		},
 		pword: String,
-		api_id: {
-			type: String,
-			unique: true
-		},
 		api_sc: String,
-		spotify_data: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "UserV2_spotify_data",
-			required: true
+		spotify_data_permitted: {
+			type: Boolean,
+			default: false
 		},
-		youtube_data: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "UserV2_youtube_data",
-			required: true
-		}
+		spotify_data_access_token: String,
+		spotify_data_expires_in: Number,
+		spotify_data_refresh_token: String,
+		youtube_data_access_token: String,
+		youtube_data_expires_in: Number,
+		youtube_data_refresh_token: String
 	})
 );
 

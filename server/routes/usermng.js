@@ -59,7 +59,8 @@ module.exports = function(app) {
 		var data = await controller.signIn(req,res);
 		console.log(data)
 		//CREAZIONE COOKIE PIU SOLIDA NECESSARIA
-		res.cookie(data.user_id);	
+		console.log(data.user_id.toHexString());
+		res.cookie('user_id',data.user_id.toHexString());	
 		res.render(href='partials/logged_in', {Dati: data});
 
 //		var response = JSON.stringify(res);

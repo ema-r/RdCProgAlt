@@ -1,13 +1,12 @@
-const user = require('../models/userv2.model');
-const google_data = require('../models/userv2_youtube_data.model');
+const userv2 = require('../models/userv2.model');
 
 const bcrypt = require('bcryptjs');
 
 module.exports = {
 	async updatePermissions(req, res) {
-		google_data.updateOne({
-			id: req.body.user_id},
-			{$set: { has_permissions: true }},
+		userv2.updateOne({
+			id: req.body.data_id},
+			{$set: { youtube_has_permissions: true }},
 			function(err, data) {
 			if (err) {
 				return res.status(500).send({message: err});
@@ -19,9 +18,9 @@ module.exports = {
 		})
 	},
 	updateAccessToken(req, res) {
-		google_data.updateOne({
-			id: req.body.data_id},
-			{$set: {access_token: bcrypt.hashSync(req.body.google_access_token, 8),
+		userv2.updateOne({
+			id: req.body.user_id},
+			{$set: {youtube_access_token: bcrypt.hashSync(req.body.google_access_token, 8),
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
@@ -35,9 +34,9 @@ module.exports = {
 		)
 	},
 	updateRefreshToken(req,res) {
-		google_data.updateOne({
-		id: req.body.data_id},
-			{$set: {refresh_token: bcrypt.hashSync(req.body.google_refresh_token, 8)}},
+		userv2.updateOne({
+		id: req.body.user_id},
+			{$set: {youtube_refresh_token: bcrypt.hashSync(req.body.google_refresh_token, 8)}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -50,9 +49,9 @@ module.exports = {
 		)
 	},	
 	updateIdToken(req,res) {
-		google_data.updateOne({
-		id: req.body.data_id},
-			{$set: {id_token: bcrypt.hashSync(req.body.google_id_token, 8)}},
+		userv2.updateOne({
+		id: req.body.user_id},
+			{$set: {youtube_id_token: bcrypt.hashSync(req.body.google_id_token, 8)}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -69,38 +68,38 @@ module.exports = {
 		updateRefreshToken(req,res);
 		updateIdToken(req,res);
 	},	
-	getAccessToken(perm_id) {
-		google_data.findOne({id: perm_id}).exec((err,spotData) => {
+	getAccessToken(req,res) {
+		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
-			if (!spotData || !spotData.access_token) {
+			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
-			return {accessToken: spotData.access_token,
-				expiresAt: spotData.expires_in}
+			return {accessToken: spotData.youtube_access_token,
+				expiresAt: spotData.youtube_expires_in}
 		})
 	},
-	getRefreshToken(perm_id) {
-		google_data.findOne({id: perm_id}).exec((err,spotData) => {
+	getRefreshToken(req,res) {
+		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
-			if (!spotData || !spotData.access_token) {
+			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
-			return {refreshToken: spotData.refresh_token}
+			return {refreshToken: spotData.youtube_refresh_token}
 		})
 	},
-	getIdToken(perm_id) {
-		google_data.findOne({id: perm_id}).exec((err,spotData) => {
+	getIdToken(req,res) {
+		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}
-			if (!spotData || !spotData.access_token) {
+			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
-			return {idToken: spotData.id_token}
+			return {idToken: spotData.youtube_id_token}
 		})
 	},
 }
