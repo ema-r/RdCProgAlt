@@ -16,12 +16,12 @@ module.exports = {
 			if (!data) {
 				return res.status(404).send({message: 'ERRORE GRAVE: permission field non esistente'});
 			}
-			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente')
+			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente per user: ' + req.body.user_id)
 		})
 	},
 	getPermissions(req,res) {
 		try {
-			var spotData = spotify_data.findOne({id: req.body.data_id})
+			var spotData = spotify_data.findOne({id: req.body.data_id});
 
 			if (!spotData) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
@@ -46,7 +46,7 @@ module.exports = {
 				if (!data) {
 					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
 				}
-				console.log('[SPOTIFY CONTROLLER] access token salvato');
+				console.log('[SPOTIFY CONTROLLER] access token salvato per user: ' + req.body.user_id);
 			}
 		)
 	},
@@ -63,7 +63,7 @@ module.exports = {
 				if (!data) {
 					return res.status(404).send({message: 'ERRORE GRAVE: refresh_token field non esistente'})
 				}
-				console.log('[SPOTIFY CONTROLLER] refresh token salvato');
+				console.log('[SPOTIFY CONTROLLER] refresh token salvato per user: '+ req.body.user_id);
 			}
 		)
 	},
@@ -71,9 +71,9 @@ module.exports = {
 		updateAccessToken(req, res);
 		updateRefreshToken(req,res);
 	},
-	async getAccessToken(perm_id) {
+	async getAccessToken(req,res) {
 		try {
-			var spotData = await spotify_data.findOne({id: perm_id})
+			var spotData = await spotify_data.findOne({id: req.body.data_id})		
 
 			if (!spotData || !spotData.access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});

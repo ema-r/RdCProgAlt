@@ -37,8 +37,6 @@ module.exports = function(app) {
 	//
 	//app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
 	app.get('/oauth/spotify/login', function(req, res) {
-		console.log(res.cookie);
-		console.log(req.cookie);
 		session = req.session;
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state, {httpOnly: false});
@@ -86,8 +84,7 @@ module.exports = function(app) {
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
 
-		    	req.body.data_id = await userController.getSpotifyData(); //questa chiamata puo essere inclusa in funz
-
+			req.body.data_id = await userController.getSpotifyData(req,res);
 			console.log(req.body.access_token);
 		        await spotifyController.updatePermissions(req,res);
 		    	await userController.updateSpotifyTokens(req,res);
@@ -96,11 +93,12 @@ module.exports = function(app) {
 		}
 	});
 
-	app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
-	//app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
+	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
+	app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
 		//TODO: rimedia access token da JWT token, refresh se necessario
-		var access_token = userController.getSpotifyToken(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
+		var access_token = await userController.getSpotifyTokens(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
+		console.log(access_token);
 		const req_options = {
 			playlist_id: req.body.playlist_id,
 			market: 'IT',
@@ -145,6 +143,7 @@ async function getSpotifyAccessToken(query) {
 }
 
 function getPlaylist(req_options) {
+	console.log(req_options);
 	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'?market='+ req_options.market
 	const res = axios.get(rootUrl, {
 		headers: {

@@ -23,8 +23,8 @@ module.exports = {
 		});
 	},
 	cookieCheck(req,res,next) {
-		let token = req.cookies.user_id
-
+		session = req.session;
+		let token = req.body.user_id;
 		if (!token) {
 			return res.status(403).send({message: 'cookie non fornito'});
 		}

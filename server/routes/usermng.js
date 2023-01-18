@@ -55,7 +55,7 @@ module.exports = function(app) {
 	//in tutto il codice, attualmente utilizziamo entrambi per access token
 	//in modo intermittente
 	app.post('/oauth/login', async (req, res) => {
-		//session = req.session
+		session = req.session
 		var data = await controller.signIn(req,res);
 		console.log(data)
 		//CREAZIONE COOKIE PIU SOLIDA NECESSARIA
@@ -70,8 +70,7 @@ module.exports = function(app) {
 	//login bypassando frontend, riceve json dati
 	app.post('/oauth/login/JSON', async (req,res) => {
 		var data = await controller.signIn(req,res);
-		console.log(data);
-		res.send({apiSecret: data.apiSecret, user_id: data.user_id});
+		res.send({accessToken: data.accessToken});
 	})
 //	app.get('/oauth/postlogin', (req,res) => {
 //		res.render(href='partials/logged_in')

@@ -64,10 +64,13 @@ module.exports = {
 					message: 'password non valida'
 				});
 			}
+			var token = jwt.sign({id: user._id}, process.env.SECRET, {
+				expiresIn: 3600
+			});
 			return {
 				user_name: req.body.uname,
-				user_id: user._id.toHexString(),
-				apiSecret: user.api_sc
+				user_id: user._id,
+				accessToken: token
 			};
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
@@ -186,7 +189,7 @@ module.exports = {
 	async getSpotifyTokens(req,res) {
 		try {
 			var user = await UserV2.findOne({id: req.body.user_id})
-			if (!user) {
+			if (!user || user === 'undefined') {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}

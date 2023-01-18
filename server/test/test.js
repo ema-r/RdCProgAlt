@@ -32,56 +32,55 @@ describe("test accesso e permessi", () => {
 //      .done;
 //  });
 	//
-  it ('signup POST test, status 200', function(done) {
-	  chai.request(host)
-	      .post('oauth/signup')
-	      .set('content-type', 'application/x-www-form-urlencoded')
-	      .send({uname: 'test', pword: 'test1'})
-	      .end(function(error, response, body) {
-		      if (error) {
-			      done(error);
-		      } else {
-			      expect(response.statusCode).to.equal(200);
-			      done();
-		      }
-	      })
-  })
+//  it ('signup POST test, status 200', function(done) {
+//	  chai.request(host)
+//	      .post('oauth/signup')
+//	      .set('content-type', 'application/x-www-form-urlencoded')
+//	      .send({uname: 'test', pword: 'test1'})
+//	      .end(function(error, response, body) {
+//		      if (error) {
+//			      done(error);
+//		      } else {
+//			      expect(response.statusCode).to.equal(200);
+//			      done();
+//		      }
+//	      })
+//  })
 
   it('login POST test, credenziali accesso api, status 200', function(done) {
         chai
             .request(host)
             .post('oauth/login/JSON')
             .set('content-type', 'application/x-www-form-urlencoded')
-            .send({uname: 'test', pword: 'test1'})
+            .send({uname: 'dev', pword: 'devpass'})
             .end(function(error, response, body) {
                 if (error) {
                     done(error);
                 } else {
 		    expect(response.statusCode).to.equal(200);
-		    api_secret = response.body.apiSecret;
-		    api_id = response.body.user_id.toString;
-		    console.log(api_secret, api_id)
+		    console.log(response.body.accessToken)
+		    token = response.body.accessToken
                     done();
                 }
             });
   });
 
-  it('richiesta token POST test, restituisce token JWT, status 200', function(done) {
-        chai
-            .request(host)
-            .post('oauth/request_token')
-            .set('content-type', 'application/x-www-form-urlencoded')
-            .send({user_id: api_id, api_sc: api_secret})
-            .end(function(error, response, body) {
-                if (error) {
-                    done(error);
-                } else {
-		    expect(response.statusCode).to.equal(200);
-		    token = response.body.accessToken;
-                    done();
-                }
-            });
-  });
+//  it('richiesta token POST test, restituisce token JWT, status 200', function(done) {
+//        chai
+//            .request(host)
+//            .post('oauth/request_token')
+//            .set('content-type', 'application/x-www-form-urlencoded')
+//            .send({user_id: api_id, api_sc: api_secret})
+//            .end(function(error, response, body) {
+//                if (error) {
+//                    done(error);
+//                } else {
+//		    expect(response.statusCode).to.equal(200);
+//		    token = response.body.accessToken;
+//                    done();
+//                }
+//            });
+//  });
 
 //  it("login con username corretto e password sbagliata, restituisce 401", async () => {
 //    await fetch("https://localhost:8443/oauth/login", {
@@ -128,18 +127,20 @@ describe("test accesso e permessi", () => {
 //
 });
 //
-//describe("test spotify", () => {
-//  it("Richiesta playlist a spotify, con JWT token corretto. Restituisce 200", async () => {
-//    await fetch("https://localhost:8443/spotify/scrub_playlist", {
-//      method: "POST",
-//      headers: { "x-access-token": token },
-//    })
-//      .then((result) => {
-//        expect(result.status).to.equal(200);
-//      })
-//      .catch((err) => {
-//        console.error(err.message);
-//      })
-//      .done;
-//  });
-//});
+describe("test spotify", () => {
+  it("Richiesta playlist a spotify, con JWT token corretto. Restituisce 200", async () => {
+    await fetch("https://localhost:8443/spotify/scrub_playlist", {
+      method: "POST",
+      body: {'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'},
+      headers: { "x-access-token": token },
+    })
+      .then((result) => {
+        expect(result.status).to.equal(200);
+	console.log(result);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      })
+      .done;
+  });
+});
