@@ -66,7 +66,7 @@ module.exports = {
 			}
 			return {
 				user_name: req.body.uname,
-				user_id: user._id,
+				user_id: user._id.toHexString(),
 				apiSecret: user.api_sc
 			};
 		} catch(error) {
@@ -76,15 +76,16 @@ module.exports = {
 	},
 	async requestJWT(req,res) {
 		try {
-			var user = UserV2.findOne({id: req.body.user_id})
+			var user = await UserV2.findOne({id: req.body.user_id})
 			console.log('breakpoint 1')
 			if (!user) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
+			console.log(user.uname);
 			console.log(req.body.api_sc)
 			console.log(user.api_sc)
-			var apiSecretIsValid = (req.body.api_sc === user.api_sc)
+			var apiSecretIsValid = bcrypt.compareSync(req.body.api_sc, user.api_sc)
 			console.log('breakpoint 3')
 			if (!apiSecretIsValid) {
 				return res.status(401).send({

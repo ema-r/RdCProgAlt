@@ -31,20 +31,35 @@ describe("test accesso e permessi", () => {
 //      })
 //      .done;
 //  });
+	//
+  it ('signup POST test, status 200', function(done) {
+	  chai.request(host)
+	      .post('oauth/signup')
+	      .set('content-type', 'application/x-www-form-urlencoded')
+	      .send({uname: 'test', pword: 'test1'})
+	      .end(function(error, response, body) {
+		      if (error) {
+			      done(error);
+		      } else {
+			      expect(response.statusCode).to.equal(200);
+			      done();
+		      }
+	      })
+  })
 
   it('login POST test, credenziali accesso api, status 200', function(done) {
         chai
             .request(host)
             .post('oauth/login/JSON')
             .set('content-type', 'application/x-www-form-urlencoded')
-            .send({uname: 'dev', pword: 'devpass'})
+            .send({uname: 'test', pword: 'test1'})
             .end(function(error, response, body) {
                 if (error) {
                     done(error);
                 } else {
 		    expect(response.statusCode).to.equal(200);
 		    api_secret = response.body.apiSecret;
-		    api_id = response.body.user_id;
+		    api_id = response.body.user_id.toString;
 		    console.log(api_secret, api_id)
                     done();
                 }
