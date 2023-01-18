@@ -39,7 +39,7 @@ module.exports = function(app) {
 	
 		req.body.google_id_token = id_token;
 		req.body.google_access_token = access_token;
-		updateGoogleTokens(req,res);
+		//updateGoogleTokens(req,res);
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
 		const googleUser2 = await getGoogleUser({id_token, access_token})
@@ -79,6 +79,7 @@ function getGoogleOAuthURL() {
 }
 
 async function handlerGoogleOAuth(code) {
+	console.log(code);
 	const {id_token, access_token} = await getGoogleOAuthToken(code);
 	console.log('[HANDLER]: '+ id_token);
 	console.log('[HANDLER]: '+ access_token);
@@ -95,16 +96,19 @@ async function getGoogleOAuthToken(code) {
 		code,
 		client_id: process.env.GOOGLE_CLIENT_ID.toString(),
 		client_secret: process.env.GOOGLE_CLIENT_SECRET.toString(),
-		redirect_uri: process.env.GOOGLE_REDIRECT_URI.toString(),
+		redirect_uri: "https://localhost:8443/oauth/google/login",
 		grant_type: 'authorization_code',
 	};
 
 	try {
-		const res = await axios.post(rootUrl, JSON.stringify(options), {
+		const res = await  axios.post(rootUrl,options, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
+			
+			
 		});
+		console.log(res);
 		return res.data
 	} catch(error) {
 		console.log(error, 'fallimento fetch token');
