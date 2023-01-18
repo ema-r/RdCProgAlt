@@ -43,10 +43,11 @@ module.exports = function(app) {
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
 		const googleUser2 = await getGoogleUser({id_token, access_token})
+		req.body.user_id = req.cookies.user_id;
 		console.log("google user trovato: "+JSON.stringify(googleUser2));
 	
 		//aggiorna permessi nel nostro db
-		googleController.updatePermissions(req,res);
+		await googleController.updatePermissions(req,res);
 		res.redirect('/');
 	});
 	

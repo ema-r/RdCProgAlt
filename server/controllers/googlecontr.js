@@ -4,7 +4,7 @@ const google_data = require('../models/userv2_youtube_data.model');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-	updatePermissions(req, res) {
+	async updatePermissions(req, res) {
 		google_data.updateOne({
 			id: req.body.user_id},
 			{$set: { has_permissions: true }},
