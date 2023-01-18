@@ -75,15 +75,12 @@ module.exports = function(app) {
 				grant_type: 'authorization_code'
 			}
 			var query = new URLSearchParams(authOptions).toString();
-			var data = await getSpotifyAccessToken(query);
-			console.log(JSON.stringify(data));		
-
+			var data = await getSpotifyAccessToken(query);	
 			req.body.user_id = req.cookies.user_id	
 
 		        req.body.access_token = data.access_token;
 		        req.body.expires_in = data.expires_in;
 		    	req.body.refresh_token = data.refresh_token;
-
 			req.body.data_id = await userController.getSpotifyData(req,res);
 			console.log(req.body.access_token);
 		        await spotifyController.updatePermissions(req,res);
@@ -128,7 +125,7 @@ async function getSong(song_id, access_token) {
 async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
-		const result = await axios.post(rootUrl, query.toString(), {
+		const result = await axios.post(rootUrl, query, {
 			headers: {
 				'Authorization': 'Basic ' + (Buffer.from(process.env.SPOTIFY_CLIENT_ID.toString()
 				+ ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')),

@@ -132,9 +132,6 @@ function initialize() {
 
 /* get root path */
 app.get('/', async (req, res) => {
-	req.body.data_id = await controller.getSpotifyData(req,res)
-	var SpotifyData = await spotifyController.getPermissions(req,res)
-	console.log(SpotifyData)
 	res.render('index', { title: 'SongLify' });
 });
 
@@ -147,9 +144,12 @@ require('./routes/spotreq')(app);
 require('./routes/googlereq')(app);
 
 app.get('/oauth/logout', (req, res) => {
-	req.session.destroy();
-	console.log("Sloggato con successo");
-	res.redirect("https://localhost:8443");
+	if ( req.session){
+		req.session.destroy();
+		console.log("Sloggato con successo");
+		res.redirect("https://localhost:8443");
+	}
+	
 });
 
 app.post('/spotify/try_logged', (req, res) => {
