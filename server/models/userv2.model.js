@@ -22,7 +22,8 @@ const UserV2 = mongoose.model(
 		spotify_data_refresh_token: String,
 		youtube_data_access_token: String,
 		youtube_data_expires_in: Number,
-		youtube_data_refresh_token: String
+		youtube_data_refresh_token: String,
+		sancrispino: Boolean
 	})
 );
 

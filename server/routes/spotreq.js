@@ -92,7 +92,7 @@ module.exports = function(app) {
 		        await spotifyController.updatePermissions(req,res);
 		    	await userController.updateSpotifyTokens(req,res);
 		    	console.log('dati correttamente salvati');
-			res.redirect('/');
+			res.redirect('/test/test');
 		}
 	});
 
@@ -115,7 +115,7 @@ module.exports = function(app) {
 		req.body.user_id = req.cookies.user_id
 //		req.body.data_id = await userController.getSpotifyData(req,res);
 //		console.log('[TEST]'+req.body.data_id);
-		var funi = await spotifyController.getPermissions(req,res);
+		var funi = await spotifyController.getData(req,res);
 		console.log('[TEST]: '+funi);
 		res.status(200).send({res: funi});
 	});

@@ -12,8 +12,9 @@ var token = '';
 var api_secret = '';
 var api_id = '';
 
+var host = 'https://localhost:8443/';
+
 describe("test accesso e permessi", () => {
-  var host = 'https://localhost:8443/';
 //  it("login con username e password sbagliati, restituisce 404 poiche non trova utente", async () => {
 //    await fetch("https://localhost:8443/oauth/login", {
 //      method: "POST",
@@ -128,10 +129,11 @@ describe("test accesso e permessi", () => {
 });
 //
 describe("test spotify", () => {
-//  it("Richiesta playlist a spotify, con JWT token corretto. Restituisce 200", async () => {
+
+//  it("Richiesta playlist a spotify 1, con JWT token corretto. Restituisce 200", async () => {
 //    await fetch("https://localhost:8443/spotify/scrub_playlist", {
 //      method: "POST",
-//      body: {'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'},
+//      body: JSON.stringify({'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'}),
 //      headers: { "x-access-token": token },
 //    })
 //      .then((result) => {
@@ -142,9 +144,9 @@ describe("test spotify", () => {
 //        console.error(err.message);
 //      })
 //      .done;
-//  });
+// });
 
-  it('Richiesta playlist a spotify, con JWT token corretto. Restituisce 200', function(done) {
+  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
         chai
             .request(host)
             .post('spotify/scrub_playlist')
@@ -155,7 +157,7 @@ describe("test spotify", () => {
                     done(error);
                 } else {
 		    expect(response.statusCode).to.equal(200);
-		    console.log(response.body);
+		    console.log(response);
                     done();
                 }
             });

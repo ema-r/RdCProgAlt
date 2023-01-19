@@ -67,6 +67,7 @@ module.exports = {
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
+			spotifycontr.setData(req,res);
 			return {
 				user_name: req.body.uname,
 				user_id: user._id,

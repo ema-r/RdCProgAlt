@@ -4,10 +4,9 @@ const bcrypt = require('bcryptjs');
 
 module.exports = {
 	async updatePermissions(req, res) {
-
 		userv2.updateOne({
 			id: req.body.user_id},
-			{$set: { spotify_has_permissions: true }},
+			{$set: { spotify_has_permission: true }},
 			function(err, data) {
 			if (err) {
 				return res.status(500).send({message: err});
@@ -15,7 +14,7 @@ module.exports = {
 			if (!data) {
 				return res.status(404).send({message: 'ERRORE GRAVE: permission field non esistente'});
 			}
-			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente per user: ' + req.body.user_id)
+			console.log('[SPOTIFY CONTROLLER] permessi aggiornati correttamente per user: ' + data)
 		})
 	},
 	async getPermissions(req,res) {
@@ -26,6 +25,35 @@ module.exports = {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
 			return spotData.spotify_has_permission;
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
+	},
+	async setData(req,res) {
+		userv2.updateOne({
+			id: req.body.user_id},
+			{$set: {sancrispino: true}},
+			function(err, data) {
+				if (err) {
+					return res.status(500).send({message: err})
+				}
+				if (!data) {
+					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
+				}
+				console.log('[SPOTIFY CONTROLLER] access token salvato per user: ' + req.body.user_id);
+
+			})
+	
+	},
+	async getData(req,res) {
+		try {
+			var spotData = await userv2.findOne({id: req.body.user_id});
+
+			if (!spotData) {
+				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
+			}
+			return spotData;
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
