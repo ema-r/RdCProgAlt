@@ -99,25 +99,30 @@ module.exports = function(app) {
 	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
 	app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
-		//TODO: rimedia access token da JWT token, refresh se necessario
-		var access_token = await userController.getSpotifyTokens(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
-		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
+		console.log('[SCRUB PLAYLIST] USER ID: '+req.body.user_id);
+		var tokenData = await userController.getSpotifyTokens(req, res)
+		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+tokenData);
 		const req_options = {
 			playlist_id: req.body.playlist_id,
 			market: 'IT',
-			access_token: access_token
+			access_token: tokenData.accessToken 
 		}
 		const result = await getPlaylist(req_options);
 		console.log(JSON.stringify(result));
+		res.status(200).send(result);
 	});
-	app.get('/test/test', async function(req,res) {
+	app.get('/test', async function(req,res) {
 		session = req.session
 		req.body.user_id = req.cookies.user_id
 //		req.body.data_id = await userController.getSpotifyData(req,res);
 //		console.log('[TEST]'+req.body.data_id);
 		var funi = await spotifyController.getData(req,res);
-		console.log('[TEST]: '+funi);
-		res.status(200).send({res: funi});
+		var tokenData = await userController.getSpotifyTokens(req,res);
+		console.log('[TEST] tokendata'+tokenData);
+		var token = tokenData.accessToken;
+		console.log('[TEST] dati:  '+funi);
+		console.log('[TEST] token: '+token);
+		res.status(200).send({res: funi, res2: token});
 	});
 };
 
@@ -133,7 +138,7 @@ async function getSong(song_id, access_token) {
 		console.log('response',res.data)
 		})
 	.catch((error) => {
-		console.log('errore riciesta canzone: ',error.response)
+		console.log('errore richiesta canzone: ',error.response)
 	})
 }
 
@@ -168,6 +173,6 @@ function getPlaylist(req_options) {
 		console.log('response',res.data)
 	})
 	.catch((error) => {
-		console.log('errore riciesta canzone: ',error.response)
+		console.log('errore richiesta playlist: ',error.response)
 	})
 }

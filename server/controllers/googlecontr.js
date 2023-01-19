@@ -30,11 +30,11 @@ module.exports = {
 			throw new Error(error.message)
 		}
 	},
-
-	updateAccessToken(req, res) {
+	async updateAccessToken(req, res) {
 		userv2.updateOne({
 			id: req.body.user_id},
-			{$set: {youtube_access_token: bcrypt.hashSync(req.body.google_access_token, 8),
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {youtube_access_token: req.body.google_access_token,
 				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
@@ -47,10 +47,11 @@ module.exports = {
 			}
 		)
 	},
-	updateRefreshToken(req,res) {
+	async updateRefreshToken(req,res) {
 		userv2.updateOne({
 		id: req.body.user_id},
-			{$set: {youtube_refresh_token: bcrypt.hashSync(req.body.google_refresh_token, 8)}},
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {youtube_refresh_token: req.body.google_refresh_token}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -62,10 +63,11 @@ module.exports = {
 			}
 		)
 	},	
-	updateIdToken(req,res) {
+	async updateIdToken(req,res) {
 		userv2.updateOne({
 		id: req.body.user_id},
-			{$set: {youtube_id_token: bcrypt.hashSync(req.body.google_id_token, 8)}},
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {youtube_id_token: req.body.google_id_token}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -82,31 +84,32 @@ module.exports = {
 		updateRefreshToken(req,res);
 		updateIdToken(req,res);
 	},	
-	getAccessToken(req,res) {
-		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+	async getAccessToken(req,res) {
+		try {
+			var user = userv2.findOne({id: req.body.user_id})
 			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
 			return {accessToken: spotData.youtube_access_token,
 				expiresAt: spotData.youtube_expires_in}
-		})
+		} catch(error) {
+			res.status(500).send({message: error+' in funzione getAccessToken @ googlecontr.js'})
+		}
 	},
-	getRefreshToken(req,res) {
-		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+	async getRefreshToken(req,res) {
+		try {
+			var user = userv2.findOne({id: req.body.user_id});
 			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
 			return {refreshToken: spotData.youtube_refresh_token}
-		})
+		} catch(error) {
+			res.status(500).send({message: error+' in function getRefreshToken @ googlecontr.js'})
+		}
 	},
-	getIdToken(req,res) {
-		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
+	async getIdToken(req,res) {
+		try {
+			var user = userv2.findOne({id: req.body.user_id})
 			if (err) {
 				return res.status(500).send({message: err});
 			}
@@ -114,6 +117,8 @@ module.exports = {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
 			return {idToken: spotData.youtube_id_token}
-		})
+		} catch(error) {
+			res.status(500).send({message: error+' in funzione getIdToken @ googlecontr.js'})
+		}
 	},
 }

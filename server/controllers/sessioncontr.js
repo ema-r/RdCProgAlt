@@ -171,36 +171,37 @@ module.exports = {
 			throw new Error(error.message);
 		}
 	},
-	getGoogleTokens(req, res) {
-		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
-			if (err) {
-				res.status(500).send({message:err});
-				return;
-			} if (!user) {
+	async getGoogleTokens(req, res) {
+		try {
+			var user = UserV2.findOne({id: req.body.user_id})
+			if (!user || user === undefined) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-			req.body.data_id = user._id
-			var accessTokenData = googlecontr.getAccessToken(req,res);
-			if (isExpired(accessTokenData.youtube_data_expires_in)) {
-				accessTokenData = refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
-			}
+			var accessTokenData = await googlecontr.getAccessToken(req,res);
+//			if (isExpired(accessTokenData.expiresAt)) {
+//				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
+//			}
 			return {accessToken: accessTokenData.accessToken}
-		})
+		} catch(error) {
+			res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});
+		}
 	},
 	async getSpotifyTokens(req,res) {
 		try {
 			var user = await UserV2.findOne({id: req.body.user_id})
-			if (!user || user === 'undefined') {
+			if (!user || user === undefined) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-			console.log('[FUNZIONE GET SPOTIFY TOKEN] user trovato: '+user)
-			req.body.data_id = user.spotify_data._id
-			var accessTokenData = spotifycontr.getAccessToken(req,res);
-			if (isExpired(accessTokenData.expiresAt)) {
-				accessTokenData = await refreshSpotifyToken(spotifycontr.getRefreshToken(req,res));
-			}
+//			console.log('[FUNZIONE GET SPOTIFY TOKEN] user trovato: '+user)
+			var accessTokenData = await spotifycontr.getAccessToken(req,res);
+//			console.log('[FUNZIONE GET SPOTIFY TOKEN] token trovato: ');
+//			if (isExpired(accessTokenData.expiresAt)) {
+//				req.body.refreshToken = spotifycontr.getRefreshToken(req,res)
+//				accessTokenData = await refreshSpotifyToken(req,res);
+//			}
+//			console.log('[GET SPOTIFY TOKEN] token trovato: '+accessTokenData.accessToken);
 			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
 			res.status(500).send({message: error});
@@ -209,7 +210,7 @@ module.exports = {
 }
 
 function isExpired(expirationDate) {
-	if (accessTokenData.expiresAt < new Date().getTime()/1000) {
+	if (expirationDate < new Date().getTime()/1000) {
 		return true;
 	} else {
 		return false;
@@ -231,10 +232,12 @@ async function refreshSpotifyToken(req,res) {
 			},
 		});
 		
-		req.body.accessToken = request.access_token;
+
+		//RIVEDI QUESTA PARTE
+		req.body.access_token = request.access_token;
 		req.body.expires_in = request.expires_in;
-		updateSpotifyToken(req,res)
-		return request.access_token;
+		spotifycontr.updateSpotifyToken(req,res)
+		return {accessToken: request.access_token};
 	} catch {
 		console.log(error, 'fallimento fetch token');
 		throw new Error(error.message);

@@ -41,7 +41,7 @@ module.exports = {
 				if (!data) {
 					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
 				}
-				console.log('[SPOTIFY CONTROLLER] access token salvato per user: ' + req.body.user_id);
+				console.log('[SPOTIFY CONTROLLER] dati impostati per user: ' + req.body.user_id);
 
 			})
 	
@@ -63,7 +63,8 @@ module.exports = {
 		console.log('[ACCESS TOKEN UPDATE] ACCESS TOKEN: '+req.body.access_token);
 		userv2.updateOne({
 			id: req.body.user_id},
-			{$set: {spotify_access_token: bcrypt.hashSync(req.body.access_token, 8),
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {spotify_access_token: req.body.access_token,
 				spotify_expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
 			function(err, data) {
 				if (err) {
@@ -81,7 +82,8 @@ module.exports = {
 		console.log('sono in updateRefreshToken')
 		userv2.updateOne({
 		id: req.body.user_id},
-			{$set: {spotify_refresh_token: bcrypt.hashSync(req.body.refresh_token, 8)}},
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {spotify_refresh_token: req.body.refresh_token}},
 			function(err, data) {
 				console.log('sono in funzione interna updateRefreshToken')
 				if (err) {
@@ -105,9 +107,10 @@ module.exports = {
 			if (!spotData || !spotData.spotify_access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
+			console.log('sono in getAccessToken @ spotifycontr.js, prendendo access token '+spotData.spotify_access_token+' per utente '+spotData.uname);
 			return {
-				access_token: spotData.spotify_access_token,
-				expires_at: spotData.spotify_expires_in,
+				accessToken: spotData.spotify_access_token,
+				expiresAt: spotData.spotify_expires_in,
 			}
 		} catch(error) {
 			console.log(error, 'fallimento sign in');

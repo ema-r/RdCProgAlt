@@ -150,12 +150,13 @@ describe("test spotify", () => {
         chai
             .request(host)
             .post('spotify/scrub_playlist')
-            .set('content-type', 'application/x-www-form-urlencoded', 'x-access-token', token)
-            .send({'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'})
+            .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+            .send({playlist_id: '7qYYNPg5mBzyHvxlFGLMdB'})
             .end(function(error, response, body) {
                 if (error) {
                     done(error);
                 } else {
+		    console.log(response.statusCode);
 		    expect(response.statusCode).to.equal(200);
 		    console.log(response);
                     done();
