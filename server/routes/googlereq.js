@@ -52,9 +52,30 @@ module.exports = function(app) {
 	});
 	
 	//YOUTUBE SCRUB PLAYLIST
-	app.get('/youtube/scrub_playlist', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
-		return
-	})
+	app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
+		var access_token = await userController.getAccessToken(req,res);
+		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
+		const req_options = {
+			playlist_id: req.body.playlist_id,
+			api_key: process.env.GOOGLE_API_KEY,
+			access_token: access_token
+		}
+		const result = await getPlaylist(req_options);
+		console.log(JSON.stringify(result));
+	});
+	
+	app.get('/youtube/scrub_playlist', async (req, res) => {
+		var access_token = await userController.getGoogleTokens(req,res);
+		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
+		const req_options = {
+			playlist_id: req.body.playlist_id,
+			api_key: process.env.GOOGLE_API_KEY,
+			access_token: access_token
+		}
+		const result = await getPlaylist(req_options);
+		console.log(JSON.stringify(result));
+	});
+	
 }
 
 function getGoogleOAuthURL() {
@@ -129,4 +150,23 @@ async function getGoogleUser({id_token, access_token}) {
 		console.log(error, "ERRORE RITORNO DATI UTENTE");
 		throw new Error(error.message);
 	}
+}
+
+
+function getPlaylist(req_options){
+	console.log(req_options);
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId='+ req_options.playlist_id+'&key='+req_options.api_key
+	const res = axios.get(rootUrl, {
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': 'Bearer ' + req_options.access_token
+		}
+	}, 
+	{ withCredentials: true })
+	.then((res) => {
+		console.log('response',res.data)
+	})
+	.catch((error) => {
+		console.log('errore riciesta canzone: ',error.response)
+	})
 }

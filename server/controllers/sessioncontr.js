@@ -179,9 +179,9 @@ module.exports = {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-			req.body.data_id = user.spotify_data._id
+			req.body.data_id = user._id
 			var accessTokenData = googlecontr.getAccessToken(req,res);
-			if (isExpired(accessTokenData.expiresAt)) {
+			if (isExpired(accessTokenData.youtube_data_expires_in)) {
 				accessTokenData = refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
 			}
 			return {accessToken: accessTokenData.accessToken}
