@@ -6,7 +6,7 @@ module.exports = {
 	async updatePermissions(req, res) {
 		userv2.updateOne({
 			id: req.body.data_id},
-			{$set: { youtube_has_permissions: true }},
+			{$set: { youtube_has_permission: true }},
 			function(err, data) {
 			if (err) {
 				return res.status(500).send({message: err});

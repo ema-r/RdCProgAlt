@@ -17,12 +17,13 @@ const UserV2 = mongoose.model(
 			type: Boolean,
 			default: false
 		},
-		spotify_data_access_token: String,
-		spotify_data_expires_in: Number,
-		spotify_data_refresh_token: String,
-		youtube_data_access_token: String,
-		youtube_data_expires_in: Number,
-		youtube_data_refresh_token: String,
+		spotify_access_token: String,
+		spotify_expires_in: Number,
+		spotify_refresh_token: String,
+		youtube_access_token: String,
+		youtube_id_token: String,
+		youtube_expires_in: Number,
+		youtube_refresh_token: String,
 		sancrispino: Boolean
 	})
 );
