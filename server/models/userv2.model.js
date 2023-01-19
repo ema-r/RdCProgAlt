@@ -9,7 +9,11 @@ const UserV2 = mongoose.model(
 		},
 		pword: String,
 		api_sc: String,
-		spotify_data_permitted: {
+		spotify_has_permission: {
+			type: Boolean,
+			default: false
+		},
+		youtube_has_permission: {
 			type: Boolean,
 			default: false
 		},

@@ -128,19 +128,36 @@ describe("test accesso e permessi", () => {
 });
 //
 describe("test spotify", () => {
-  it("Richiesta playlist a spotify, con JWT token corretto. Restituisce 200", async () => {
-    await fetch("https://localhost:8443/spotify/scrub_playlist", {
-      method: "POST",
-      body: {'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'},
-      headers: { "x-access-token": token },
-    })
-      .then((result) => {
-        expect(result.status).to.equal(200);
-	console.log(result);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      })
-      .done;
+//  it("Richiesta playlist a spotify, con JWT token corretto. Restituisce 200", async () => {
+//    await fetch("https://localhost:8443/spotify/scrub_playlist", {
+//      method: "POST",
+//      body: {'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'},
+//      headers: { "x-access-token": token },
+//    })
+//      .then((result) => {
+//        expect(result.status).to.equal(200);
+//	console.log(result);
+//      })
+//      .catch((err) => {
+//        console.error(err.message);
+//      })
+//      .done;
+//  });
+
+  it('Richiesta playlist a spotify, con JWT token corretto. Restituisce 200', function(done) {
+        chai
+            .request(host)
+            .post('spotify/scrub_playlist')
+            .set('content-type', 'application/x-www-form-urlencoded', 'x-access-token', token)
+            .send({'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'})
+            .end(function(error, response, body) {
+                if (error) {
+                    done(error);
+                } else {
+		    expect(response.statusCode).to.equal(200);
+		    console.log(response.body);
+                    done();
+                }
+            });
   });
 });

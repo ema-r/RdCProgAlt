@@ -101,7 +101,7 @@ module.exports = function(app) {
 //		res.render('get_playlist', {title: 'Get playlist'});
 		//TODO: rimedia access token da JWT token, refresh se necessario
 		var access_token = await userController.getSpotifyTokens(req, res) //da vedere cosa passare, tutta req sembra piuttosto "grande"
-		console.log(access_token);
+		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
 		const req_options = {
 			playlist_id: req.body.playlist_id,
 			market: 'IT',
@@ -113,9 +113,11 @@ module.exports = function(app) {
 	app.get('/test/test', async function(req,res) {
 		session = req.session
 		req.body.user_id = req.cookies.user_id
-		req.body.data_id = await userController.getSpotifyData(req,res);
-		console.log('[TEST]'+req.body.data_id);
-		console.log('[TEST]'+await spotifyController.getPermissions(req,res));
+//		req.body.data_id = await userController.getSpotifyData(req,res);
+//		console.log('[TEST]'+req.body.data_id);
+		var funi = await spotifyController.getPermissions(req,res);
+		console.log('[TEST]: '+funi);
+		res.status(200).send({res: funi});
 	});
 };
 

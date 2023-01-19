@@ -16,7 +16,21 @@ module.exports = {
 			}
 			console.log('[GOOGLE CONTROLLER] documento permessi modificato per user: '+req.body.user_id);
 		})
+	},	
+	async getPermissions(req,res) {
+		try {
+			var ytData = await userv2.findOne({id: req.body.user_id});
+
+			if (!ytData) {
+				return res.status(404).send({message: 'dati youtube relativi ad user non trovati'});
+			}
+			return ytData.youtube_has_permission;
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
 	},
+
 	updateAccessToken(req, res) {
 		userv2.updateOne({
 			id: req.body.user_id},

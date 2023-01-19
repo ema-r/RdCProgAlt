@@ -25,7 +25,7 @@ module.exports = {
 			if (!spotData) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
 			}
-			return spotData.spotify_has_permissions;
+			return spotData.spotify_has_permission;
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
