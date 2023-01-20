@@ -99,16 +99,16 @@ module.exports = function(app) {
 	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
 	app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
-		console.log('[SCRUB PLAYLIST] USER ID: '+req.body.user_id);
 		var tokenData = await userController.getSpotifyTokens(req, res)
-		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+tokenData);
 		const req_options = {
 			playlist_id: req.body.playlist_id,
 			market: 'IT',
 			access_token: tokenData.accessToken 
 		}
 		const result = await getPlaylist(req_options);
-		console.log(JSON.stringify(result));
+		console.log('spotify scrub playlist response: '+result);
+		const daRimuovere = snocciolaPlaylist(result.items);
+		console.log('spotify scrub da rimuovere: '+daRimuovere);
 		res.status(200).send(result);
 	});
 	app.get('/test', async function(req,res) {
@@ -122,6 +122,12 @@ module.exports = function(app) {
 		res.status(200).send({res: dati});
 	});
 };
+
+function snocciolaPlaylist(tracks) {
+	tracks.forEach(function(track)) {
+		console.log(track);
+	}
+}
 
 async function getSong(song_id, access_token) {
 	const rootUrl = 'https://api.spotify.com/v1/tracks/'+song_id+'?market=IT'
@@ -158,16 +164,15 @@ async function getSpotifyAccessToken(query) {
 
 function getPlaylist(req_options) {
 	console.log(req_options);
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'?market='+ req_options.market+'/tracks'
+	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'/tracks'+'?market='+ req_options.market
 	const res = axios.get(rootUrl, {
 		headers: {
 			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + req_options.access_token
 		}
-	}, 
-	{ withCredentials: true })
+	})
 	.then((res) => {
-		console.log('response',res.data)
+		return res.data
 	})
 	.catch((error) => {
 		console.log('errore richiesta playlist: ',error.response)
