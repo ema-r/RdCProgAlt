@@ -92,7 +92,7 @@ module.exports = function(app) {
 		        await spotifyController.updatePermissions(req,res);
 		    	await userController.updateSpotifyTokens(req,res);
 		    	console.log('dati correttamente salvati');
-			res.redirect('/test/test');
+			res.redirect('/test');
 		}
 	});
 
@@ -114,15 +114,12 @@ module.exports = function(app) {
 	app.get('/test', async function(req,res) {
 		session = req.session
 		req.body.user_id = req.cookies.user_id
-//		req.body.data_id = await userController.getSpotifyData(req,res);
-//		console.log('[TEST]'+req.body.data_id);
-		var funi = await spotifyController.getData(req,res);
-		var tokenData = await userController.getSpotifyTokens(req,res);
-		console.log('[TEST] tokendata'+tokenData);
-		var token = tokenData.accessToken;
-		console.log('[TEST] dati:  '+funi);
-		console.log('[TEST] token: '+token);
-		res.status(200).send({res: funi, res2: token});
+
+		var dati = await userController.getData(req,res);
+
+		console.log('[TEST] dati:  '+dati);
+
+		res.status(200).send({res: dati});
 	});
 };
 

@@ -77,6 +77,19 @@ module.exports = {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
 		}
+	},	
+	async getData(req,res) {
+		try {
+			var user = await userv2.findOne({id: req.body.user_id});
+
+			if (!user) {
+				return res.status(404).send({message: 'dati user non trovati'});
+			}
+			return user;
+		} catch(error) {
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message)
+		}
 	},
 	async requestJWT(req,res) {
 		try {

@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 	async updatePermissions(req, res) {
 		userv2.updateOne({
-			id: req.body.data_id},
+			id: req.body.user_id},
 			{$set: { youtube_has_permission: true }},
 			function(err, data) {
 			if (err) {

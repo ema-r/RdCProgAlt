@@ -151,7 +151,7 @@ describe("test spotify", () => {
             .request(host)
             .post('spotify/scrub_playlist')
             .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-            .send({playlist_id: '7qYYNPg5mBzyHvxlFGLMdB'})
+            .send({playlist_id: '68mFNGy6fVJtvhLmjSekKQ'})
             .end(function(error, response, body) {
                 if (error) {
                     done(error);

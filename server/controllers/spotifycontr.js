@@ -46,19 +46,6 @@ module.exports = {
 			})
 	
 	},
-	async getData(req,res) {
-		try {
-			var spotData = await userv2.findOne({id: req.body.user_id});
-
-			if (!spotData) {
-				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
-			}
-			return spotData;
-		} catch(error) {
-			console.log(error, 'fallimento sign in');
-			throw new Error(error.message)
-		}
-	},
 	async updateAccessToken(req, res) {
 		console.log('[ACCESS TOKEN UPDATE] ACCESS TOKEN: '+req.body.access_token);
 		userv2.updateOne({
