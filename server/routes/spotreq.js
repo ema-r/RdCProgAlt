@@ -124,9 +124,9 @@ module.exports = function(app) {
 };
 
 function snocciolaPlaylist(tracks) {
-	tracks.forEach(function(track)) {
+	tracks.forEach(function(track) {
 		console.log(track);
-	}
+	});
 }
 
 async function getSong(song_id, access_token) {
