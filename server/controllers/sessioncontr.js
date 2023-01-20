@@ -80,7 +80,7 @@ module.exports = {
 	},	
 	async getData(req,res) {
 		try {
-			var user = await userv2.findOne({id: req.body.user_id});
+			var user = await UserV2.findOne({id: req.body.user_id});
 
 			if (!user) {
 				return res.status(404).send({message: 'dati user non trovati'});
