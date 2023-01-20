@@ -126,6 +126,7 @@ module.exports = function(app) {
 };
 
 function snocciolaPlaylist(tracks) {
+
 	tracks.forEach(function(track) {
 		console.log(track);
 	})

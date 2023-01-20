@@ -154,14 +154,15 @@ async function getGoogleUser({id_token, access_token}) {
 
 
 async function getPlaylist(req_options){
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId='+ req_options.playlist_id+'&key='+req_options.api_key
-	const res = axios.get(rootUrl, {
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+ req_options.playlist_id+'&access_token='+req.options.access_token+'&key='+req_options.api_key;
+	
+	try {(const res = axios.get(rootUrl, {
 		headers: {
 			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + req_options.access_token
 		}
 	}, 
-	{ withCredentials: true })
+	)}
 	.then((res) => {
 		console.log('response',res.data)
 	})
