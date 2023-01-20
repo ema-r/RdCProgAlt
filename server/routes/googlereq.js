@@ -64,7 +64,7 @@ module.exports = function(app) {
 	//	console.log(JSON.stringify(result));
 	//});
 	
-	app.get('/youtube/scrub_playlist', async (req, res) => {
+	app.get('/youtube/scrub_playlist',  [functions.tokenCheck], async (req, res) => {
 		var access_token = await userController.getGoogleTokens(req,res);
 		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
 		const req_options = {
@@ -154,7 +154,6 @@ async function getGoogleUser({id_token, access_token}) {
 
 
 async function getPlaylist(req_options){
-	console.log(req_options);
 	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId='+ req_options.playlist_id+'&key='+req_options.api_key
 	const res = axios.get(rootUrl, {
 		headers: {
