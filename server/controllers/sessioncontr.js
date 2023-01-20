@@ -123,7 +123,7 @@ module.exports = {
 			res.status(500).send({message:error});
 		}
 	},
-	updateGoogleTokens(req,res) {
+	async updateGoogleTokens(req,res) {
 		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
 			if (err) {
 				return res.status(500).send({message: err});
@@ -139,8 +139,8 @@ module.exports = {
 //				return googlecontr.updateRefreshToken(req,res);
 //			}
 //			if (req.body.refresh_token === null) {
-				googlecontr.updateAccessToken(req,res);
-				googlecontr.updateIdToken(req,res);
+				await googlecontr.updateAccessToken(req,res);
+				await googlecontr.updateIdToken(req,res);
 				return;
 //			}
 //			return googlecontr.initializeTokens(req, res);

@@ -37,8 +37,8 @@ module.exports = function(app) {
 		console.log("[GOOGLE CALLBACK ROUTE] "+id_token);
 		console.log("[GOOGLE CALLBACK ROUTE] "+access_token);
 	
-		req.body.id_token = id_token;
-		req.body.access_token = access_token;
+		req.body.google_id_token = id_token;
+		req.body.google_access_token = access_token;
 		var result = await userController.updateGoogleTokens(req,res);
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
