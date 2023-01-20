@@ -124,27 +124,26 @@ module.exports = {
 		}
 	},
 	async updateGoogleTokens(req,res) {
-		UserV2.findOne({id: req.body.user_id}).exec((err,user) => {
-			if (err) {
-				return res.status(500).send({message: err});
-			}
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id})
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
-
-
 			//attualmente non prendiamo refresh token da google
 			//probabilmente caso di modificare
 //			if (req.body.access_token === null) {
 //				return googlecontr.updateRefreshToken(req,res);
 //			}
 //			if (req.body.refresh_token === null) {
-				await googlecontr.updateAccessToken(req,res);
-				await googlecontr.updateIdToken(req,res);
-				return;
+			await googlecontr.updateAccessToken(req,res);
+			await googlecontr.updateIdToken(req,res);
+			return;
 //			}
 //			return googlecontr.initializeTokens(req, res);
-		})
+		} catch(error) {
+			console.log(error, 'fallimento save token google');
+			throw new Error(error.message)
+		}
 	},
 	async updateSpotifyTokens(req,res) {
 		try {

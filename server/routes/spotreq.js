@@ -158,7 +158,7 @@ async function getSpotifyAccessToken(query) {
 
 function getPlaylist(req_options) {
 	console.log(req_options);
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'?market='+ req_options.market
+	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'?market='+ req_options.market+'/tracks'
 	const res = axios.get(rootUrl, {
 		headers: {
 			'Content-Type': 'application/json',
