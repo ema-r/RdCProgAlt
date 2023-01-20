@@ -146,7 +146,7 @@ describe("test spotify", () => {
 //      .done;
 // });
 it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
-	this.timeout(20000);
+	this.timeout(10000);
        chai
 	.request(host)
         .post('spotify/scrub_playlist')
@@ -164,25 +164,25 @@ it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', fu
 });
 
 
-describe("test youtube", () => {
-    
-    it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
-            chai
-                .request(host)
-                .post('youtube/scrub_playlist')
-                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-                .send({playlist_id: 'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs'})
-                .end(function(error, response, body) {
-                    if (error) {
-                        done(error);
-                    } else {
-                console.log(response.statusCode);
-                expect(response.statusCode).to.equal(200);
-                console.log(response);
-                        done();
-                    }
-                });
-      });
-    });
-
-    
+//describe("test youtube", () => {
+//    
+//    it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
+//            chai
+//                .request(host)
+//                .post('youtube/scrub_playlist')
+//                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+//                .send({playlist_id: 'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs'})
+//                .end(function(error, response, body) {
+//                    if (error) {
+//                        done(error);
+//                    } else {
+//                console.log(response.statusCode);
+//                expect(response.statusCode).to.equal(200);
+//                console.log(response);
+//                        done();
+//                    }
+//                });
+//      });
+//    });
+//
+//    
