@@ -107,8 +107,10 @@ module.exports = function(app) {
 		}
 		const result = await getPlaylist(req_options);
 		console.log('spotify scrub playlist response: '+result);
+
 		const daRimuovere = snocciolaPlaylist(result.items);
 		console.log('spotify scrub da rimuovere: '+daRimuovere);
+
 		res.status(200).send(result);
 	});
 	app.get('/test', async function(req,res) {
@@ -126,7 +128,7 @@ module.exports = function(app) {
 function snocciolaPlaylist(tracks) {
 	tracks.forEach(function(track) {
 		console.log(track);
-	});
+	})
 }
 
 async function getSong(song_id, access_token) {
@@ -162,19 +164,27 @@ async function getSpotifyAccessToken(query) {
 	}
 }
 
-function getPlaylist(req_options) {
-	console.log(req_options);
+async function getPlaylist(req_options) {
 	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'/tracks'+'?market='+ req_options.market
-	const res = axios.get(rootUrl, {
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': 'Bearer ' + req_options.access_token
-		}
-	})
-	.then((res) => {
+	try {
+		var res = await axios.get(rootUrl, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + req_options.access_token
+			},
+		});
+		console.log(res);
 		return res.data
-	})
-	.catch((error) => {
-		console.log('errore richiesta playlist: ',error.response)
-	})
+	} catch(error) {
+		console.log(error, 'fallimento fetch playlist da spotify');
+		throw new Error(error.message);
+	}
+	
+//	})
+//	.then((res) => {
+//		return res.data;
+//	})
+//	.catch((error) => {
+//		console.log('errore richiesta playlist: ',error.response)
+//	})
 }
