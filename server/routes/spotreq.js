@@ -45,10 +45,11 @@ module.exports = function(app) {
 //		console.log('[SPOTIFY INITIAL SETUP 2] USERID: '+ req.cookie.user_id)
 		console.log('[SPOTIFY INITIAL SETUP 3] USERID: '+ req.body.user_id)
 
-		var scope = '';
+		var scope = 'playlist-read-private playlist-modify-private playlist-modify-public';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
 		var options = {
 			client_id: process.env.SPOTIFY_CLIENT_ID.toString(),
+			scope: scope,
 			response_type: 'code',
 			redirect_uri: 'https://localhost:8443/oauth/spotify/callback',
 			state: state
@@ -110,7 +111,6 @@ module.exports = function(app) {
 		console.log('spotify scrub playlist response items: '+result.items);
 
 		const daRimuovere = elementiDaRimuovere(result.items);
-		console.log('n i c e');
 		console.log(daRimuovere);
 
 		const resRimozione = await snocciolaPlaylist(req_options,daRimuovere);
@@ -139,18 +139,19 @@ function elementiDaRimuovere(tracks) {
 		console.log('elementi in traccia: '+Object.keys(trackData.track))
 		console.log('TRACCIA TROVATA IN PLAYLIST NUMERO '+cnt+', traccia: '+trackData.track.name);
 		if (trackData.track.is_playable === false) {
-			removeTrack.push({uri: trackData.track.uri});
+			removeTrack.push({'uri': trackData.track.uri});
 		}
 	})
 	return removeTrack;
 }
 
 async function snocciolaPlaylist(req_options,uris) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+req_options.playlist_id+'/tracks?market='+req_options.market
+	const rootUrl = 'https://api.spotify.com/v1/playlists/'+req_options.playlist_id+'/tracks'
 	try {
 		var res = await axios.delete(rootUrl, {
 			headers: {
-				'Content-Type': 'applications/json',
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
 				'Authorization': 'Bearer ' + req_options.access_token
 			},
 			data: {
