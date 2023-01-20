@@ -37,9 +37,9 @@ module.exports = function(app) {
 		console.log("[GOOGLE CALLBACK ROUTE] "+id_token);
 		console.log("[GOOGLE CALLBACK ROUTE] "+access_token);
 	
-		req.body.google_id_token = id_token;
-		req.body.google_access_token = access_token;
-		//updateGoogleTokens(req,res);
+		req.body.id_token = id_token;
+		req.body.access_token = access_token;
+		var result = await userController.updateGoogleTokens(req,res);
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
 		const googleUser2 = await getGoogleUser({id_token, access_token})
@@ -52,17 +52,17 @@ module.exports = function(app) {
 	});
 	
 	//YOUTUBE SCRUB PLAYLIST
-	app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
-		var access_token = await userController.getAccessToken(req,res);
-		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
-		const req_options = {
-			playlist_id: req.body.playlist_id,
-			api_key: process.env.GOOGLE_API_KEY,
-			access_token: access_token
-		}
-		const result = await getPlaylist(req_options);
-		console.log(JSON.stringify(result));
-	});
+	//app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
+	//	var access_token = await userController.getAccessToken(req,res);
+	//	console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
+	//	const req_options = {
+	//		playlist_id: req.body.playlist_id,
+	//		api_key: process.env.GOOGLE_API_KEY,
+	//		access_token: access_token
+	//	}
+	//	const result = await getPlaylist(req_options);
+	//	console.log(JSON.stringify(result));
+	//});
 	
 	app.get('/youtube/scrub_playlist', async (req, res) => {
 		var access_token = await userController.getGoogleTokens(req,res);
@@ -153,7 +153,7 @@ async function getGoogleUser({id_token, access_token}) {
 }
 
 
-function getPlaylist(req_options){
+async function getPlaylist(req_options){
 	console.log(req_options);
 	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId='+ req_options.playlist_id+'&key='+req_options.api_key
 	const res = axios.get(rootUrl, {

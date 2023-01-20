@@ -131,7 +131,6 @@ module.exports = {
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
-			req.body.data_id = user.google_data._id
 
 
 			//attualmente non prendiamo refresh token da google
