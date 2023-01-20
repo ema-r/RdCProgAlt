@@ -156,17 +156,16 @@ async function getGoogleUser({id_token, access_token}) {
 async function getPlaylist(req_options){
 	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+ req_options.playlist_id+'&access_token='+req.options.access_token+'&key='+req_options.api_key;
 	
-	try {(const res = axios.get(rootUrl, {
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': 'Bearer ' + req_options.access_token
-		}
-	}, 
-	)}
-	.then((res) => {
-		console.log('response',res.data)
-	})
-	.catch((error) => {
-		console.log('errore riciesta canzone: ',error.response)
-	})
+	try {
+		var res = await axios.get(rootUrl, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + req_options.access_token
+			}
+		});
+		console.log(res.data);
+		return res.data;
+	}catch(error) {
+		console.log('errore richiesta canzone: ', error.response)
+	}
 }
