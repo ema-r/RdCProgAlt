@@ -124,10 +124,11 @@ module.exports = function(app) {
 };
 
 function snocciolaPlaylist(tracks) {
-	tracks.forEach(function(track){
+
+	tracks.forEach(function(track) {
 		console.log(track);
-	})
-};
+	});
+}
 
 async function getSong(song_id, access_token) {
 	const rootUrl = 'https://api.spotify.com/v1/tracks/'+song_id+'?market=IT'
