@@ -3,9 +3,10 @@ const dotenv = require('dotenv').config('./../.env')
 const UserV2 = require('../models/userv2.model');
 const UserV2_spotify_data = require('../models/userv2_spotify_data.model');
 const UserV2_youtube_data = require('../models/userv2_youtube_data.model');
-
+var amqp = require('amqplib/callback_api');
 const googlecontr = require('./googlecontr');
 const spotifycontr = require('./spotifycontr');
+const UserRabbit = require("../models/userv2.model");
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -53,6 +54,51 @@ module.exports = {
 		try {
 			var user = await UserV2.findOne({uname: req.body.uname});
 			if (!user) {
+
+
+//RABBIT//
+
+			
+amqp.connect("amqp://rabbit", (error, connection) => {
+	if (error) {
+		console.error(error.message);
+		res.sendStatus(500);
+		return;
+	}
+	connection.createChannel((err, channel) => {
+		if (err) {
+		  console.error(err.message);
+		  res.sendStatus(500);
+		  return;
+		}
+
+		channel.assertQueue(QUEUE);
+		channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(createdPost)));
+	  });
+
+	connection.createChannel((err, channel) => {
+		if (err) {
+		  console.error(err.message);
+		  res.sendStatus(500);
+		  return;
+		}
+		channel.assertQueue(QUEUE);
+		channel.consume(QUEUE, async (message) => {
+		const text = JSON.parse(message.content.toString());
+		channel.ack(message);
+		await UserRabbit.create(text).catch((err) => {
+
+			console.error(err.message);
+			res.sendStatus(500);
+			return;
+			});
+		});
+	});
+
+	})
+	//FINE RABBIT//
+
+
 				res.status(404).send({message: 'user non trovato'});
 			}
 			var pwordIsValid = bcrypt.compareSync(
@@ -64,6 +110,10 @@ module.exports = {
 					message: 'password non valida'
 				});
 			}
+
+
+
+			
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
@@ -77,6 +127,7 @@ module.exports = {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
 		}
+		
 	},	
 	async getData(req,res) {
 		try {
