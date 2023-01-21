@@ -75,8 +75,8 @@ module.exports = function(app) {
 			api_key:'AIzaSyCUuvYYNiE15CimywpG5MYLe43jHmtOoM8',
 			access_token: tokenData.accessToken
 		}
-		const result = await getPlaylist(req_options);
-		console.log(result);
+//		const result = await getPlaylist(req_options);
+//		console.log(result);
 		res.status(200).send({message: 'finito'});
 	});
 	

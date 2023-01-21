@@ -193,6 +193,8 @@ module.exports = {
 //			if (isExpired(accessTokenData.expiresAt)) {
 //				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
 //			}
+			console.log('[accessTokenData in getGoogleTokens @ sessioncontr.js]'+accessTokenData)
+			console.log('parametri in accessTokenData: '+Object.keys(accessTokenData));
 			return {accessToken: accessTokenData.accessToken}
 		} catch(error) {
 			res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});

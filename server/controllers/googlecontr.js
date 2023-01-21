@@ -86,10 +86,11 @@ module.exports = {
 	},	
 	async getAccessToken(req,res) {
 		try {
-			var spotData  = userv2.findOne({id: req.body.user_id})
+			var spotData  = await userv2.findOne({id: req.body.user_id})
 			if (!spotData) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
+			console.log('[access token youtube trovato da getAccessToken @ googlecontr] '+spotData.youtube_access_token)
 			return {accessToken: spotData.youtube_access_token,
 				expiresAt: spotData.youtube_expires_in}
 		} catch(error) {
