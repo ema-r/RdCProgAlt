@@ -128,61 +128,41 @@ describe("test accesso e permessi", () => {
 //
 });
 //
-describe("test spotify", () => {
+describe("test api", () => {
 
-//  it("Richiesta playlist a spotify 1, con JWT token corretto. Restituisce 200", async () => {
-//    await fetch("https://localhost:8443/spotify/scrub_playlist", {
-//      method: "POST",
-//      body: JSON.stringify({'playlist_id': '7qYYNPg5mBzyHvxlFGLMdB'}),
-//      headers: { "x-access-token": token },
-//    })
-//      .then((result) => {
-//        expect(result.status).to.equal(200);
-//	console.log(result);
-//      })
-//      .catch((err) => {
-//        console.error(err.message);
-//      })
-//      .done;
-// });
-it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
-	this.timeout(10000);
-       chai
-	.request(host)
-        .post('spotify/scrub_playlist')
-          .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-          .send({playlist_id: '68mFNGy6fVJtvhLmjSekKQ'})
-          .end(function(error, response, body) {
-              if (error) {
-                 done(error);
-              } else {
-		  expect(response.statusCode).to.equal(200);
-                  done();
-              }
-          });
-  });
+//  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
+//	this.timeout(10000);
+//       chai
+//	.request(host)
+//        .post('spotify/scrub_playlist')
+//          .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+//          .send({playlist_id: '68mFNGy6fVJtvhLmjSekKQ'})
+//          .end(function(error, response, body) {
+//              if (error) {
+//                 done(error);
+//              } else {
+//		  expect(response.statusCode).to.equal(200);
+//                  done();
+//              }
+//          });
+//  });
+    
+  it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
+	    this.timeout(10000);
+            chai
+                .request(host)
+                .post('youtube/scrub_playlist')
+                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+                .send({playlist_id: 'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs'})
+                .end(function(error, response, body) {
+                    if (error) {
+                        done(error);
+                    } else {
+                console.log(response.statusCode);
+                expect(response.statusCode).to.equal(200);
+                console.log(response);
+                        done();
+                    }
+                });
+      });
 });
-
-
-//describe("test youtube", () => {
-//    
-//    it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
-//            chai
-//                .request(host)
-//                .post('youtube/scrub_playlist')
-//                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-//                .send({playlist_id: 'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs'})
-//                .end(function(error, response, body) {
-//                    if (error) {
-//                        done(error);
-//                    } else {
-//                console.log(response.statusCode);
-//                expect(response.statusCode).to.equal(200);
-//                console.log(response);
-//                        done();
-//                    }
-//                });
-//      });
-//    });
-//
-//    

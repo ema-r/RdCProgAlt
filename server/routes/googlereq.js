@@ -64,16 +64,20 @@ module.exports = function(app) {
 	//	console.log(JSON.stringify(result));
 	//});
 	
-	app.get('/youtube/scrub_playlist',  [functions.tokenCheck], async (req, res) => {
-		var access_token = await userController.getGoogleTokens(req,res);
-		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
+	app.post('/youtube/scrub_playlist',  [functions.tokenCheck], async (req, res) => {
+		console.log('breakpoint 1');
+		var tokenData = await userController.getGoogleTokens(req,res);
+		console.log('breakpoint 2');
+		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+tokenData.accessToken);
+		console.log('breakpoint 3');
 		const req_options = {
 			playlist_id:'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs',
 			api_key:'AIzaSyCUuvYYNiE15CimywpG5MYLe43jHmtOoM8',
-			access_token: access_token
+			access_token: tokenData.accessToken
 		}
 		const result = await getPlaylist(req_options);
-		console.log(JSON.stringify(result));
+		console.log(result);
+		res.status(200).send({message: 'finito'});
 	});
 	
 }
