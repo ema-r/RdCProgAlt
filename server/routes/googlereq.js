@@ -75,8 +75,8 @@ module.exports = function(app) {
 			api_key:'AIzaSyCUuvYYNiE15CimywpG5MYLe43jHmtOoM8',
 			access_token: tokenData.accessToken
 		}
-//		const result = await getPlaylist(req_options);
-//		console.log(result);
+		const result = await getPlaylist(req_options);
+		console.log(result);
 		res.status(200).send({message: 'finito'});
 	});
 	
@@ -158,7 +158,7 @@ async function getGoogleUser({id_token, access_token}) {
 
 
 async function getPlaylist(req_options){
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&key=AIzaSyCUuvYYNiE15CimywpG5MYLe43jHmtOoM8'
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token;
 	//'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+req_options.playlist_id+'&key='+req_options.api_key;
 	try {
 		var res = await axios.get(rootUrl, {
@@ -167,7 +167,6 @@ async function getPlaylist(req_options){
 				'Authorization': 'Bearer ' + req_options.access_token
 			}
 		});
-		console.log(res.data);
 		return res.data;
 	}catch(error) {
 		console.log('errore richiesta canzone: ', error.response)
