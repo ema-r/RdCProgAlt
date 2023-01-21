@@ -62,24 +62,77 @@ module.exports = function(app) {
 	//	}
 	//	const result = await getPlaylist(req_options);
 	//	console.log(JSON.stringify(result));
-	//});
-	
+	//});	
 	app.post('/youtube/scrub_playlist',  [functions.tokenCheck], async (req, res) => {
-		console.log('breakpoint 1');
 		var tokenData = await userController.getGoogleTokens(req,res);
-		console.log('breakpoint 2');
-		console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+tokenData.accessToken);
-		console.log('breakpoint 3');
+
 		const req_options = {
-			playlist_id:'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs',
-			api_key:'AIzaSyCUuvYYNiE15CimywpG5MYLe43jHmtOoM8',
+			playlist_id: req.playlist_id,
 			access_token: tokenData.accessToken
 		}
 		const result = await getPlaylist(req_options);
-		console.log(result);
+
+		//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
+		if (result.status === 404) {
+			res.status(404).send({message: 'playlist non trovata'})
+		}
+		if (result.status < 200 || result.statusCode > 299) {
+			res.status(500).send({message: 'errore'});
+		}
+		console.log(result.data);
+		var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
+
 		res.status(200).send({message: 'finito'});
+		
 	});
 	
+}
+
+async function elementiDaRimuovere(token, elements) {
+	var removeVideo = new Array();
+	var cnt = 0;
+	elements.forEach(function(videoData) {
+		cnt = cnt+1
+		console.log('elementi in elemento: '+Object.keys(videoData.snippet))
+		console.log('snippet: '+videoData.snippet);
+		isVideoAvailable(token, videoData.snippet.resourceId.videoId);
+	})
+	return removeVideo;
+}
+
+async function isVideoAvailable(token, video_id) {
+	console.log(video_id);
+	const rootUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatus&id='+video_id+'&access_token='+token;	
+	try {
+		var res = await axios.get(rootUrl, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + token
+			}
+		});
+		console.log('in isVideoAvailable, video items: '+res.data);
+		return res;
+	} catch(error) {
+		console.log('errore richiesta canzone: '+error.response);
+	}
+
+}
+
+async function getPlaylist(req_options){
+	//AGGIUNGI GESTIONE PER PLAYLIST CON > 50 ELEMENTI
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2Cid&playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token+'&maxResults=50';
+	//'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+req_options.playlist_id+'&key='+req_options.api_key;
+	try {
+		var res = await axios.get(rootUrl, {
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + req_options.access_token
+			}
+		});
+		return res;
+	}catch(error) {
+		console.log('errore richiesta canzone: ', error.response)
+	}
 }
 
 function getGoogleOAuthURL() {
@@ -156,19 +209,3 @@ async function getGoogleUser({id_token, access_token}) {
 	}
 }
 
-
-async function getPlaylist(req_options){
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token;
-	//'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+req_options.playlist_id+'&key='+req_options.api_key;
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			}
-		});
-		return res.data;
-	}catch(error) {
-		console.log('errore richiesta canzone: ', error.response)
-	}
-}

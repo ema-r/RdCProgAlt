@@ -153,7 +153,7 @@ describe("test api", () => {
                 .request(host)
                 .post('youtube/scrub_playlist')
                 .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-                .send({playlist_id: 'PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs'})
+                .send({playlist_id: 'PLnif9Rfb5AdkmxSH3fAMsozp5eTnSqBYf'})
                 .end(function(error, response, body) {
                     if (error) {
                         done(error);
