@@ -88,30 +88,78 @@ module.exports = function(app) {
 	
 }
 
+//utilizza id video invece che id video playlist
+//async function elementiDaRimuovere(token, elements) {
+//	var cnt = 0;
+//	elements.forEach(function(videoData) {
+//		cnt = cnt+1
+//		console.log('elementi in elemento: '+Object.keys(videoData))
+//		console.log('snippet: '+videoData.snippet);
+//		if (!isVideoAvailable(token, videoData.snippet.resourceId.videoId)) {
+//			await rimuoviVideo(token, videoData);
+//		}
+//	})
+//	return res.status(200).send({message:'finito'});
+//}
+
 async function elementiDaRimuovere(token, elements) {
-	var removeVideo = new Array();
 	var cnt = 0;
 	elements.forEach(function(videoData) {
 		cnt = cnt+1
-		console.log('elementi in elemento: '+Object.keys(videoData.snippet))
-		console.log('snippet: '+videoData.snippet);
-		isVideoAvailable(token, videoData.snippet.resourceId.videoId);
+		if (!isVideoAvailable(token, videoData)) {
+			await rimuoviVideo(token, videoData);
+		}
 	})
-	return removeVideo;
+	return res.status(200).send({message:'finito'});
 }
 
-async function isVideoAvailable(token, video_id) {
-	console.log(video_id);
-	const rootUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatus&id='+video_id+'&access_token='+token;	
+async function rimuoviVideo(token, videoData) {
+	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
 	try {
-		var res = await axios.get(rootUrl, {
+		var res = await.axios.get(rootUrl, {
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + token
+				'Authorization': 'Bearer'+token
 			}
 		});
-		console.log('in isVideoAvailable, video items: '+res.data);
 		return res;
+	} catch(error) {
+		console.log('errore DELETE elemento da playlist')
+		res.status(500).send({message: errore});
+	}
+}
+
+//usa video invece che playlist item
+//async function isVideoAvailable(token, video_id) {
+//	const rootUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatus&id='+video_id+'&access_token='+token;	
+//	try {
+//		var res = await axios.get(rootUrl, {
+//			headers: {
+//				'Content-Type': 'application/json',
+//				'Authorization': 'Bearer ' + token
+//			}
+//		});
+//
+//		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
+//		//res.data.items[0].contentDetails.regionRestriction
+//		var videoData = res.data.items[0];
+//		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
+//			return false;
+//		}
+//		return true;
+//	} catch(error) {
+//		console.log('errore richiesta canzone: '+error.response);
+//	}
+//
+//}
+
+async function isVideoAvailable(token, videoData) {
+		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
+		//res.data.items[0].contentDetails.regionRestriction
+		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
+			return false;
+		}
+		return true;
 	} catch(error) {
 		console.log('errore richiesta canzone: '+error.response);
 	}
@@ -120,7 +168,7 @@ async function isVideoAvailable(token, video_id) {
 
 async function getPlaylist(req_options){
 	//AGGIUNGI GESTIONE PER PLAYLIST CON > 50 ELEMENTI
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2Cid&playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token+'&maxResults=50';
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus%2Cid&playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token+'&maxResults=50';
 	//'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+req_options.playlist_id+'&key='+req_options.api_key;
 	try {
 		var res = await axios.get(rootUrl, {
