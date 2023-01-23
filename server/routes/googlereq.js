@@ -104,7 +104,7 @@ module.exports = function(app) {
 
 async function elementiDaRimuovere(token, elements) {
 	var cnt = 0;
-	elements.forEach(function(videoData) {
+	elements.forEach(async function(videoData) {
 		cnt = cnt+1
 		if (!isVideoAvailable(token, videoData)) {
 			await rimuoviVideo(token, videoData);
@@ -116,7 +116,7 @@ async function elementiDaRimuovere(token, elements) {
 async function rimuoviVideo(token, videoData) {
 	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
 	try {
-		var res = await.axios.get(rootUrl, {
+		var res = await axios.get(rootUrl, {
 			headers: {
 				'Content-Type': 'application/json',
 				'Authorization': 'Bearer'+token
@@ -160,9 +160,6 @@ async function isVideoAvailable(token, videoData) {
 			return false;
 		}
 		return true;
-	} catch(error) {
-		console.log('errore richiesta canzone: '+error.response);
-	}
 
 }
 
