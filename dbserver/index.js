@@ -2,13 +2,15 @@ require('dotenv').config()
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
+const path = require('path');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const amqp = require('amqplib/callback_api');
 
-var userModel = require('../server/models/userv2.model');
+var userModel = require('./models/userv2.model');
 
-mongoose.connect(MONGO_URI, {
+mongoose.connect('mongodb://mongo:27017/', {
 		useNewUrlParser: true,
 		useUnifiedTopology: true
 	})

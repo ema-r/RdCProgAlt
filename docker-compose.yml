@@ -39,6 +39,7 @@ services:
       dockerfile: dbDockerfile
     volumes:
       - ./dbserver:/usr/src/app
+      - ./server/models:/usr/src/app/models
       - /usr/src/app/node_modules
     environment:
       - INSTANCE=dbnode
@@ -53,8 +54,11 @@ services:
     networks:
       - app-network
 
-  rabbitmq:
+  myrabbit:
     image: rabbitmq:3.10.14
+    ports:
+      - 5672:5672
+      - 15672:15672
     networks:
       - app-network
 

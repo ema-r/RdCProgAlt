@@ -95,7 +95,7 @@ app.get('/oauth/logout', (req, res) => {
 app.get('/amqptest', (req,res) =>  {
 	amqp.connect('amqp://localhost', function(error0, connection) {
 		if (error0) {
-			throw error1;
+			throw error0;
 		}
 		connection.createChannel(function(error1, channel) {
 			if (error1) {
