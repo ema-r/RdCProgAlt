@@ -1,0 +1,55 @@
+{
+  "name": "appdb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "nodemon -L index.js",
+    "start": "node index.js",
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.9.0",
+    "apidoc": "^0.51.1",
+    "axios": "^1.2.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "chai-http": "^4.3.0",
+    "connect-mongo": "^4.6.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "googleapis": "^100.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.3.3",
+    "mongoose-findorcreate": "^3.0.0",
+    "node-fetch": "^2.6.7",
+    "nodemailer": "^6.7.5",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-spotify": "^2.0.0",
+    "query-string": "^8.0.2",
+    "request-promise": "^4.2.6",
+    "request-promise-native": "^1.0.9",
+    "to-regex-range": "^5.0.1"
+  },
+  "devDependencies": {
+    "axios": "^1.2.1",
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0",
+    "nodemon": "^2.0.16"
+  },
+  "apidoc": {
+    "title": "REST Api Documentation",
+    "version": "0.1.0"
+  }
+}
