@@ -156,10 +156,12 @@ async function rimuoviVideo(token, videoData) {
 async function isVideoAvailable(token, videoData) {
 		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
 		//res.data.items[0].contentDetails.regionRestriction
-		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
+	// if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
+	console.log('test is video available');
+	if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private')
 			return false;
-		}
-		return true;
+	}
+	return true;
 
 }
 
