@@ -95,7 +95,7 @@ module.exports = function(app) {
 //		cnt = cnt+1
 //		console.log('elementi in elemento: '+Object.keys(videoData))
 //		console.log('snippet: '+videoData.snippet);
-//		if (!isVideoAvailable(token, videoData.snippet.resourceId.videoId)) {
+//		if (!isilable(token, videoData.snippet.resourceId.videoId)) {
 //			await rimuoviVideo(token, videoData);
 //		}
 //	})
@@ -106,26 +106,29 @@ async function elementiDaRimuovere(token, elements) {
 	var cnt = 0;
 	elements.forEach(async function(videoData) {
 		cnt = cnt+1
-		if (!isVideoAvailable(token, videoData)) {
+		if (isVideoAvailable(token, videoData) === false) {
+			console.log("CIAOOOOOOOO");
 			await rimuoviVideo(token, videoData);
 		}
 	})
-	return res.status(200).send({message:'finito'});
+	return ;
 }
 
 async function rimuoviVideo(token, videoData) {
+	console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
 	try {
-		var res = await axios.get(rootUrl, {
+		var res = await axios.delete(rootUrl, {
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': 'Bearer'+token
+				'Authorization': 'Bearer '+token
 			}
 		});
+		console.log(res);
 		return res;
 	} catch(error) {
 		console.log('errore DELETE elemento da playlist')
-		res.status(500).send({message: errore});
+		res.status(500).send({message: error});
 	}
 }
 
@@ -153,10 +156,12 @@ async function rimuoviVideo(token, videoData) {
 //
 //}
 
-async function isVideoAvailable(token, videoData) {
+function isVideoAvailable(token, videoData) {
+	console.log("TEST");
 		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
 		//res.data.items[0].contentDetails.regionRestriction
-		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
+		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' ) {
+			console.log("ERRORE?");
 			return false;
 		}
 		return true;
@@ -165,8 +170,8 @@ async function isVideoAvailable(token, videoData) {
 
 async function getPlaylist(req_options){
 	//AGGIUNGI GESTIONE PER PLAYLIST CON > 50 ELEMENTI
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus%2Cid&playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token+'&maxResults=50';
-	//'https://youtube.googleapis.com/youtube/v3/playlistItems?playlistId='+req_options.playlist_id+'&key='+req_options.api_key;
+	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus%2Cid&playlistId=PL3NbNT5u7ISkrMCyLZmt8Gs7tU_ef3lOa&access_token='+req_options.access_token+'&maxResults=50';
+	//https://www.youtube.com/playlist?list=PL3NbNT5u7ISkrMCyLZmt8Gs7tU_ef3lOa
 	try {
 		var res = await axios.get(rootUrl, {
 			headers: {
