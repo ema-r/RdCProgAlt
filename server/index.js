@@ -93,7 +93,7 @@ app.get('/oauth/logout', (req, res) => {
 });
 
 app.get('/amqptest', (req,res) =>  {
-	amqp.connect('amqp://localhost', function(error0, connection) {
+	amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
 		if (error0) {
 			throw error0;
 		}

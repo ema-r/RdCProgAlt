@@ -54,7 +54,7 @@ services:
     networks:
       - app-network
 
-  myrabbit:
+  rabbitmq:
     image: rabbitmq:3.10.14
     ports:
       - 5672:5672
