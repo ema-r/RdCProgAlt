@@ -111,29 +111,6 @@ app.get('/amqptest', (req,res) =>  {
 			console.log(" [X] sent %s", msg);
 		})
 
-		connection.createChannel( function(error1, channel) {
-			if (error1) {
-				throw error1;
-			}
-			var queue = 'hello';
-	
-			channel.assertQueue(queue, {
-				durable: false,
-			})
-			console.log(' [*] in attesa di msg su %s', queue);
-			channel.consume(queue, async function(msg) {
-				 await GoogleContr.updateData(req,res).catch((err) => {
-					if(err){
-						throw err;
-					}
-				});
-				console.log(" [x] ricevuto %s", msg.content.toString());
-			}, {
-				noAck: true
-			})
-		
-			
-		})
 		setTimeout(function() {
 			connection.close();
 			res.redirect('/');

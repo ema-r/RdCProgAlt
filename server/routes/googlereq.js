@@ -4,6 +4,8 @@ const userController = require('./../controllers/sessioncontr.js');
 const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
 
+const rabbitfun = require('./../functions/rabbitfun');
+
 module.exports = function(app) {
 	app.use(function(req,res,next) {
 		res.header(
@@ -71,23 +73,28 @@ module.exports = function(app) {
 	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck], async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 
-		const req_options = {
-			playlist_id: req.playlist_id,
-			access_token: tokenData.accessToken
-		}
-		const result = await getPlaylist(req_options);
+		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
-		if (result.status === 404) {
-			res.status(404).send({message: 'playlist non trovata'})
-		}
-		if (result.status < 200 || result.statusCode > 299) {
-			res.status(500).send({message: 'errore'});
-		}
-		console.log(result.data);
-		var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
+	//	const req_options = {
+	//		playlist_id: req.playlist_id,
+	//		access_token: tokenData.accessToken
+	//	}
+	//	const result = await getPlaylist(req_options);
 
-		res.status(200).send({message: 'finito'});
+	//	//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
+	//	if (result.status === 404) {
+	//		res.status(404).send({message: 'playlist non trovata'})
+	//	}
+	//	if (result.status < 200 || result.statusCode > 299) {
+	//		res.status(500).send({message: 'errore'});
+	//	}
+	//	console.log(result.data);
+	//	var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
+		setTimeout(function() {
+			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
+		}, 600);
+
+		res.status(202).send({message: 'richiesta API accettata'});
 		
 	});
 
@@ -109,54 +116,6 @@ module.exports = function(app) {
 	
 }
 
-async function elementiDaRimuovere(token, elements) {
-	var cnt = 0;
-	elements.forEach(async function(videoData) {
-		cnt = cnt+1
-		if (!isVideoAvailable(token, videoData)) {
-			await rimuoviVideo(token, videoData);
-		}
-	})
-	return res.status(200).send({message:'finito'});
-}
-
-async function rimuoviVideo(token, videoData) {
-	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer'+token
-			}
-		});
-		return res;
-	} catch(error) {
-		console.log('errore DELETE elemento da playlist')
-		res.status(500).send({message: errore});
-	}
-}
-
-async function isVideoAvailable(token, videoData) {
-	if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private') {
-			return false;
-	}
-	return true;
-}
-
-async function getPlaylist(req_options){
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus%2Cid&playlistId=PLiN-7mukU_RF0TJ1EpG-9zOVTjDFjWlIs&access_token='+req_options.access_token+'&maxResults=50';
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			}
-		});
-		return res;
-	}catch(error) {
-		console.log('errore richiesta canzone: ', error.response)
-	}
-}
 
 function getGoogleOAuthURL() {
 	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'

@@ -5,6 +5,8 @@ const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
 const {URLSearchParams} = require('url');
 
+const rabbitfun = require('./../functions/rabbitfun');
+
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
 	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -103,22 +105,27 @@ module.exports = function(app) {
 	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
 		var tokenData = await userController.getSpotifyTokens(req, res)
-		const req_options = {
-			playlist_id: req.body.playlist_id,
-			market: 'IT',
-			access_token: tokenData.accessToken 
-		}
-		const result = await getPlaylist(req_options);
 
-		//console.log('spotify scrub playlist response: '+result);
-		//console.log('spotify scrub playlist response items: '+result.items);
+		//check preliminare errori?
+		
 
-		const daRimuovere = elementiDaRimuovere(result.items);
+		//qui rabbitmq?
+		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		const resRimozione = await snocciolaPlaylist(req_options,daRimuovere);
+		//TIENI D'OCCHIO IL FUNZIONAMENTO QUESTA FUNZIONE NEL TEST, SPESSO RITORNANO
+		//500 QUANDO NON DOVREBBERO.
+		setTimeout(function() {
+			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
+		}, 600);
 
-		res.status(200).send(result);
+		res.status(202).send({message: 'richiesta API accettata'});
 	});
+
+	app.get('/spotify/rmqtest', async function(req,res) {
+		var data = await rabbitfun.sendAPIData('test:23vwg343hvsa:gibberishtoken');
+		//aggiungi error handling
+		return res.status(202).send({message: 'test in corso'});
+	})
 
 	app.delete('/spotify/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
 		await userController.deleteSpotifyData(req,res);
@@ -143,40 +150,6 @@ module.exports = function(app) {
 	});
 };
 
-function elementiDaRimuovere(tracks) {
-	var removeTrack = new Array();
-	var cnt = 0;
-	tracks.forEach(function(trackData) {
-		cnt = cnt+1
-		console.log('elementi in traccia: '+Object.keys(trackData.track))
-		console.log('TRACCIA TROVATA IN PLAYLIST NUMERO '+cnt+', traccia: '+trackData.track.name);
-		if (trackData.track.is_playable === false) {
-			removeTrack.push({'uri': trackData.track.uri});
-		}
-	})
-	return removeTrack;
-}
-
-async function snocciolaPlaylist(req_options,uris) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+req_options.playlist_id+'/tracks'
-	try {
-		var res = await axios.delete(rootUrl, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			},
-			data: {
-				tracks: uris,
-			},
-		});
-		return res
-	} catch(error) {
-		console.log(error, 'fallimento eliminazione elementi');
-		throw new Error(error.message);
-	}
-}
-
 async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
 	try {
@@ -194,26 +167,4 @@ async function getSpotifyAccessToken(query) {
 	}
 }
 
-async function getPlaylist(req_options) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'/tracks'+'?market='+ req_options.market
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			},
-		});
-		return res.data
-	} catch(error) {
-		console.log(error, 'fallimento fetch playlist da spotify');
-		throw new Error(error.message);
-	}
-	
-//	})
-//	.then((res) => {
-//		return res.data;
-//	})
-//	.catch((error) => {
-//		console.log('errore richiesta playlist: ',error.response)
-//	})
-}
+
