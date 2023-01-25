@@ -62,6 +62,24 @@ module.exports = {
 			}
 		)
 	},
+
+	async updateData(req, res) {
+		userv2.updateOne({
+			id: req.body.user_id},
+			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
+			{$set: {san_crispino: true}},
+			function(err, data) {
+				if (err) {
+					return res.status(500).send({message: err})
+				}
+				if (!data) {
+					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
+				}
+				console.log('[GOOGLE CONTROLLER] access_token e expire_time salvati');
+			}
+		)
+	},
+
 	async updateRefreshToken(req,res) {
 		userv2.updateOne({
 		id: req.body.user_id},

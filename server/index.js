@@ -12,7 +12,7 @@ const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
 const amqp = require('amqplib/callback_api');
-
+const GoogleContr = require('./controllers/googlecontr');
 
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -93,7 +93,7 @@ app.get('/oauth/logout', (req, res) => {
 });
 
 app.get('/amqptest', (req,res) =>  {
-	amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
+	amqp.connect('amqp://rabbitmq', function(error0, connection) {
 		if (error0) {
 			throw error0;
 		}
@@ -109,6 +109,30 @@ app.get('/amqptest', (req,res) =>  {
 			});
 			channel.sendToQueue(queue, Buffer.from(msg));
 			console.log(" [X] sent %s", msg);
+		})
+
+		connection.createChannel( function(error1, channel) {
+			if (error1) {
+				throw error1;
+			}
+			var queue = 'hello';
+	
+			channel.assertQueue(queue, {
+				durable: false,
+			})
+			console.log(' [*] in attesa di msg su %s', queue);
+			channel.consume(queue, async function(msg) {
+				 await GoogleContr.updateData(req,res).catch((err) => {
+					if(err){
+						throw err;
+					}
+				});
+				console.log(" [x] ricevuto %s", msg.content.toString());
+			}, {
+				noAck: true
+			})
+		
+			
 		})
 		setTimeout(function() {
 			connection.close();

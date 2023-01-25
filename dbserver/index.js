@@ -37,7 +37,7 @@ async function initialize() {
 	})
 }
 
-amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
+amqp.connect('amqp://rabbitmq', function(error0, connection) {
 	console.log('amqptest')
 	if (error0) {
 		throw error0;
