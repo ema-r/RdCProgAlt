@@ -65,6 +65,7 @@ async function amqpconn() {
 				noAck: true
 			});
 		});
+
 	})
 }
 
