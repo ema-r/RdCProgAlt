@@ -6,7 +6,7 @@ const path = require('path');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const amqp = require('amqplib');
+const amqp = require('amqplib/callback_api');
 
 var userModel = require('./models/userv2.model');
 
@@ -23,6 +23,9 @@ mongoose.connect('mongodb://mongo:27017/', {
 		process.exit();
 	});
 
+console.log('inizializzo amqp');
+amqpconn();
+
 async function initialize() {
 	userModel.estimatedDocumentCount((err, count) => {
 		if (!err && count === 0) {
@@ -37,30 +40,31 @@ async function initialize() {
 	})
 }
 
-amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
-	console.log('amqptest')
-	if (error0) {
-		throw error0;
-	}
-
-	connection.createChannel(function(error1, channel) {
-		if (error1) {
-			throw error1;
-		}
-		var queue = 'hello';
-
-		channel.assertQueue(queue, {
-			durable: false,
-		})
-		console.log(' [*] in attesa di msg su %s', queue);
-		channel.consume(queue, function(msg) {
-			console.log(" [x] ricevuto %s", msg.content.toString());
-		}, {
-			noAck: true
-		})
+async function amqpconn() {
+	await new Promise(r => setTimeout(r, 60000));
+	console.log('dbserver, tempo di attesa terminato, apro connessione a rabbitmq');
+	amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
+		console.log('amqptest')
+		if (error0) {
+			console.log('errore amqp')
+			throw error0;
+		}	
+		connection.createChannel(function(error1, channel) {
+			if (error1) {
+				throw error1;
+			}
+			var queue = 'hello';
+	
+			channel.assertQueue(queue, {
+				durable: false,
+			})
+			console.log(' [*] in attesa di msg su %s', queue);
+			channel.consume(queue, function(msg) {
+				console.log(" [x] ricevuto %s", msg.content.toString());
+			}, {
+				noAck: true
+			});
+		});
 	})
-	setTimeout(function() {
-		connection.close();
-		res.redirect('/');
-	}, 10000);
-})
+}
+
