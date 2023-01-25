@@ -6,7 +6,7 @@ const path = require('path');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const amqp = require('amqplib/callback_api');
+const amqp = require('amqplib');
 
 var userModel = require('./models/userv2.model');
 
@@ -38,6 +38,7 @@ async function initialize() {
 }
 
 amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
+	console.log('amqptest')
 	if (error0) {
 		throw error0;
 	}
@@ -58,5 +59,8 @@ amqp.connect('amqp://rabbitmq:5672', function(error0, connection) {
 			noAck: true
 		})
 	})
-
+	setTimeout(function() {
+		connection.close();
+		res.redirect('/');
+	}, 10000);
 })

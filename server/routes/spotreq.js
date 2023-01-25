@@ -41,10 +41,6 @@ module.exports = function(app) {
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state, {httpOnly: false});
 
-//		console.log('[SPOTIFY INITIAL SETUP 1] USERID: '+ req.cookie(user_id))	
-//		console.log('[SPOTIFY INITIAL SETUP 2] USERID: '+ req.cookie.user_id)
-		console.log('[SPOTIFY INITIAL SETUP 3] USERID: '+ req.body.user_id)
-
 		var scope = 'playlist-read-private playlist-modify-private playlist-modify-public';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
 		var options = {
@@ -98,7 +94,13 @@ module.exports = function(app) {
 	});
 
 	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
-	app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
+	//
+	//FUNZIONE PLAYLIST SCRUB
+	//riceve token jwt, playlist id nel body, ottiene i token spotify salvati per l'utente se presente (check), ottiene
+	//playlist da spotify con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso spotify. restituisce 200 se andato a buon fine
+	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a spotify
+	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck],  async function(req, res){
 //		res.render('get_playlist', {title: 'Get playlist'});
 		var tokenData = await userController.getSpotifyTokens(req, res)
 		const req_options = {
@@ -107,16 +109,26 @@ module.exports = function(app) {
 			access_token: tokenData.accessToken 
 		}
 		const result = await getPlaylist(req_options);
-		console.log('spotify scrub playlist response: '+result);
-		console.log('spotify scrub playlist response items: '+result.items);
+
+		//console.log('spotify scrub playlist response: '+result);
+		//console.log('spotify scrub playlist response items: '+result.items);
 
 		const daRimuovere = elementiDaRimuovere(result.items);
-		console.log(daRimuovere);
 
 		const resRimozione = await snocciolaPlaylist(req_options,daRimuovere);
 
 		res.status(200).send(result);
 	});
+
+	app.delete('/spotify/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
+		await userController.deleteSpotifyData(req,res);
+		res.status(200).send({message: 'spotify data deleted'});
+	})
+
+	app.delete('/spotify/delete_access_data', [functions.sessionCheck], async function(req,res) {
+		await userController.deleteSpotifyData(req,res);
+		res.redirect('/login/oauth');
+	})
 
 	//SEMPLICE FUNZIONE TEST
 	app.get('/test', async function(req,res) {

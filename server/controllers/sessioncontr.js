@@ -176,21 +176,16 @@ amqp.connect("amqp://rabbit", (error, connection) => {
 	},
 	async updateGoogleTokens(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id})
-			if (!user) {
-				return res.status(404).send({message: 'user non trovato'});
+			if (req.body.refresh_token !== null) {
+				googlecontr.updateRefreshToken(req,res);
 			}
-			//attualmente non prendiamo refresh token da google
-			//probabilmente caso di modificare
-//			if (req.body.access_token === null) {
-//				return googlecontr.updateRefreshToken(req,res);
-//			}
-//			if (req.body.refresh_token === null) {
-			await googlecontr.updateAccessToken(req,res);
-			await googlecontr.updateIdToken(req,res);
+			if (req.body.access_token !== null) {
+				googlecontr.updateAccessToken(req,res);
+			}
+			if (req.body.id_token !== null) {
+				googlecontr.updateIdToken(req,res);
+			}
 			return;
-//			}
-//			return googlecontr.initializeTokens(req, res);
 		} catch(error) {
 			console.log(error, 'fallimento save token google');
 			throw new Error(error.message)
@@ -244,8 +239,8 @@ amqp.connect("amqp://rabbit", (error, connection) => {
 //			if (isExpired(accessTokenData.expiresAt)) {
 //				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
 //			}
-			console.log('[accessTokenData in getGoogleTokens @ sessioncontr.js]'+accessTokenData)
-			console.log('parametri in accessTokenData: '+Object.keys(accessTokenData));
+//			console.log('[accessTokenData in getGoogleTokens @ sessioncontr.js]'+accessTokenData)
+//			console.log('parametri in accessTokenData: '+Object.keys(accessTokenData));
 			return {accessToken: accessTokenData.accessToken}
 		} catch(error) {
 			res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});
@@ -270,6 +265,20 @@ amqp.connect("amqp://rabbit", (error, connection) => {
 		} catch(error) {
 			res.status(500).send({message: error});
 		}
+	},
+	async deleteSpotifyData(req,res) {
+		await spotifycontr.deleteData(req,res);
+	},
+	async deleteYoutubeData(req,res) {
+		await googlecontr.deleteData(req,res);
+	},
+	async deleteUser(req,res) {
+		UserV2.deleteOne({id: req.body.user_id}), function(err,data) {
+			if (err) {
+				return res.status(500).send({message: 'errore cancellazione account'});
+			}
+			console.log('account cancellato correttamente');
+		}
 	}
 }
 
@@ -283,10 +292,11 @@ function isExpired(expirationDate) {
 
 async function refreshSpotifyToken(req,res) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
+	var reftoken = await spotifycontr.getSpotifyRefreshToken(req,res);
 	try {
 		var request = await axios.post(rootURL, { form: {
 				grant_type: 'refresh_token',
-				refresh_token: refreshToken,
+				refresh_token: reftoken.refreshToken,
 			}
 		}, {
 			headers: {
@@ -301,13 +311,31 @@ async function refreshSpotifyToken(req,res) {
 		req.body.access_token = request.access_token;
 		req.body.expires_in = request.expires_in;
 		spotifycontr.updateSpotifyToken(req,res)
-		return {accessToken: request.access_token};
-	} catch {
+		return {accessToken: request.access_token, expiresIn: request.expires_in};
+	} catch(error) {
 		console.log(error, 'fallimento fetch token');
 		throw new Error(error.message);
 	}
 }
 
 async function refreshGoogleToken(req,res) {
+	var rootUrl = 'https://oauth2.googleapis.com/token'
+	var reftoken = await googlecontr.getYoutubeRefreshToken(req,res);
+	try {
+		var request = await axios.post(rootUrl, { form: {
+			client_id: process.env.GOOGLE_CLIENT_ID,
+			client_secret: process.env.GOOGLE_CLIENT_SECRET,
+			grant_type: 'refresh_token',
+			refresh_token: reftoken.refreshToken,
+		}, headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		});
+		req.body.google_access_token = request.access_token;
+		req.body.google_expires_in = request.expires_in;
+		return {accessToken: request.access_token, expiresIn: request.expires_in};
+	} catch(error) {
+		res.status(500).send({message: 'error getting refresh token google'});
+	}
 	return
 }

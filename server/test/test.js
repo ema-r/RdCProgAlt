@@ -51,7 +51,7 @@ describe("test accesso e permessi", () => {
   it('login POST test, credenziali accesso api, status 200', function(done) {
         chai
             .request(host)
-            .post('oauth/login/JSON')
+            .post('oauth/login/api')
             .set('content-type', 'application/x-www-form-urlencoded')
             .send({uname: 'dev', pword: 'devpass'})
             .end(function(error, response, body) {
@@ -112,46 +112,46 @@ describe("test accesso e permessi", () => {
 //	  }).done;
 //  });
 
-//  it("GET request a /api/test, con JWT token corretto. Restituisce 200", async () => {
-//    await fetch("https://localhost:8443/api/test", {
-//      method: "GET",
-//      headers: { "x-access-token": token },
-//    })
-//      .then((result) => {
-//        expect(result.status).to.equal(200);
-//      })
-//      .catch((err) => {
-//        console.error(err.message);
-//      })
-//      .done;
-//  });
-//
+  it("GET request a /api/test, con JWT token corretto. Restituisce 200", async () => {
+    await fetch("https://localhost:8443/api/test", {
+      method: "GET",
+      headers: { "x-access-token": token },
+    })
+      .then((result) => {
+        expect(result.status).to.equal(200);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      })
+      .done;
+  });
+
 });
-//
+
 describe("test api", () => {
 
-//  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
-//	this.timeout(10000);
-//       chai
-//	.request(host)
-//        .post('spotify/scrub_playlist')
-//          .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-//          .send({playlist_id: '68mFNGy6fVJtvhLmjSekKQ'})
-//          .end(function(error, response, body) {
-//              if (error) {
-//                 done(error);
-//              } else {
-//		  expect(response.statusCode).to.equal(200);
-//                  done();
-//              }
-//          });
-//  });
+  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
+	this.timeout(10000);
+       chai
+	.request(host)
+        .post('spotify/scrub_playlist/api')
+          .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+          .send({playlist_id: '68mFNGy6fVJtvhLmjSekKQ'})
+          .end(function(error, response, body) {
+              if (error) {
+                 done(error);
+              } else {
+		  expect(response.statusCode).to.equal(200);
+                  done();
+              }
+          });
+  });
     
   it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
 	    this.timeout(10000);
             chai
                 .request(host)
-                .post('youtube/scrub_playlist')
+                .post('youtube/scrub_playlist/api')
                 .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
                 .send({playlist_id: 'PLnif9Rfb5AdkmxSH3fAMsozp5eTnSqBYf'})
                 .end(function(error, response, body) {

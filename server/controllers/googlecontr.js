@@ -29,13 +29,28 @@ module.exports = {
 			console.log(error, 'fallimento sign in');
 			throw new Error(error.message)
 		}
+	},	
+	async deleteData(req,res) {
+		userv2.updateOne({
+			id: req.body.user_id},
+			{$set: {youtube_has_permission: false}, $unset: {youtube_access_token: '', youtube_expires_in: '', youtube_refresh_token: '', youtube_id_token: ''}},
+			function(err, data) {
+				if (err) {
+					return res.status(500).send({message: err})
+				}
+				if (!data) {
+					return res.status(404).send({message: 'ERRORE GRAVE: access_token field non esistente'})
+				}
+				console.log('[GOOGLE CONTROLLER] dati eliminati per user: ' + req.body.user_id);
+			})
+	
 	},
 	async updateAccessToken(req, res) {
 		userv2.updateOne({
 			id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {youtube_access_token: req.body.google_access_token,
-				expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
+				expires_in: ((new Date().getTime() / 1000) + req.body.google_expires_in)}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
@@ -79,11 +94,6 @@ module.exports = {
 			}
 		)
 	},
-	initializeTokens(req,res) {
-		updateAccessToken(req,res);
-		updateRefreshToken(req,res);
-		updateIdToken(req,res);
-	},	
 	async getAccessToken(req,res) {
 		try {
 			var spotData  = await userv2.findOne({id: req.body.user_id})

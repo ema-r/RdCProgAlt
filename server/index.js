@@ -112,7 +112,7 @@ app.get('/amqptest', (req,res) =>  {
 		})
 		setTimeout(function() {
 			connection.close();
-			process.exit(0);
+			res.redirect('/');
 		}, 500);
 	});
 });
