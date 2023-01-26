@@ -54,51 +54,6 @@ module.exports = {
 		try {
 			var user = await UserV2.findOne({uname: req.body.uname});
 			if (!user) {
-
-
-//RABBIT//
-
-			
-amqp.connect("amqp://rabbit", (error, connection) => {
-	if (error) {
-		console.error(error.message);
-		res.sendStatus(500);
-		return;
-	}
-	connection.createChannel((err, channel) => {
-		if (err) {
-		  console.error(err.message);
-		  res.sendStatus(500);
-		  return;
-		}
-
-		channel.assertQueue(QUEUE);
-		channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(createdPost)));
-	  });
-
-	connection.createChannel((err, channel) => {
-		if (err) {
-		  console.error(err.message);
-		  res.sendStatus(500);
-		  return;
-		}
-		channel.assertQueue(QUEUE);
-		channel.consume(QUEUE, async (message) => {
-		const text = JSON.parse(message.content.toString());
-		channel.ack(message);
-		await UserRabbit.create(text).catch((err) => {
-
-			console.error(err.message);
-			res.sendStatus(500);
-			return;
-			});
-		});
-	});
-
-	})
-	//FINE RABBIT//
-
-
 				res.status(404).send({message: 'user non trovato'});
 			}
 			var pwordIsValid = bcrypt.compareSync(
@@ -110,9 +65,6 @@ amqp.connect("amqp://rabbit", (error, connection) => {
 					message: 'password non valida'
 				});
 			}
-
-
-
 			
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
@@ -273,12 +225,30 @@ amqp.connect("amqp://rabbit", (error, connection) => {
 		await googlecontr.deleteData(req,res);
 	},
 	async deleteUser(req,res) {
-		UserV2.deleteOne({id: req.body.user_id}), function(err,data) {
-			if (err) {
-				return res.status(500).send({message: 'errore cancellazione account'});
+		try {
+			var user = UserV2.findOne({uname: req.body.uname, pword: req.body.pword});
+
+			var pwordIsValid = bcrypt.compareSync(
+				req.body.pword,
+				user.pword
+			)
+			if (!pwordIsValid) {
+				return res.status(401).send({
+					message: 'password non valida'
+				});
+			}		
+
+			UserV2.deleteOne({id: user._id}), function(err,data) {
+				if (err) {
+					return res.status(500).send({message: 'errore cancellazione account'});
+				}
+				console.log('account cancellato correttamente');
 			}
-			console.log('account cancellato correttamente');
+		} catch(error) {			
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message);
 		}
+
 	}
 }
 

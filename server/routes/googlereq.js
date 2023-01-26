@@ -58,7 +58,11 @@ module.exports = function(app) {
 		res.redirect('/');
 	});
 	
-	//YOUTUBE SCRUB PLAYLIST
+	//YOUTUBE SCRUB PLAYLIST	
+	////riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token google salvati per l'utente se presente (check), ottiene
+	//playlist da google con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso google. restituisce 202 accettato
+	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google
 	//app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
 	//	var access_token = await userController.getAccessToken(req,res);
 	//	console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
@@ -100,7 +104,7 @@ module.exports = function(app) {
 
 	
 	//elimina dati utente relativi a youtube (id token, access token, refresh token) tramite 
-	//chiamata API REST. Richiede token JWT valido
+	//chiamata API REST. Richiede token JWT valido passato come x-access-token nell'header
 	app.delete('/youtube/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
 		await userController.deleteYoutubeData(req,res);
 		res.status(200).send({message: 'spotify data deleted'});

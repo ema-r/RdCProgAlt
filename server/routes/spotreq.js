@@ -95,15 +95,12 @@ module.exports = function(app) {
 		}
 	});
 
-	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
-	//
 	//FUNZIONE PLAYLIST SCRUB
-	//riceve token jwt, playlist id nel body, ottiene i token spotify salvati per l'utente se presente (check), ottiene
+	//riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token spotify salvati per l'utente se presente (check), ottiene
 	//playlist da spotify con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
 	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso spotify. restituisce 200 se andato a buon fine
 	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a spotify
 	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck],  async function(req, res){
-//		res.render('get_playlist', {title: 'Get playlist'});
 		var tokenData = await userController.getSpotifyTokens(req, res)
 
 		//check preliminare errori?
@@ -121,33 +118,20 @@ module.exports = function(app) {
 		res.status(202).send({message: 'richiesta API accettata'});
 	});
 
-	app.get('/spotify/rmqtest', async function(req,res) {
-		var data = await rabbitfun.sendAPIData('test:23vwg343hvsa:gibberishtoken');
-		//aggiungi error handling
-		return res.status(202).send({message: 'test in corso'});
-	})
-
+	//FUNZIONE ELIMINA DATI SPOTIFY UTENTE
+	//Riceve token JWT come x-access-token nell'header e cancella tutti i dati relativi
+	//all'utente e spotify nel db. Restituisce 200 se andata a buon termine
 	app.delete('/spotify/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
 		await userController.deleteSpotifyData(req,res);
 		res.status(200).send({message: 'spotify data deleted'});
 	})
 
+	//COME SOPRA MA DESTINATA A FRONTEND
 	app.delete('/spotify/delete_access_data', [functions.sessionCheck], async function(req,res) {
 		await userController.deleteSpotifyData(req,res);
 		res.redirect('/login/oauth');
 	})
 
-	//SEMPLICE FUNZIONE TEST
-	app.get('/test', async function(req,res) {
-		session = req.session
-		req.body.user_id = req.cookies.user_id
-
-		var dati = await userController.getData(req,res);
-
-		console.log('[TEST] dati: '+dati);
-
-		res.status(200).send({res: dati});
-	});
 };
 
 async function getSpotifyAccessToken(query) {
