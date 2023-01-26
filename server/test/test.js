@@ -130,7 +130,7 @@ describe("test accesso e permessi", () => {
 
 describe("test api", () => {
 
-  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 200', function(done) {
+  it('Richiesta playlist a spotify 2, con JWT token corretto. Restituisce 202', function(done) {
 	this.timeout(10000);
        chai
 	.request(host)
@@ -141,7 +141,7 @@ describe("test api", () => {
               if (error) {
                  done(error);
               } else {
-		  expect(response.statusCode).to.equal(200);
+		  expect(response.statusCode).to.equal(202);
                   done();
               }
           });
@@ -159,7 +159,7 @@ describe("test api", () => {
                         done(error);
                     } else {
                 console.log(response.statusCode);
-                expect(response.statusCode).to.equal(200);
+                expect(response.statusCode).to.equal(202);
                 console.log(response);
                         done();
                     }

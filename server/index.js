@@ -12,6 +12,7 @@ const mailer = require('nodemailer');
 const {URL} = require('url');
 const axios = require('axios');
 const amqp = require('amqplib/callback_api');
+const bcrypt = require('bcryptjs');
 const GoogleContr = require('./controllers/googlecontr');
 
 const INSTANCE = process.env.INSTANCE || '';
@@ -69,6 +70,38 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
+
+//MONGODB INIT
+var userModel = require("./models/userv2.model")
+mongoose
+	.connect(MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	})
+	.then(() => {
+		console.log("MONGOOSE, UP AND RUNNING");
+		initialize();
+	})
+	.catch(err => {
+		console.error("ERRORE CONNESSIONE MONGOOSE", err);
+		process.exit();
+	});
+
+async function initialize() {
+	userModel.estimatedDocumentCount((err, count) => {
+		if (!err && count === 0) {
+			new userModel({
+				uname: "dev",
+				pword: bcrypt.hashSync('devpass', 8),
+				api_sc: bcrypt.hashSync(generateRandomString(64),8),
+				sancrispino: false,
+			}).save(err => {
+				if (err) { console.log('salvataggio modello dummy fallito:', err) }
+			})
+			console.log('db inizializzato con dummy dev model [NON INTESO PER PRODUCTION]')
+		}
+	});
+}
 
 /* get root path */
 app.get('/', async (req, res) => {

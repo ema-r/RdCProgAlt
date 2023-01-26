@@ -15,7 +15,7 @@ module.exports = function(app) {
 	//front end "home" funzioni login
 	app.get('/oauth', (req,res) => {
 		console.log(functions)
-		if (functions.jwtfun.tokenCheck === 200) {
+		if (functions.tokenCheck === 200) {
 			res.redirect("https://localhost:8443");
 		} else {
 			res.render(href="partials/login_form");
