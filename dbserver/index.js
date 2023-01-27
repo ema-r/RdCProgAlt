@@ -35,7 +35,7 @@ async function amqpconn() {
 				APIhandler.APIrequest(receivedDataString);
 				setTimeout(function() {
 					console.log('[x] chiamato apihandler');
-					channel.ack(msg):
+					channel.ack(msg);
 				}, 1 * 1000);
 			}, {
 				noAck: false
