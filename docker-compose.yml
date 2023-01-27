@@ -7,9 +7,10 @@ services:
       dockerfile: Dockerfile
     links:
       - node1:node1
-      - dbnode:dbnode
+      - node2:node2
     depends_on:
       - node1
+      - node2
     ports:
       - "8080:80"
       - "8443:443"
@@ -30,11 +31,25 @@ services:
       - INSTANCE=node1
     depends_on:
       - mongo
-      - dbnode
     networks:
       - app-network
 
-  dbnode:
+  node2:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    volumes:
+      - ./server:/usr/src/app
+      - ./server/public/uploads:/usr/src/app/public/uploads
+      - /usr/src/app/node_modules
+    environment:
+      - INSTANCE=node2
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  apinode1:
     build:
       context: ./dbserver
       dockerfile: dbDockerfile
@@ -43,7 +58,39 @@ services:
       - ./server/models:/usr/src/app/models
       - /usr/src/app/node_modules
     environment:
-      - INSTANCE=dbnode
+      - INSTANCE=apinode1
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-network
+
+  apinode2:
+    build:
+      context: ./dbserver
+      dockerfile: dbDockerfile
+    volumes:
+      - ./dbserver:/usr/src/app
+      - ./server/models:/usr/src/app/models
+      - /usr/src/app/node_modules
+    environment:
+      - INSTANCE=apinode2
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-network
+
+  apinode3:
+    build:
+      context: ./dbserver
+      dockerfile: dbDockerfile
+    volumes:
+      - ./dbserver:/usr/src/app
+      - ./server/models:/usr/src/app/models
+      - /usr/src/app/node_modules
+    environment:
+      - INSTANCE=apinode3
     depends_on:
       - mongo
       - rabbitmq
