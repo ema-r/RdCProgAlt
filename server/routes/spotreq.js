@@ -109,11 +109,7 @@ module.exports = function(app) {
 		//qui rabbitmq?
 		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		//TIENI D'OCCHIO IL FUNZIONAMENTO QUESTA FUNZIONE NEL TEST, SPESSO RITORNANO
-		//500 QUANDO NON DOVREBBERO.
-		setTimeout(function() {
-			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
-		}, 600);
+		//implementiamo sistema che attende ack?
 
 		res.status(202).send({message: 'richiesta API accettata'});
 	});
