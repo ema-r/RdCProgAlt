@@ -4,32 +4,26 @@
 
 ![alt text](//inserisci link immagine schema in github)
 
-## Autori
-
-Questo progetto di Reti di Calcolatori è stato sviluppato dagli studenti:
-- Andrea Masciarelli
-- Emanuele Roncioni
-
 ## Caratteristiche del progetto
-Effettuando l'accesso con il proprio profilo Google o Spotify e poi inserendo il link di una playlist è possibile eliminare da quella stessa playlist tutti i video o le canzoni non disponibili.
+Effettuando l'accesso con il proprio profilo Google o Spotify tramite OAUTH, e' possibile, inserendo il link di una playlist eliminare da quella stessa playlist tutti i video o le canzoni non disponibili.
 
-Inoltre, sono rese disponibili delle API documentate [qui](// inserisci file in questo percorso /server/public/docs/index.html).
+Le API rese disponibili da questo progetto sono documentate [qui](// inserisci file in questo percorso /server/public/docs/index.html).
 
 ## Requisiti
 - [docker](https://www.docker.com/) 
     Containerizzazione del progetto
 - [node.js](https://nodejs.org)
-    Sviluppo ambiente beck-end
+    Sviluppo logica back-end e front-end
 - [npm](https://www.npmjs.com/)
     Gestore di pacchetti
 - [nginx](https://www.nginx.com/)
-    Ruolo di Web Server
+    Ruolo di Web Server. Agisce da reverse proxy per i node di "facciata"
 - [RabbitMQ](https://www.rabbitmq.com/)
-    Protocollo asincrono richiesto dalle specifiche, usato per le chiamte API
+    Protocollo asincrono, utilizzato per gestire chiamate API con notevole costo computazionale. Richieste sono passate a rabbit da nodi 'frontfacing' e poi smistate a nodi addetti solamente a queste chiamate.
 
 ## Caratteristiche Aggiuntive Richieste dalle Specifiche
 - Accesso a due servizi REST di terzi parti: Google e Spotify
-- Accesso al servizio REST di Google tramite utilizzo di OAUTH: OAUTH2.0
+- Accesso al servizio REST di Google e Spotify tramite utilizzo di OAUTH2.0
 - Automazione del processo di test: Mocha e Chai
 - Implementazione di CI/CD: github actions
 
@@ -58,6 +52,7 @@ SPOTIFY_USER= i tuoi dati api Spotify API
 GOOGLE_REDIRECT_URI=https://localhost:8443/oauth/google/login
 
 ```
+Sono richiesti anche dei certificati SSL self signed validi, posti nella cartelle ./nginx/cert, cosi da poter utilizzare https.
 
 ## Installazione
 
@@ -72,6 +67,7 @@ git clone https://github.com/ema-r/RdCProgAlt.git
 cd RdCPRogAlt/server
 npm install
 ```
+Questo installa LOCALMENTE, sulla propria macchina unix i moduli npm necessari
 
 - Eseguire il build delle immagini e avviare il compose con:
 
@@ -88,7 +84,15 @@ Per avviare i test automatici occorre spostarsi nella directori "server" e usare
 ```
 npm test
 ```
+Ambiente di test utilizza account "di servizio" per testare il funzionamento delle funzioni di scrub,
+per testare sara' necessario fornire dati di accesso adeguati a quest'ultimo.
 
 ## Documentazione Api
 
 Le Api sono state documentate tramite //Commenti?//.
+
+## Autori
+
+Questo progetto di Reti di Calcolatori è stato sviluppato dagli studenti:
+- Andrea Masciarelli
+- Emanuele Roncioni
