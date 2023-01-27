@@ -50,7 +50,6 @@ module.exports = function(app) {
 		var result = await userController.updateGoogleTokens(req,res);
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
-		const googleUser2 = await getGoogleUser({id_token, access_token})
 		req.body.user_id = req.cookies.user_id;
 	
 		//aggiorna permessi nel nostro db
