@@ -102,6 +102,7 @@ async function spotifySnocciolaPlaylist(req_options,uris) {
 //GOOGLE
 async function youtubeScrubPlaylist(req_options) {
 	const result = await youtubeGetPlaylist(req_options);
+	console.log(result.data.items);
 	var daRimuovere = await youtubeElementiDaRimuovere(req_options.access_token, result.data.items);
 	return;
 }
@@ -110,23 +111,26 @@ async function youtubeElementiDaRimuovere(token, elements) {
 	var cnt = 0;
 	elements.forEach(async function(videoData) {
 		cnt = cnt+1
+		console.log("CIAO00000000");
 		if (!youtubeIsVideoAvailable(token, videoData)) {
+			console.log("CIAO");
 			await youtubeRimuoviVideo(token, videoData);
 		}
 	})
-	return res.status(200).send({message:'finito'});
+	console.log("Finito");
+	return;
 }
 
 async function youtubeRimuoviVideo(token, videoData) {
 	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
 	try {
-		var res = await axios.get(rootUrl, {
+		var res = await axios.delete(rootUrl, {
 			headers: {
 				'Content-Type': 'application/json',
 				'Authorization': 'Bearer'+token
 			}
 		});
-		return res;
+		
 	} catch(error) {
 		console.log('errore DELETE elemento da playlist')
 		res.status(500).send({message: errore});
@@ -134,6 +138,9 @@ async function youtubeRimuoviVideo(token, videoData) {
 }
 
 async function youtubeIsVideoAvailable(token, videoData) {
+	console.log("CIAO2");
+	console.log('ciao2 '+videoData.status.uploadStatus);
+	console.log('ciao2 '+videoData.status.privacyStatus);
 	if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private') {
 			return false;
 	}

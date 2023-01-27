@@ -23,13 +23,13 @@ module.exports = {
 		});
 	},
 	sessionCheck(req,res,next) {
-//		session = req.session;
-//		let token = req.body.user_id;
-//		if (!token) {
-//			return res.status(403).send({message: 'cookie non fornito'});
-//		}
-//		req.body.user_id = req.cookies.user_id
-		next();
+		console.log(req.cookies.user_id);
+		if(req.cookies.user_id !== undefined ){
+			req.body.user_id = req.cookies.user_id;
+			next();
+		} else {
+			return res.status(403).send({message: 'cookie non fornito'});
+		}
 	},
 	hasGivenSpotifyPerm(req, res, next) {
 		User.findById(req.user_id).exec((err, user) => {

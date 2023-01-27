@@ -67,9 +67,15 @@ module.exports = function(app) {
 
 		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		setTimeout(function() {
-			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
-		}, 600);
+
+		res.status(202).send({message: 'richiesta API accettata'});
+		
+	});
+
+	app.post('/youtube/scrub_playlist', async (req, res) => {
+		var tokenData = await userController.getGoogleTokens(req,res);
+		rabbitfun.sendAPIData('youtube:'+req.body.formUrl1+':'+tokenData.accessToken);
+
 
 		res.status(202).send({message: 'richiesta API accettata'});
 		

@@ -114,6 +114,18 @@ module.exports = function(app) {
 		res.status(202).send({message: 'richiesta API accettata'});
 	});
 
+	app.post('/spotify/scrub_playlist',  async (req, res) => {
+		var tokenData = await userController.getSpotifyTokens(req, res)
+
+		//check preliminare errori?
+		
+
+		//qui rabbitmq?
+		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
+
+		res.status(202).send({message: 'richiesta API accettata'});
+	});
+
 	//FUNZIONE ELIMINA DATI SPOTIFY UTENTE
 	//Riceve token JWT come x-access-token nell'header e cancella tutti i dati relativi
 	//all'utente e spotify nel db. Restituisce 200 se andata a buon termine
