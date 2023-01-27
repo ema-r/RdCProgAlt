@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config('../.env')
 
-//const db = require('/models')
+const controller = require('../controllers/sessioncontr')
 const UserV2 = require('../models/userv2.model');
 const UserV2_spotify_data = require('../models/userv2_spotify_data.model');
 const UserV2_youtube_data = require('../models/userv2_youtube_data.model');
@@ -32,48 +32,18 @@ module.exports = {
 		}
 	},
 	hasGivenSpotifyPerm(req, res, next) {
-		User.findById(req.user_id).exec((err, user) => {
-			if (err) {
-				res.status(500).send({message: err});
-				return;
-			}
-			UserV2_spotify_data.Find({_id: { $in: user.spotify_data }},
-				(err, roles) => {
-					if (err) {
-						res.status(500).send({message: err});
-						return;
-					}
-					if (spotify_data.has_permission === true) {
-						next();
-						return;
-					}
-				res.status(403).send({message: 'permessi spotify richiesti'});
-				return;
-				}
-			)
-		})
+		var data = await controller.spotifyGetPermission(req,res);		
+		if (data === false) {
+			res.status(403).send({message: 'accesso a spotify necessario'});
+		}
+		next();
 	},
 	hasGivenYoutubePerm(req, res, next) {
-		User.findById(req.user_id).exec((err, user) => {
-			if (err) {
-				res.status(500).send({message: err});
-				return;
-			}
-			UserV2_youtube_data.Find({_id: { $in: user.youtube_data }},
-				(err, roles) => {
-					if (err) {
-						res.status(500).send({message: err});
-						return;
-					}
-					if (youtube_data.has_permission === true) {
-						next();
-						return;
-					}
-				res.status(403).send({message: 'permessi spotify richiesti'});
-				return;
-				}
-			)
-		})
+		var data = await controller.youtubeGetPermission(req,res);
+		if (data === false) {
+			res.status(403).send({message: 'accesso a youtube necessario'});
+		}
+		next();
 	}
 
 }
