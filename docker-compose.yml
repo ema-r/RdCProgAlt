@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     links:
       - node1:node1
+      - dbnode:dbnode
     depends_on:
       - node1
     ports:
@@ -29,11 +30,38 @@ services:
       - INSTANCE=node1
     depends_on:
       - mongo
+      - dbnode
+    networks:
+      - app-network
+
+  dbnode:
+    build:
+      context: ./dbserver
+      dockerfile: dbDockerfile
+    volumes:
+      - ./dbserver:/usr/src/app
+      - ./server/models:/usr/src/app/models
+      - /usr/src/app/node_modules
+    environment:
+      - INSTANCE=dbnode
+    depends_on:
+      - mongo
+      - rabbitmq
     networks:
       - app-network
 
   mongo:
     image: mongo:4.4.6
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3.10.14-management-alpine
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - app-network
 

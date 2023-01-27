@@ -1,4 +1,4 @@
-const functions = require('./../functions/exported');
+const functions = require('./../functions/jwtfun');
 const controller = require('./../controllers/sessioncontr');
 const util = require('node:util');
 
@@ -15,45 +15,45 @@ module.exports = function(app) {
 	//front end "home" funzioni login
 	app.get('/oauth', (req,res) => {
 		console.log(functions)
-		if (functions.jwtfun.tokenCheck === 200) {
+		if (functions.tokenCheck === 200) {
 			res.redirect("https://localhost:8443");
 		} else {
 			res.render(href="partials/login_form");
 		}
 	});
+
 	//front end iscrizione
 	app.get('/oauth/signup', (req,res) => {
 		//implem check duplicati. Gia presenti nelle funzioni
 		//vanno solamente aggiunti
 		res.render(href="partials/signup_form")
 	});	
-	//Riceve richieste JWT token. Il token va salvato da client,
-	//e va mandato in richiesta per la maggior parte delle funzioni
-	//dell'API.
-	app.post('/oauth/request_token', (req,res) => {
-		controller.requestJWT(req,res);
-	})
 
+	//Riceve richieste creazione account FRONTEND. Necessita un campo uname
+	//(username) e un campo pword (password) per crearlo correttamente,
+	//forniti da form
+	//necessario per accedere a /oauth/login, che fornisce token JWT
+	//per utilizzo applicazione. se andato senza problemi redirige a 
+	//home
+	app.post('/oauth/signup', async (req, res) => {
+		var data = await controller.signUp(req,res);
+		res.redirect('/');
+	});
+	
 	//Riceve richieste creazione account. Necessita un campo uname
 	//(username) e un campo pword (password) per crearlo correttamente
 	//necessario per accedere a /oauth/login, che fornisce token JWT
 	//per utilizzo applicazione. se andato senza problemi restituisce
 	//status 200 e un JSON contenente messaggio di reg riuscita
 	//e nome utente.
-	app.post('/oauth/signup', async (req, res) => {
-		controller.signUp(req,res);
-	});
-	
+	app.post('/oauth/signup/api', async (req, res) => {
+		var data = await controller.signUp(req,res);
+		res.status(200).send({message: 'iscrizione riuscita'});
+	})
 
 	//Necessita un campo uname e pword validi e gia presenti nel DB
-	//Se non incontra problemi, restituisce una risposta con status
-	//200 e contenente user id, user uname e l'accesstoken richiesto
-	//rispettivamente in campi user_id, uname e accessToken
-	//
-	//DA RISOLVERE E CANCELLARE PRIMA DI CONSEGNA
-	//Sarebbe buona idea rendere consistente utilizzo camelcase/underscore
-	//in tutto il codice, attualmente utilizziamo entrambi per access token
-	//in modo intermittente
+	//Se non incontra problemi, manda utente a pagina account, 
+	//aggiunge cookie user id
 	app.post('/oauth/login', async (req, res) => {
 		session = req.session
 		var data = await controller.signIn(req,res);
@@ -68,12 +68,27 @@ module.exports = function(app) {
 //		console.log('oauth login route res: '+response);
 //		res.redirect('https://localhost:8443/api/test')
 	})
-	//login bypassando frontend, riceve json dati
-	app.post('/oauth/login/JSON', async (req,res) => {
+
+	//Necessita campo uname e pword validi e gia presenti nel DB
+	//se non incontra problemi, restituisce status 200 e 
+	//accessToken, token JWT necessario per API
+	app.post('/oauth/login/api', async (req,res) => {
 		var data = await controller.signIn(req,res);
 		res.send({accessToken: data.accessToken});
 	})
-//	app.get('/oauth/postlogin', (req,res) => {
-//		res.render(href='partials/logged_in')
-//	})
+
+	//Necessita campo uname e pword validi, gia presenti nel DB
+	//se non incontra problemi redirige a home, per FRONTEND
+	app.delete('/oauth/delete', [functions.sessionCheck] ,async (req,res) => {
+		var data = await controller.deleteUser(req,res);
+		res.redirect('/');
+	});
+
+	//Necessita campo uname e pword validi, gia presenti nel DB
+	//se non incontra problemi restituisce 200	
+	app.delete('/oauth/delete/api', [functions.tokenCheck], async (req,res) => {
+		var data = await controller.deleteUser(req,res);
+		res.status(200).send({message: 'account eliminato correttamente, arrivederci'});
+	});
+
 ;}
