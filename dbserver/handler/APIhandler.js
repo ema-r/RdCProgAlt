@@ -101,9 +101,9 @@ async function spotifySnocciolaPlaylist(req_options,uris) {
 
 //GOOGLE
 async function youtubeScrubPlaylist(req_options) {
-	const result = await getPlaylist(req_options);
-	var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
-	return
+	const result = await youtubeGetPlaylist(req_options);
+	var daRimuovere = await youtubeElementiDaRimuovere(tokenData.accessToken, result.data.items);
+	return;
 }
 
 async function youtubeElementiDaRimuovere(token, elements) {
