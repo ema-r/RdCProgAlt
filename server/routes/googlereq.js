@@ -4,6 +4,8 @@ const userController = require('./../controllers/sessioncontr.js');
 const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
 
+const rabbitfun = require('./../functions/rabbitfun');
+
 module.exports = function(app) {
 	app.use(function(req,res,next) {
 		res.header(
@@ -33,25 +35,34 @@ module.exports = function(app) {
 	
 		const id_token = tokens.id_token;
 		const access_token = tokens.access_token;
+		const refresh_token = tokens.refres_token;
+		const expires_in = tokens.expires_in
 	
 		console.log("[GOOGLE CALLBACK ROUTE] "+id_token);
 		console.log("[GOOGLE CALLBACK ROUTE] "+access_token);
+		console.log("[GOOGLE CALLBACK ROUTE] "+refresh_token);
 	
 		req.body.google_id_token = id_token;
 		req.body.google_access_token = access_token;
+		req.body.google_refresh_token = refresh_token;
+		req.body.google_expires_in = expires_in;
+
 		var result = await userController.updateGoogleTokens(req,res);
 	
 		//solo per test, puo essere tranquillamente rimosso piu avanti
 		const googleUser2 = await getGoogleUser({id_token, access_token})
 		req.body.user_id = req.cookies.user_id;
-		console.log("google user trovato: "+JSON.stringify(googleUser2));
 	
 		//aggiorna permessi nel nostro db
 		await googleController.updatePermissions(req,res);
 		res.redirect('/');
 	});
 	
-	//YOUTUBE SCRUB PLAYLIST
+	//YOUTUBE SCRUB PLAYLIST	
+	////riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token google salvati per l'utente se presente (check), ottiene
+	//playlist da google con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso google. restituisce 202 accettato
+	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google
 	//app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
 	//	var access_token = await userController.getAccessToken(req,res);
 	//	console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
@@ -63,126 +74,49 @@ module.exports = function(app) {
 	//	const result = await getPlaylist(req_options);
 	//	console.log(JSON.stringify(result));
 	//});	
-	app.post('/youtube/scrub_playlist',  [functions.tokenCheck], async (req, res) => {
+	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck], async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 
-		const req_options = {
-			playlist_id: req.playlist_id,
-			access_token: tokenData.accessToken
-		}
-		const result = await getPlaylist(req_options);
+		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
-		if (result.status === 404) {
-			res.status(404).send({message: 'playlist non trovata'})
-		}
-		if (result.status < 200 || result.statusCode > 299) {
-			res.status(500).send({message: 'errore'});
-		}
-		console.log(result.data);
-		var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
+	//	const req_options = {
+	//		playlist_id: req.playlist_id,
+	//		access_token: tokenData.accessToken
+	//	}
+	//	const result = await getPlaylist(req_options);
 
-		res.status(200).send({message: 'finito'});
+	//	//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
+	//	if (result.status === 404) {
+	//		res.status(404).send({message: 'playlist non trovata'})
+	//	}
+	//	if (result.status < 200 || result.statusCode > 299) {
+	//		res.status(500).send({message: 'errore'});
+	//	}
+	//	console.log(result.data);
+	//	var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
+		setTimeout(function() {
+			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
+		}, 600);
+
+		res.status(202).send({message: 'richiesta API accettata'});
 		
 	});
-	
-}
 
-//utilizza id video invece che id video playlist
-//async function elementiDaRimuovere(token, elements) {
-//	var cnt = 0;
-//	elements.forEach(function(videoData) {
-//		cnt = cnt+1
-//		console.log('elementi in elemento: '+Object.keys(videoData))
-//		console.log('snippet: '+videoData.snippet);
-//		if (!isilable(token, videoData.snippet.resourceId.videoId)) {
-//			await rimuoviVideo(token, videoData);
-//		}
-//	})
-//	return res.status(200).send({message:'finito'});
-//}
-
-async function elementiDaRimuovere(token, elements) {
-	var cnt = 0;
-	elements.forEach(async function(videoData) {
-		cnt = cnt+1
-		if (isVideoAvailable(token, videoData) === false) {
-			console.log("CIAOOOOOOOO");
-			await rimuoviVideo(token, videoData);
-		}
+	//elimina dati utente relativi a youtube (id token, access token, refresh token) tramite 
+	//chiamata API REST. Richiede token JWT valido passato come x-access-token nell'header
+	app.delete('/youtube/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
+		await userController.deleteYoutubeData(req,res);
+		res.status(200).send({message: 'spotify data deleted'});
 	})
-	return ;
-}
 
-async function rimuoviVideo(token, videoData) {
-	console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	const rootUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?id='+videoData.id+'&access_token='+token;
-	try {
-		var res = await axios.delete(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer '+token
-			}
-		});
-		console.log(res);
-		return res;
-	} catch(error) {
-		console.log('errore DELETE elemento da playlist')
-		res.status(500).send({message: error});
-	}
-}
 
-//usa video invece che playlist item
-//async function isVideoAvailable(token, video_id) {
-//	const rootUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatus&id='+video_id+'&access_token='+token;	
-//	try {
-//		var res = await axios.get(rootUrl, {
-//			headers: {
-//				'Content-Type': 'application/json',
-//				'Authorization': 'Bearer ' + token
-//			}
-//		});
-//
-//		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
-//		//res.data.items[0].contentDetails.regionRestriction
-//		var videoData = res.data.items[0];
-//		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' || (videoData.contentDetails.regionRestriction != null && (!videoData.contentDetails.regionRestriction.allowed.includes('IT') || videoData.contentDetails.regionRestriction.blocked.includes('IT'))) ) {
-//			return false;
-//		}
-//		return true;
-//	} catch(error) {
-//		console.log('errore richiesta canzone: '+error.response);
-//	}
-//
-//}
-
-function isVideoAvailable(token, videoData) {
-	console.log("TEST");
-		//utili res.data.items[0].status.uploadStatus, res.data.items[0].status.privacyStatus,
-		//res.data.items[0].contentDetails.regionRestriction
-		if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private' ) {
-			console.log("ERRORE?");
-			return false;
-		}
-		return true;
-
-}
-
-async function getPlaylist(req_options){
-	//AGGIUNGI GESTIONE PER PLAYLIST CON > 50 ELEMENTI
-	const rootUrl = 'https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus%2Cid&playlistId=PL3NbNT5u7ISkrMCyLZmt8Gs7tU_ef3lOa&access_token='+req_options.access_token+'&maxResults=50';
-	//https://www.youtube.com/playlist?list=PL3NbNT5u7ISkrMCyLZmt8Gs7tU_ef3lOa
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			}
-		});
-		return res;
-	}catch(error) {
-		console.log('errore richiesta canzone: ', error.response)
-	}
+	//elimina dati utente relativi a youtube (id token, access token, refresh token). Richiede 
+	//sessione valida
+	app.delete('/youtube/delete_access_data', [functions.sessionCheck], async function(req,res) {
+		await userController.deleteYoutubeData(req,res);
+		res.redirect('/login/oauth');
+	})
+	
 }
 
 function getGoogleOAuthURL() {
@@ -208,13 +142,15 @@ function getGoogleOAuthURL() {
 }
 
 async function handlerGoogleOAuth(code) {
-	console.log(code);
-	const {id_token, access_token} = await getGoogleOAuthToken(code);
-	console.log('[HANDLER]: '+ id_token);
-	console.log('[HANDLER]: '+ access_token);
-	var data = {
-		id_token: id_token,
-		access_token: access_token
+	var tokens = await getGoogleOAuthToken(code);
+	console.log('[HANDLER]: '+ tokens.id_token);
+	console.log('[HANDLER]: '+ tokens.access_token);
+	console.log('[HANDLER]: '+ tokens.refresh_token);
+	const data = {
+		id_token: tokens.id_token,
+		access_token: tokens.access_token,
+		refresh_token: tokens.refresh_token,
+		expires_in: tokens.expires_in
 	}	
 	return data;
 }
@@ -228,34 +164,15 @@ async function getGoogleOAuthToken(code) {
 		redirect_uri: "https://localhost:8443/oauth/google/login",
 		grant_type: 'authorization_code',
 	};
-
 	try {
 		const res = await  axios.post(rootUrl,options, {
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-			
-			
+			},		
 		});
-		console.log(res);
+		console.log('[TOKEN DI GOOGLE]: '+res);
 		return res.data
 	} catch(error) {
 		console.log(error, 'fallimento fetch token');
 	}
 };
-
-
-async function getGoogleUser({id_token, access_token}) {
-	try {
-		const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token='+access_token, {
-			headers: {
-				Authorization: 'Bearer '+id_token
-			}
-		})
-		return res.data
-	} catch(error) {
-		console.log(error, "ERRORE RITORNO DATI UTENTE");
-		throw new Error(error.message);
-	}
-}
-

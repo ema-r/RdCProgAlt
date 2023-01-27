@@ -5,6 +5,8 @@ const axios = require('axios');
 const dotenv = require('dotenv').config('./../.env');
 const {URLSearchParams} = require('url');
 
+const rabbitfun = require('./../functions/rabbitfun');
+
 var generateRandomString = function(length) {  //va spostata in functions, per ora e' qui
 	var text = '';
 	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -40,10 +42,6 @@ module.exports = function(app) {
 		session = req.session;
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state, {httpOnly: false});
-
-//		console.log('[SPOTIFY INITIAL SETUP 1] USERID: '+ req.cookie(user_id))	
-//		console.log('[SPOTIFY INITIAL SETUP 2] USERID: '+ req.cookie.user_id)
-		console.log('[SPOTIFY INITIAL SETUP 3] USERID: '+ req.body.user_id)
 
 		var scope = 'playlist-read-private playlist-modify-private playlist-modify-public';
 		var rootUrl = 'https://accounts.spotify.com/authorize?';
@@ -97,73 +95,44 @@ module.exports = function(app) {
 		}
 	});
 
-	//app.post('/spotify/scrub_playlist', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
-	app.post('/spotify/scrub_playlist', [functions.tokenCheck],  async function(req, res){
-//		res.render('get_playlist', {title: 'Get playlist'});
+	//FUNZIONE PLAYLIST SCRUB
+	//riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token spotify salvati per l'utente se presente (check), ottiene
+	//playlist da spotify con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso spotify. restituisce 200 se andato a buon fine
+	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a spotify
+	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck],  async function(req, res){
 		var tokenData = await userController.getSpotifyTokens(req, res)
-		const req_options = {
-			playlist_id: req.body.playlist_id,
-			market: 'IT',
-			access_token: tokenData.accessToken 
-		}
-		const result = await getPlaylist(req_options);
-		console.log('spotify scrub playlist response: '+result);
-		console.log('spotify scrub playlist response items: '+result.items);
 
-		const daRimuovere = elementiDaRimuovere(result.items);
-		console.log(daRimuovere);
+		//check preliminare errori?
+		
 
-		const resRimozione = await snocciolaPlaylist(req_options,daRimuovere);
+		//qui rabbitmq?
+		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-		res.status(200).send(result);
+		//TIENI D'OCCHIO IL FUNZIONAMENTO QUESTA FUNZIONE NEL TEST, SPESSO RITORNANO
+		//500 QUANDO NON DOVREBBERO.
+		setTimeout(function() {
+			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
+		}, 600);
+
+		res.status(202).send({message: 'richiesta API accettata'});
 	});
 
-	//SEMPLICE FUNZIONE TEST
-	app.get('/test', async function(req,res) {
-		session = req.session
-		req.body.user_id = req.cookies.user_id
-
-		var dati = await userController.getData(req,res);
-
-		console.log('[TEST] dati: '+dati);
-
-		res.status(200).send({res: dati});
-	});
-};
-
-function elementiDaRimuovere(tracks) {
-	var removeTrack = new Array();
-	var cnt = 0;
-	tracks.forEach(function(trackData) {
-		cnt = cnt+1
-		console.log('elementi in traccia: '+Object.keys(trackData.track))
-		console.log('TRACCIA TROVATA IN PLAYLIST NUMERO '+cnt+', traccia: '+trackData.track.name);
-		if (trackData.track.is_playable === false) {
-			removeTrack.push({'uri': trackData.track.uri});
-		}
+	//FUNZIONE ELIMINA DATI SPOTIFY UTENTE
+	//Riceve token JWT come x-access-token nell'header e cancella tutti i dati relativi
+	//all'utente e spotify nel db. Restituisce 200 se andata a buon termine
+	app.delete('/spotify/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
+		await userController.deleteSpotifyData(req,res);
+		res.status(200).send({message: 'spotify data deleted'});
 	})
-	return removeTrack;
-}
 
-async function snocciolaPlaylist(req_options,uris) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+req_options.playlist_id+'/tracks'
-	try {
-		var res = await axios.delete(rootUrl, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			},
-			data: {
-				tracks: uris,
-			},
-		});
-		return res
-	} catch(error) {
-		console.log(error, 'fallimento eliminazione elementi');
-		throw new Error(error.message);
-	}
-}
+	//COME SOPRA MA DESTINATA A FRONTEND
+	app.delete('/spotify/delete_access_data', [functions.sessionCheck], async function(req,res) {
+		await userController.deleteSpotifyData(req,res);
+		res.redirect('/login/oauth');
+	})
+
+};
 
 async function getSpotifyAccessToken(query) {
 	var rootUrl = 'https://accounts.spotify.com/api/token';
@@ -182,26 +151,4 @@ async function getSpotifyAccessToken(query) {
 	}
 }
 
-async function getPlaylist(req_options) {
-	const rootUrl = 'https://api.spotify.com/v1/playlists/'+ req_options.playlist_id+'/tracks'+'?market='+ req_options.market
-	try {
-		var res = await axios.get(rootUrl, {
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + req_options.access_token
-			},
-		});
-		return res.data
-	} catch(error) {
-		console.log(error, 'fallimento fetch playlist da spotify');
-		throw new Error(error.message);
-	}
-	
-//	})
-//	.then((res) => {
-//		return res.data;
-//	})
-//	.catch((error) => {
-//		console.log('errore richiesta playlist: ',error.response)
-//	})
-}
+

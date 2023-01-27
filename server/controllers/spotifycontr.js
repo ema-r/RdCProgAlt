@@ -30,10 +30,10 @@ module.exports = {
 			throw new Error(error.message)
 		}
 	},
-	async setData(req,res) {
+	async deleteData(req,res) {
 		userv2.updateOne({
 			id: req.body.user_id},
-			{$set: {sancrispino: true}},
+			{$set: {spotify_has_permission: false}, $unset: {spotify_access_token: '', spotify_expires_in: '', spotify_refresh_token: ''}},
 			function(err, data) {
 				if (err) {
 					return res.status(500).send({message: err})
