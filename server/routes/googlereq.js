@@ -102,7 +102,6 @@ module.exports = function(app) {
 		
 	});
 
-	
 	//elimina dati utente relativi a youtube (id token, access token, refresh token) tramite 
 	//chiamata API REST. Richiede token JWT valido passato come x-access-token nell'header
 	app.delete('/youtube/delete_access_data/api', [functions.tokenCheck], async function(req,res) {
@@ -119,7 +118,6 @@ module.exports = function(app) {
 	})
 	
 }
-
 
 function getGoogleOAuthURL() {
 	const rootUrl = 'https://accounts.google.com/o/oauth2/auth?'
