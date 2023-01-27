@@ -59,41 +59,15 @@ module.exports = function(app) {
 	});
 	
 	//YOUTUBE SCRUB PLAYLIST	
-	////riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token google salvati per l'utente se presente (check), ottiene
+	//riceve JWT come x-access-token nell'header, playlist_id nel body, ottiene i token google salvati per l'utente se presente (check), ottiene
 	//playlist da google con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
 	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso google. restituisce 202 accettato
 	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google
-	//app.get('/youtube/scrub_playlist/JSON', [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
-	//	var access_token = await userController.getAccessToken(req,res);
-	//	console.log('[SCRUB PLAYLIST] ACCESS TOKEN TROVATO :'+access_token);
-	//	const req_options = {
-	//		playlist_id: req.body.playlist_id,
-	//		api_key: process.env.GOOGLE_API_KEY,
-	//		access_token: access_token
-	//	}
-	//	const result = await getPlaylist(req_options);
-	//	console.log(JSON.stringify(result));
-	//});	
 	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck], async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 
 		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
 
-	//	const req_options = {
-	//		playlist_id: req.playlist_id,
-	//		access_token: tokenData.accessToken
-	//	}
-	//	const result = await getPlaylist(req_options);
-
-	//	//SAREBBE BUONA IDEA CREARE SINGOLA FUNZIONE DI ERROR HANDLING
-	//	if (result.status === 404) {
-	//		res.status(404).send({message: 'playlist non trovata'})
-	//	}
-	//	if (result.status < 200 || result.statusCode > 299) {
-	//		res.status(500).send({message: 'errore'});
-	//	}
-	//	console.log(result.data);
-	//	var daRimuovere = await elementiDaRimuovere(tokenData.accessToken, result.data.items);
 		setTimeout(function() {
 			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
 		}, 600);

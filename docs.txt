@@ -1,0 +1,51 @@
+//user access and management
+
+POST https://yourdomainname/oauth/signup/api
+
+	Riceve richieste creazione account. Necessita un campo uname
+	(username) e un campo pword (password) per crearlo correttamente
+	necessario per accedere a /oauth/login, che fornisce token JWT
+	per utilizzo applicazione. se andato senza problemi restituisce
+	status 200 e un JSON contenente messaggio di reg riuscita
+	e nome utente.
+
+POST https://yourdomainname/oauth/login/api
+
+	Necessita campo uname e pword validi e gia presenti nel DB
+	se non incontra problemi, restituisce status 200 e 
+	accessToken, token JWT necessario per API
+
+DELETE https://yourdomainname/oauth/delete/api
+	
+	Necessita campo uname e pword validi, gia presenti nel DB
+	se non incontra problemi redirige a home, per FRONTEND
+
+//spotify
+
+POST https://yourdomainname/spotify/scrub_playlist/api
+	
+	FUNZIONE PLAYLIST SCRUB
+	riceve JWT come x-access-token nell'header, playlist id nel body, ottiene i token spotify salvati per l'utente se presente (check), ottiene
+	playlist da spotify con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso spotify. restituisce 202 se accettato
+	accessibile solo tramite chiamate api con token jwt valido, necessario accesso a spotify tramite frontend fornito
+
+DELETE https://yourdomainname/spotify/delete_access_data/api
+
+	Riceve token JWT come x-access-token nell'header e cancella tutti i dati relativi
+	all'utente e spotify nel db. Restituisce 200 se andata a buon termine
+
+//youtube/google
+
+POST https://yourdomainname/youtube/scrub_playlist/api
+
+	riceve JWT come x-access-token nell'header, playlist_id nel body, ottiene i token google salvati per l'utente se presente (check), ottiene
+	playlist da google con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
+	e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso google. restituisce 202 accettato
+	accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google tramite frontend fornito
+
+DELETE https://yourdomainname/youtube/delete_access_data/api
+
+	elimina dati utente relativi a youtube (id token, access token, refresh token) tramite 
+	chiamata API REST. Richiede token JWT valido passato come x-access-token nell'header
+

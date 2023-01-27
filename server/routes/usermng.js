@@ -86,7 +86,7 @@ module.exports = function(app) {
 
 	//Necessita campo uname e pword validi, gia presenti nel DB
 	//se non incontra problemi restituisce 200	
-	app.delete('/oauth/delete/api', [functions.tokenCheck], async (req,res) => {
+	app.delete('/oauth/delete/api', async (req,res) => {
 		var data = await controller.deleteUser(req,res);
 		res.status(200).send({message: 'account eliminato correttamente, arrivederci'});
 	});
