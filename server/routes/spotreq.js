@@ -121,7 +121,7 @@ module.exports = function(app) {
 		
 
 		//qui rabbitmq?
-		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
+		rabbitfun.sendAPIData('spotify:'+req.body.formUrl2+':'+tokenData.accessToken);
 
 		res.status(202).send({message: 'richiesta API accettata'});
 	});

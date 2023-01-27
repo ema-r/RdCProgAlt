@@ -137,11 +137,8 @@ async function youtubeRimuoviVideo(token, videoData) {
 	}
 }
 
-async function youtubeIsVideoAvailable(token, videoData) {
-	console.log("CIAO2");
-	console.log('ciao2 '+videoData.status.uploadStatus);
-	console.log('ciao2 '+videoData.status.privacyStatus);
-	if (videoData.status.uploadStatus === 'deleted' || videoData.status.privacyStatus === 'private') {
+function youtubeIsVideoAvailable(token, videoData) {
+	if (videoData.status.privacyStatus === 'private' || videoData.status.uploadStatus === 'deleted') {
 			return false;
 	}
 	return true;
