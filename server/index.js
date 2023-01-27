@@ -14,7 +14,7 @@ const axios = require('axios');
 const amqp = require('amqplib/callback_api');
 const bcrypt = require('bcryptjs');
 const GoogleContr = require('./controllers/googlecontr');
-
+const authFunction = require("./functions/jwtfun");
 const INSTANCE = process.env.INSTANCE || '';
 const MONGO_URI = process.env.MONGO_URI || '';
 const PORT = process.env.PORT || 3001;
@@ -116,13 +116,10 @@ require('./routes/userreq')(app);
 require('./routes/spotreq')(app);
 require('./routes/googlereq')(app);
 
-app.get('/oauth/logout', (req, res) => {
-	if ( req.session){
-		req.session.destroy();
-		console.log("Sloggato con successo");
-		res.redirect("https://localhost:8443");
-	}
-	
+app.get('/oauth/logout', [authFunction.sessionCheck], (req, res) => {
+	res.clearCookie("user_id");
+	console.log("Sloggato con successo");
+	res.redirect("https://localhost:8443");
 });
 
 app.get('/amqptest', (req,res) =>  {
