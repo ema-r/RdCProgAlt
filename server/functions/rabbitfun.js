@@ -17,9 +17,9 @@ module.exports = {
 				var queue = 'APIcalls';
 				
 				channel.assertQueue(queue, {
-					durable: false
+					durable: true
 				});
-				channel.sendToQueue(queue, Buffer.from(datastring));
+				channel.sendToQueue(queue, Buffer.from(datastring), {persistent: true});
 				console.log(' [X] inviato %s', datastring);
 				ret = 1;
 			})

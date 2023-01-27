@@ -24,16 +24,21 @@ async function amqpconn() {
 			var queue = 'APIcalls';
 	
 			channel.assertQueue(queue, {
-				durable: false,
+				durable: true,
 			})
+			channel.prefetch(1);
 			console.log(' [*] in attesa di msg su %s', queue);
 			channel.consume(queue, function(msg) {
 				//inserisci qui azioni api
 				var receivedDataString = msg.content.toString();
 				console.log(" [x] ricevuto %s", receivedDataString);
 				APIhandler.APIrequest(receivedDataString);
+				setTimeout(function() {
+					console.log('[x] chiamato apihandler');
+					channel.ack(msg):
+				}, 1 * 1000);
 			}, {
-				noAck: true
+				noAck: false
 			});
 		});
 
