@@ -91,7 +91,7 @@ module.exports = function(app) {
 		        await spotifyController.updatePermissions(req,res);
 		    	await userController.updateSpotifyTokens(req,res);
 		    	console.log('dati correttamente salvati');
-			res.redirect('/test');
+			res.redirect('/');
 		}
 	});
 
