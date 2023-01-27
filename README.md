@@ -2,7 +2,7 @@
 
 ## Architettura
 
-![alt text](//inserisci link immagine schema in github)
+![alt text](https://github.com/ema-r/RdCProgAlt/blob/main/architettura.jpg))
 
 ## Caratteristiche del progetto
 Effettuando l'accesso con il proprio profilo Google o Spotify tramite OAUTH, e' possibile, inserendo il link di una playlist eliminare da quella stessa playlist tutti i video o le canzoni non disponibili.
