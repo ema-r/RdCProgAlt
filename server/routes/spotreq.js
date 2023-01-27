@@ -132,6 +132,11 @@ module.exports = function(app) {
 		res.redirect('/login/oauth');
 	})
 
+	app.get('/spotify/rmqtest', async function(req,res) {
+		var data = await rabbitfun.sendAPIData('test:23vwg343hvsa:gibberishtoken');
+		//aggiungi error handling
+		return res.status(202).send({message: 'test in corso'});
+	})
 };
 
 async function getSpotifyAccessToken(query) {
