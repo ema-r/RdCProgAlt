@@ -75,6 +75,19 @@ module.exports = function(app) {
 		
 	});
 
+	app.post('/youtube/scrub_playlist', async (req, res) => {
+		var tokenData = await userController.getGoogleTokens(req,res);
+
+		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
+
+		setTimeout(function() {
+			res.status(500).send({message: 'qualcosa é andato storto nella richiesta API'});
+		}, 600);
+
+		res.status(202).send({message: 'richiesta API accettata'});
+		
+	});
+
 	//elimina dati utente relativi a youtube (id token, access token, refresh token) tramite 
 	//chiamata API REST. Richiede token JWT valido passato come x-access-token nell'header
 	app.delete('/youtube/delete_access_data/api', [functions.tokenCheck], async function(req,res) {

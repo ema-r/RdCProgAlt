@@ -59,22 +59,22 @@
       </div>
       <br>
        
-      <form action="/form" method="post">
-          <label for="song_url">Inserisci url canzone: </label>
+      <form action="/youtube/scrub_playlist" method="post">
+          <label for="youtube_playlist_url">Inserisci playlist Youtube </label>
           <br>
           <input
-            id="song_url"
+            id="youtube_playlist_url"
             type="text"
             name="formUrl1"
             placeholder="inserisci testo"
             required />
           <input type="submit" value="OK" />
       </form>
-      <form action="/spot/get_playlist" method="post">
-          <label for="playlist_url">Inserisci url playlist: </label>
+      <form action="/spotify/scrub_playlist" method="post">
+          <label for="spotify_playlist_url">Inserisci playlist Spotify </label>
           <br>
           <input
-            id="playlist_url"
+            id="spotify_playlist_url"
             type="text"
             name="formUrl2"
             placeholder="inserisci testo" 
