@@ -2,7 +2,7 @@
 
 ## Architettura
 
-![alt text](//inserisci link immagine schema in github)
+![alt text](https://github.com/ema-r/RdCProgAlt/blob/main/architettura.jpg)
 
 ## Caratteristiche del progetto
 Effettuando l'accesso con il proprio profilo Google o Spotify tramite OAUTH, e' possibile, inserendo il link di una playlist eliminare da quella stessa playlist tutti i video o le canzoni non disponibili.
@@ -38,7 +38,7 @@ Ottenute le credenziali da Google e da SPotify, è necessario aggiornare il file
 ```
 GOOGLE_CLIENT_ID= il tuo client ID
 GOOGLE_CLIENT_SECRET= il tuo client Secret
-REDIRECT_URI=http://localhost:8080/oauth/google/callback
+GOOGLE_REDIRECT_URI=https://localhost:8443/oauth/google/login
 
 SECRET=secret_token
 
@@ -47,12 +47,10 @@ PORT=3000
 
 SPOTIFY_CLIENT_ID= i tuoi dati api Spotify API
 SPOTIFY_CLIENT_SECRET= i tuoi dati api Spotify API
-SPOTIFY_USER= i tuoi dati api Spotify API
-
-GOOGLE_REDIRECT_URI=https://localhost:8443/oauth/google/login
 
 ```
 Sono richiesti anche dei certificati SSL self signed validi, posti nella cartelle ./nginx/cert, cosi da poter utilizzare https.
+SECRET e' utilizzato come secret key per varie funzioni di hashing.
 
 ## Installazione
 
