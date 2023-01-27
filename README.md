@@ -87,7 +87,7 @@ per testare sara' necessario fornire dati di accesso adeguati a quest'ultimo.
 
 ## Documentazione Api
 
-Le Api sono state documentate tramite //Commenti?//.
+[Qui.](https://github.com/ema-r/RdCProgAlt/blob/main/docs.txt)
 
 ## Autori
 
