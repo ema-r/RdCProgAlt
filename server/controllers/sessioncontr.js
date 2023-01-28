@@ -43,10 +43,7 @@ module.exports = {
 				res.status(500).send({message: err, aaaaaaaaa: 'aaaaaaaaaaaaaa'});
 				return;
 			} else {
-				res.status(200).send({
-				message: 'registrazione riuscita',
-				uname: user.uname
-				})
+				return;
 			}
 		})
 	},
