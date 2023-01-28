@@ -2,15 +2,12 @@ const axios = require('axios')
 const dotenv = require('dotenv').config()
 
 module.exports = {
-	//cosa vogliamo passargli, req_options?
 	async APIrequest(datastring) {
 		const dataArray = datastring.split(':');
 		if (dataArray[0] === 'test') {
 			console.log('TEST RICONOSCIUTO CORRETTAMENTE');
 			return;
 		}
-		//dataArray[0] destinatario api, [1] playlist id, [2] token
-		//forse vale la pena criptare token
 		if (dataArray[0] === 'spotify') {
 			console.log('opero su api spotify, playlist_id: '+dataArray[1]);
 			const options = {
@@ -18,7 +15,6 @@ module.exports = {
 				playlist_id: dataArray[1],
 				access_token: dataArray[2]	
 			}
-			//await o no? aggiungiamo error handling?
 			await spotifyScrubPlaylist(options);
 			return;
 		} 
@@ -111,9 +107,7 @@ async function youtubeElementiDaRimuovere(token, elements) {
 	var cnt = 0;
 	elements.forEach(async function(videoData) {
 		cnt = cnt+1
-		console.log("CIAO00000000");
 		if (!youtubeIsVideoAvailable(token, videoData)) {
-			console.log("CIAO");
 			await youtubeRimuoviVideo(token, videoData);
 		}
 	})

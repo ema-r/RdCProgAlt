@@ -74,8 +74,6 @@ module.exports = function(app) {
 	app.post('/youtube/scrub_playlist', [functions.sessionCheck, functions.hasGivenYoutubePerm] ,async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 		rabbitfun.sendAPIData('youtube:'+req.body.formUrl1+':'+tokenData.accessToken);
-
-
 		res.status(202).send({message: 'richiesta API accettata'});
 		
 	});

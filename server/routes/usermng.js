@@ -37,8 +37,12 @@ module.exports = function(app) {
 	//per utilizzo applicazione. se andato senza problemi redirige a 
 	//home
 	app.post('/oauth/signup', async (req, res) => {
-		var data = await controller.signUp(req,res);
-		res.redirect('/oauth');
+		var code = controller.signUp(req,res);
+		if (code !== 1) {
+			res.status(500).send({message: 'iscrizione non riuscita, account gia presente'});
+		} else {
+			res.redirect('/oauth');
+		}
 	});
 	
 	//Riceve richieste creazione account. Necessita un campo uname
@@ -48,9 +52,12 @@ module.exports = function(app) {
 	//status 200 e un JSON contenente messaggio di reg riuscita
 	//e nome utente.
 	app.post('/oauth/signup/api', async (req, res) => {
-		var data = await controller.signUp(req,res);
-
-		res.status(200).send({message: 'iscrizione riuscita'});
+		var code = await controller.signUp(req,res);
+		if (code !== 1) {
+			res.status(500).send({message: 'iscrizione non riuscita, account gia presente'});
+		} else {
+			res.status(200).send({message: 'iscrizione riuscita'});
+		}
 	})
 
 	//Necessita un campo uname e pword validi e gia presenti nel DB

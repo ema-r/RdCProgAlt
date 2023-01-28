@@ -40,11 +40,9 @@ module.exports = {
 		userv2.save((err, user) => {
 			if (err) {
 				console.log('triggered errore iscrizione, ' + 'errore: '+err)
-				res.status(500).send({message: err, aaaaaaaaa: 'aaaaaaaaaaaaaa'});
-				return;
-			} else {
-				return;
+				return 0;
 			}
+			return 1;
 		})
 	},
 	async signIn(req,res) {
@@ -215,7 +213,7 @@ module.exports = {
 			}
 			return {accessToken: accessTokenData.accessToken}
 		} catch(error) {
-			res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});
+			return res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});
 		}
 	},
 	async getSpotifyTokens(req,res) {
@@ -231,8 +229,7 @@ module.exports = {
 			}
 			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
-			console.log(error, 'fallimento token spotify');
-			throw new Error(error.message);
+			return res.status(500).send({message: error+' in function getSpotifyTokens @ sessioncontr.js'});
 		}
 	},
 	async deleteSpotifyData(req,res) {

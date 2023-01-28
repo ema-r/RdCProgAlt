@@ -34,14 +34,14 @@ module.exports = {
 	async hasGivenSpotifyPerm(req, res, next) {
 		var data = await controller.spotifyGetPermission(req,res);		
 		if (data === false) {
-			res.status(403).send({message: 'accesso a spotify necessario'});
+			return res.status(403).send({message: 'accesso a spotify necessario'});
 		}
 		next();
 	},
 	async  hasGivenYoutubePerm(req, res, next) {
 		var data = await controller.youtubeGetPermission(req,res);
 		if (data === false) {
-			res.status(403).send({message: 'accesso a youtube necessario'});
+			return res.status(403).send({message: 'accesso a youtube necessario'});
 		}
 		next();
 	}
