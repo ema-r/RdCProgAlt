@@ -90,9 +90,10 @@ module.exports = function(app) {
 
 	//elimina dati utente relativi a youtube (id token, access token, refresh token). Richiede 
 	//sessione valida
-	app.delete('/youtube/delete_access_data', [functions.sessionCheck], async function(req,res) {
+	app.post('/youtube/delete_access_data', [functions.sessionCheck], async function(req,res) {
 		await userController.deleteYoutubeData(req,res);
-		res.redirect('/login/oauth');
+		console.log("Dati youtube cancellati");
+		res.redirect('/');
 	})
 	
 }

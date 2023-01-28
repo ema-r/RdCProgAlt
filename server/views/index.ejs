@@ -81,7 +81,25 @@
             required />
           <input type="submit" value="OK" />
       </form>
-        
+      
+      <br>
+      <p>Cancella dati: </p>
+      <div id="Cancella" style="display: flex;">
+       
+        <form action="/oauth/delete" method="post">
+          <input type="submit" value="Utente" 
+            name="CancellaUtente" id="CancellaUtente" />
+        </form>
+        <form action="/youtube/delete_access_data" method="post">
+          <input type="submit" value="Youtube" 
+            name="CancellaYoutube" id="CancellaYoutube" />
+        </form>
+        <form action="/spotify/delete_access_data" method="post">
+          <input type="submit" value="Spotify" 
+            name="CancellaSpotify" id="CancellaSpotify" />
+        </form>
+
+      </div>
     </div>
     
   </div>
