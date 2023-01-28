@@ -80,7 +80,7 @@ module.exports = function(app) {
 	//Necessita campo uname e pword validi, gia presenti nel DB
 	//se non incontra problemi redirige a home, per FRONTEND
 	app.post('/oauth/delete', [functions.sessionCheck] ,async (req,res) => {
-		var data = await controller.deleteUser(req,res);
+		var data = await controller.deleteUserFrontend(req,res);
 		console.log("Dati utente cancellati");
 		res.redirect('/');
 	});
