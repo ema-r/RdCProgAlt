@@ -271,6 +271,21 @@ module.exports = {
 			throw new Error(error.message);
 		}
 
+	},
+	async deleteUserFrontend(req,res) {
+		try {
+			UserV2.deleteOne({id: req.body.user_id}), function(err,data) {
+				if (err) {
+					return res.status(500).send({message: 'errore cancellazione account'});
+				}
+				console.log('account cancellato correttamente');
+				return;
+			}
+		} catch(error) {			
+			console.log(error, 'fallimento sign in');
+			throw new Error(error.message);
+		}
+
 	}
 }
 
