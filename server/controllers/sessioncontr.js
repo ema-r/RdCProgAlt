@@ -216,8 +216,6 @@ module.exports = {
 			if (isExpired(accessTokenData.expiresAt)) {
 				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
 			}
-//			console.log('[accessTokenData in getGoogleTokens @ sessioncontr.js]'+accessTokenData)
-//			console.log('parametri in accessTokenData: '+Object.keys(accessTokenData));
 			return {accessToken: accessTokenData.accessToken}
 		} catch(error) {
 			res.status(500).send({message: error+' in function getGoogleTokens @ sessioncontr.js'});
@@ -234,7 +232,6 @@ module.exports = {
 			if (isExpired(accessTokenData.expiresAt)) {
 				accessTokenData = await refreshSpotifyToken(req,res);
 			}
-//			console.log('[GET SPOTIFY TOKEN] token trovato: '+accessTokenData.accessToken);
 			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
 			res.status(500).send({message: error});
@@ -248,7 +245,9 @@ module.exports = {
 	},
 	async deleteUser(req,res) {
 		try {
-			var user = UserV2.findOne({uname: req.body.uname, pword: req.body.pword});
+			var user = await UserV2.findOne({uname: req.body.uname});
+
+			console.log('user da cancellare trovato: '+user);
 
 			var pwordIsValid = bcrypt.compareSync(
 				req.body.pword,
@@ -265,6 +264,7 @@ module.exports = {
 					return res.status(500).send({message: 'errore cancellazione account'});
 				}
 				console.log('account cancellato correttamente');
+				return;
 			}
 		} catch(error) {			
 			console.log(error, 'fallimento sign in');

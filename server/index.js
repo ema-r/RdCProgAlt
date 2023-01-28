@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const sessions = require('express-session');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
@@ -42,23 +43,23 @@ app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use(express.static('models'));
 const oneDay = 1000 * 60 * 60 * 24;
-//app.use(sessions({
-////	genid: (req) => {
-////		return uuidv4()
-////	},
-//	secret: 'keyboard cat',
-//	store: MongoStore.create({
-//		mongoUrl: MONGO_URI,
-//		dbName: process.env.MONGO_DB_NAME,
-//		collectionName: "sessions",
-//		stringify: false,
-//		autoRemove: "interval",
-//		autoRemoveInterval: 1
-//	}),
-//  	resave: true,
-//  	saveUninitialized: false,
-//  	cookie: { secure: true , maxAge: oneDay}
-//}));
+app.use(sessions({
+//	genid: (req) => {
+//		return uuidv4()
+//	},
+	secret: 'keyboard cat',
+	store: MongoStore.create({
+		mongoUrl: MONGO_URI,
+		dbName: process.env.MONGO_DB_NAME,
+		collectionName: "sessions",
+		stringify: false,
+		autoRemove: "interval",
+		autoRemoveInterval: 1
+	}),
+  	resave: true,
+  	saveUninitialized: false,
+  	cookie: { secure: true , maxAge: oneDay}
+}));
 
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
