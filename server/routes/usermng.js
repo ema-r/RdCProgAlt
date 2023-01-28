@@ -58,7 +58,7 @@ module.exports = function(app) {
 	app.post('/oauth/login', async (req, res) => {
 		session = req.session
 		var data = await controller.signIn(req,res);
-		res.cookie('user_id',data.user_id.toHexString());	
+		res.cookie('user_id',data.user_id);	
 		res.render(href='partials/logged_in', {Dati: data});
 	})
 

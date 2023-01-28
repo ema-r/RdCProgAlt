@@ -103,9 +103,6 @@ module.exports = function(app) {
 	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
 		var tokenData = await userController.getSpotifyTokens(req, res)
 
-		//check preliminare errori?
-		
-
 		//qui rabbitmq?
 		rabbitfun.sendAPIData('spotify:'+req.body.playlist_id+':'+tokenData.accessToken);
 
@@ -114,11 +111,14 @@ module.exports = function(app) {
 		res.status(202).send({message: 'richiesta API accettata'});
 	});
 
+	app.get('/spotify/ttest', [functions.sessionCheck, functions.hasGivenSpotifyPerm], async (req,res) => {
+		var tokenData = await userController.getSpotifyTokens(req,res);
+		res.status(202).send({message: 'boh'});
+	})
+
 	app.post('/spotify/scrub_playlist', [functions.sessionCheck, functions.hasGivenSpotifyPerm], async (req, res) => {
 		var tokenData = await userController.getSpotifyTokens(req, res)
 
-		//check preliminare errori?
-		
 
 		//qui rabbitmq?
 		rabbitfun.sendAPIData('spotify:'+req.body.formUrl2+':'+tokenData.accessToken);

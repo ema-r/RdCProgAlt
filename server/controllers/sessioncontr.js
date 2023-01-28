@@ -234,7 +234,8 @@ module.exports = {
 			}
 			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
-			res.status(500).send({message: error});
+			console.log(error, 'fallimento token spotify');
+			throw new Error(error.message);
 		}
 	},
 	async deleteSpotifyData(req,res) {
@@ -313,8 +314,6 @@ async function refreshSpotifyToken(req,res) {
 			},
 		});
 		
-
-		//RIVEDI QUESTA PARTE
 		req.body.access_token = request.access_token;
 		req.body.expires_in = request.expires_in;
 		spotifycontr.updateSpotifyToken(req,res)
