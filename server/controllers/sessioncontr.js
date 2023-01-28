@@ -24,26 +24,20 @@ var generateRandomString = function(length) {  //va spostata in functions, per o
 
 module.exports = {
 	//Funzione signup FRONTEND
-	signUp(req, res) {	
-		var userv2 = new UserV2({
-			uname: req.body.uname,
-			pword: bcrypt.hashSync(req.body.pword, 8),
-			api_id: generateRandomString(16), //da gestire errore collisione in caso due account con stesso api_id
-			api_sc: bcrypt.hashSync(generateRandomString(64), 8),
-			spotify_data: new UserV2_spotify_data({
-				has_permission: false
-			}),
-			youtube_data: new UserV2_youtube_data({
-				has_permission: false
+	async signUp(req, res) {
+		try {		
+			var retvalue = 0;
+			var userv2 = new UserV2({
+				uname: req.body.uname,
+				pword: bcrypt.hashSync(req.body.pword, 8)
 			})
-		})
-		userv2.save((err, user) => {
-			if (err) {
-				console.log('triggered errore iscrizione, ' + 'errore: '+err)
-				return 0;
-			}
-			return 1;
-		})
+			let userSave = await userv2.save()
+			return;
+		} catch(error) {
+			console.log('errore iscrizione: '+error);
+			res.status(500).send({message: 'errore iscrizione, probabilmente nome account è gia preso', err: error.code});
+		}
+
 	},
 	async signIn(req,res) {
 		try {

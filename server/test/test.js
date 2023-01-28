@@ -21,7 +21,7 @@ describe("test accesso e permessi", () => {
 	  chai.request(host)
 	      .post('oauth/signup')
 	      .set('content-type', 'application/x-www-form-urlencoded')
-	      .send({uname: 'test', pword: 'test1'})
+	      .send({uname: 'test525', pword: 'test1'})
 	      .end(function(error, response, body) {
 		      if (error) {
 			      done(error);
@@ -54,7 +54,7 @@ describe("test accesso e permessi", () => {
             .request(host)
             .post('oauth/login/api')
             .set('content-type', 'application/x-www-form-urlencoded')
-            .send({uname: 'test', pword: 'test1'})
+            .send({uname: 'test525', pword: 'test1'})
             .end(function(error, response, body) {
                 if (error) {
                     done(error);
@@ -71,7 +71,7 @@ describe("test accesso e permessi", () => {
 	  .request(host)
 	  .delete('oauth/delete/api')
 	  .set('content-type', 'application/x-www-form-urlencoded')
-	  .send({uname: 'test', pword: 'test1'})
+	  .send({uname: 'test525', pword: 'test1'})
 	  .end(function(error,response,body) {
 		  if (error) {
 			  done(error);
@@ -145,7 +145,6 @@ describe("test api", () => {
               }
           });
   });
-//  
   it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
 	    this.timeout(10000);
             chai

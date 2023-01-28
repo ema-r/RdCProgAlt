@@ -94,8 +94,6 @@ async function initialize() {
 			new userModel({
 				uname: "dev",
 				pword: bcrypt.hashSync('devpass', 8),
-				api_sc: bcrypt.hashSync(generateRandomString(64),8),
-				sancrispino: false,
 			}).save(err => {
 				if (err) { console.log('salvataggio modello dummy fallito:', err) }
 			})
