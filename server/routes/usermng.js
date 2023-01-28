@@ -26,6 +26,7 @@ module.exports = function(app) {
 	app.get('/oauth/signup', (req,res) => {
 		//implem check duplicati. Gia presenti nelle funzioni
 		//vanno solamente aggiunti
+
 		res.render(href="partials/signup_form")
 	});	
 
