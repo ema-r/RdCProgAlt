@@ -146,22 +146,22 @@ describe("test api", () => {
           });
   });
 //  
-//  it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
-//	    this.timeout(10000);
-//            chai
-//                .request(host)
-//                .post('youtube/scrub_playlist/api')
-//                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
-//                .send({playlist_id: 'PLnif9Rfb5AdkmxSH3fAMsozp5eTnSqBYf'})
-//                .end(function(error, response, body) {
-//                    if (error) {
-//                        done(error);
-//                    } else {
-//                console.log(response.statusCode);
-//                expect(response.statusCode).to.equal(202);
-//                console.log(response);
-//                        done();
-//                    }
-//                });
-//      });
+  it('Richiesta playlist a youtube, con JWT token corretto. Restituisce 200', function(done) {
+	    this.timeout(10000);
+            chai
+                .request(host)
+                .post('youtube/scrub_playlist/api')
+                .set({'content-type': 'application/x-www-form-urlencoded', 'x-access-token': token})
+                .send({playlist_id: 'PL3NbNT5u7ISkrMCyLZmt8Gs7tU_ef3lOa'})
+                .end(function(error, response, body) {
+                    if (error) {
+                        done(error);
+                    } else {
+                console.log(response.statusCode);
+                expect(response.statusCode).to.equal(202);
+                console.log(response);
+                        done();
+                    }
+                });
+      });
 });
