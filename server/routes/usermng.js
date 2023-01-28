@@ -37,7 +37,7 @@ module.exports = function(app) {
 	//home
 	app.post('/oauth/signup', async (req, res) => {
 		var data = await controller.signUp(req,res);
-		res.redirect('/');
+		res.redirect('/oauth');
 	});
 	
 	//Riceve richieste creazione account. Necessita un campo uname
@@ -48,6 +48,7 @@ module.exports = function(app) {
 	//e nome utente.
 	app.post('/oauth/signup/api', async (req, res) => {
 		var data = await controller.signUp(req,res);
+
 		res.status(200).send({message: 'iscrizione riuscita'});
 	})
 
@@ -57,16 +58,8 @@ module.exports = function(app) {
 	app.post('/oauth/login', async (req, res) => {
 		session = req.session
 		var data = await controller.signIn(req,res);
-		console.log(data)
-		//CREAZIONE COOKIE PIU SOLIDA NECESSARIA
-		console.log(data.user_id.toHexString());
 		res.cookie('user_id',data.user_id.toHexString());	
 		res.render(href='partials/logged_in', {Dati: data});
-
-//		var response = JSON.stringify(res);
-//		var resp = await JSON.parse(response);
-//		console.log('oauth login route res: '+response);
-//		res.redirect('https://localhost:8443/api/test')
 	})
 
 	//Necessita campo uname e pword validi e gia presenti nel DB
