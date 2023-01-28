@@ -135,9 +135,10 @@ module.exports = function(app) {
 	})
 
 	//COME SOPRA MA DESTINATA A FRONTEND
-	app.delete('/spotify/delete_access_data', [functions.sessionCheck], async function(req,res) {
+	app.post('/spotify/delete_access_data', [functions.sessionCheck], async function(req,res) {
 		await userController.deleteSpotifyData(req,res);
-		res.redirect('/login/oauth');
+		console.log("Dati Spotify cancellati");
+		res.redirect('/');
 	})
 
 	app.get('/spotify/rmqtest', async function(req,res) {
