@@ -19,8 +19,7 @@ module.exports = function(app) {
 	//genera oauth url per google e redirige
 	//
 	//REIMPLEMENTARE CHECK AUTENTICAZIONE, CON NUOVA FUNZ TOKEN UTENTE
-	//app.get('/googlelogin/init', [functions.tokenCheck], (req, res) => {
-	app.get('/googlelogin/init', (req, res) => {
+	app.get('/googlelogin/init', [functions.sessionCheck], (req, res) => {
 		res.redirect(getGoogleOAuthURL());
 	});
 	
@@ -62,7 +61,7 @@ module.exports = function(app) {
 	//playlist da google con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
 	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso google. restituisce 202 accettato
 	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google
-	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck], async (req, res) => {
+	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 
 		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
@@ -72,7 +71,7 @@ module.exports = function(app) {
 		
 	});
 
-	app.post('/youtube/scrub_playlist', async (req, res) => {
+	app.post('/youtube/scrub_playlist', [functions.sessionCheck, functions.hasGivenYoutubePerm] ,async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
 		rabbitfun.sendAPIData('youtube:'+req.body.formUrl1+':'+tokenData.accessToken);
 

@@ -38,7 +38,7 @@ module.exports = function(app) {
 	//gestione access token e refresh token automatizzata.
 	//
 	//app.get('/oauth/spotify/login', [functions.tokenCheck], function(req, res) {
-	app.get('/oauth/spotify/login', function(req, res) {
+	app.get('/oauth/spotify/login', [functions.sessionCheck], function(req, res) {
 		session = req.session;
 		var state = generateRandomString(16);
 		res.cookie(stateKey, state, {httpOnly: false});
@@ -100,7 +100,7 @@ module.exports = function(app) {
 	//playlist da spotify con chiamata api, itera su lista ottenuta per ottenere gli elementi da rimuovere
 	//e poi rimuove gli elementi in lista 1 ad 1 con chiamate api verso spotify. restituisce 200 se andato a buon fine
 	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a spotify
-	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck],  async function(req, res){
+	app.post('/spotify/scrub_playlist/api', [functions.tokenCheck, functions.hasGivenSpotifyPerm],  async function(req, res){
 		var tokenData = await userController.getSpotifyTokens(req, res)
 
 		//check preliminare errori?
@@ -114,7 +114,7 @@ module.exports = function(app) {
 		res.status(202).send({message: 'richiesta API accettata'});
 	});
 
-	app.post('/spotify/scrub_playlist',  async (req, res) => {
+	app.post('/spotify/scrub_playlist', [functions.sessionCheck, functions.hasGivenSpotifyPerm], async (req, res) => {
 		var tokenData = await userController.getSpotifyTokens(req, res)
 
 		//check preliminare errori?

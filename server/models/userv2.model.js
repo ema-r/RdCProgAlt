@@ -24,7 +24,6 @@ const UserV2 = mongoose.model(
 		youtube_id_token: String,
 		youtube_expires_in: Number,
 		youtube_refresh_token: String,
-		sancrispino: Boolean
 	})
 );
 

@@ -93,6 +93,32 @@ module.exports = {
 			throw new Error(error.message)
 		}
 	},
+	async spotifyGetPermission(req,res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id});
+
+			if (!user) {
+				return res.status(403).send({message:'dati user non trovati'});
+			}
+			return user.spotify_has_permission;
+		} catch(error) {
+			console.log(error,'fallimento db');
+			throw new Error(error.message);
+		}
+	},	
+	async youtubeGetPermission(req,res) {
+		try {
+			var user = await UserV2.findOne({id: req.body.user_id});
+
+			if (!user) {
+				return res.status(403).send({message:'dati user non trovati'});
+			}
+			return user.youtube_has_permission;
+		} catch(error) {
+			console.log(error,'fallimento db');
+			throw new Error(error.message);
+		}
+	},
 	async requestJWT(req,res) {
 		try {
 			var user = await UserV2.findOne({id: req.body.user_id})
@@ -187,9 +213,9 @@ module.exports = {
 				return;
 			}
 			var accessTokenData = await googlecontr.getAccessToken(req,res);
-//			if (isExpired(accessTokenData.expiresAt)) {
-//				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
-//			}
+			if (isExpired(accessTokenData.expiresAt)) {
+				accessTokenData = await refreshSpotifyToken(googlecontr.getRefreshToken(req,res));
+			}
 //			console.log('[accessTokenData in getGoogleTokens @ sessioncontr.js]'+accessTokenData)
 //			console.log('parametri in accessTokenData: '+Object.keys(accessTokenData));
 			return {accessToken: accessTokenData.accessToken}
@@ -204,13 +230,10 @@ module.exports = {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-//			console.log('[FUNZIONE GET SPOTIFY TOKEN] user trovato: '+user)
 			var accessTokenData = await spotifycontr.getAccessToken(req,res);
-//			console.log('[FUNZIONE GET SPOTIFY TOKEN] token trovato: ');
-//			if (isExpired(accessTokenData.expiresAt)) {
-//				req.body.refreshToken = spotifycontr.getRefreshToken(req,res)
-//				accessTokenData = await refreshSpotifyToken(req,res);
-//			}
+			if (isExpired(accessTokenData.expiresAt)) {
+				accessTokenData = await refreshSpotifyToken(req,res);
+			}
 //			console.log('[GET SPOTIFY TOKEN] token trovato: '+accessTokenData.accessToken);
 			return {accessToken: accessTokenData.accessToken};
 		} catch(error) {
@@ -265,7 +288,7 @@ async function refreshSpotifyToken(req,res) {
 	try {
 		var request = await axios.post(rootURL, { form: {
 				grant_type: 'refresh_token',
-				refresh_token: reftoken.refreshToken,
+				refresh_token: reftoken.refresh_token,
 			}
 		}, {
 			headers: {
@@ -306,5 +329,4 @@ async function refreshGoogleToken(req,res) {
 	} catch(error) {
 		res.status(500).send({message: 'error getting refresh token google'});
 	}
-	return
 }
