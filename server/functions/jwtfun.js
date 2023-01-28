@@ -31,14 +31,14 @@ module.exports = {
 			return res.status(403).send({message: 'cookie non fornito'});
 		}
 	},
-	hasGivenSpotifyPerm(req, res, next) {
+	async hasGivenSpotifyPerm(req, res, next) {
 		var data = await controller.spotifyGetPermission(req,res);		
 		if (data === false) {
 			res.status(403).send({message: 'accesso a spotify necessario'});
 		}
 		next();
 	},
-	hasGivenYoutubePerm(req, res, next) {
+	async  hasGivenYoutubePerm(req, res, next) {
 		var data = await controller.youtubeGetPermission(req,res);
 		if (data === false) {
 			res.status(403).send({message: 'accesso a youtube necessario'});
