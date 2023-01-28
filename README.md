@@ -59,7 +59,7 @@ SECRET e' utilizzato come secret key per varie funzioni di hashing.
 git clone https://github.com/ema-r/RdCProgAlt.git
 ```
 
-- Spostarsi nella directory "server" ed installare i moduli di node con:
+- Spostarsi nella directory "server" e "dbserver" ed installare i moduli di node con:
 
 ```
 cd RdCPRogAlt/server
@@ -70,15 +70,14 @@ Questo installa LOCALMENTE, sulla propria macchina unix i moduli npm necessari
 - Eseguire il build delle immagini e avviare il compose con:
 
 ```
-docker compose build
-docker compose up
+docker-compose up
 ```
 
 - Da Web Browser visitare [https://localhost:8443](https://localhost:8443)
 
 ## Test
 
-Per avviare i test automatici occorre spostarsi nella directori "server" e usare il seguente comando:
+Per avviare i test automatici occorre spostarsi nella directory "server" e usare il seguente comando:
 ```
 npm test
 ```
