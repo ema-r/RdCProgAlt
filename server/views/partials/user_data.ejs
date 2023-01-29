@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+
+</head>
+
+<body >
+  
+  <button type="submit" value="Submit" onclick="StampaDati()">Mostra Dati</button>
+
+  <form action="/" method="get">
+    <input type="submit" value="Torna alla Home, sei loggato" 
+         name="Logged" id="Logged" />
+  </form>
+
+  <br>
+
+  <form action="/googlelogin/init" method="get">
+    <input type="submit" value="Accesso con Google" 
+         name="LoggedGoogle" id="LoggedGoogle" />
+  </form>
+
+  <br>
+
+  <form action="/oauth/spotify/login" method="get">
+    <input type="submit" value="Accesso con Spotify" 
+         name="LoggedSpotify" id="LoggedSpotify" />
+  </form>
+  
+  <div id="loggedin">
+    <div id="user-profile">
+    </div>
+    <div id="oauth">
+    </div>
+  </div>
+  <script  type='text/javascript'>
+    function StampaDati(){
+    var rows =<%-JSON.stringify(Dati)%>  
+    console.log(rows);
+    function renderUserProfile(){
+      return `<h1>Loggato come: ${rows.uname}</h1>
+      <dt>Autorizzato ad accedere a Spotify: </dt><dd>${rows.spotify_has_permission}</dd>
+      <dt>Autorizzato ad accedere a Youtube: </dt><dd>${rows.youtube_has_permission}</dd>`
+    }
+    const userProfilePlaceholder = document.getElementById('user-profile');
+    userProfilePlaceholder.innerHTML = renderUserProfile();
+    }
+    
+  </script>
+
+</body>
+
+<footer>
+
+</footer>
+
+</html>
+
