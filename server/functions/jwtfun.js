@@ -23,12 +23,18 @@ module.exports = {
 		});
 	},
 	sessionCheck(req,res,next) {
-		console.log(req.cookies.user_id);
 		if(req.cookies.user_id !== undefined ){
 			req.body.user_id = req.cookies.user_id;
 			next();
 		} else {
 			return res.status(403).send({message: 'cookie non fornito'});
+		}
+	},
+	reverseSessionCheck(req,res,next) {
+		if (req.cookies.user_id !== undefined) {
+			return res.redirect('/');
+		} else {
+			next();
 		}
 	},
 	async hasGivenSpotifyPerm(req, res, next) {

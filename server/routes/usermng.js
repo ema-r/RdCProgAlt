@@ -13,7 +13,7 @@ module.exports = function(app) {
 		next();
 	});
 	//front end "home" funzioni login
-	app.get('/oauth', (req,res) => {
+	app.get('/oauth',[functions.reverseSessionCheck], (req,res) => {
 		console.log(functions)
 		if (functions.tokenCheck === 200) {
 			res.redirect("https://localhost:8443");
@@ -23,7 +23,7 @@ module.exports = function(app) {
 	});
 
 	//front end iscrizione
-	app.get('/oauth/signup', (req,res) => {
+	app.get('/oauth/signup', [functions.reverseSessionCheck],(req,res) => {
 		//implem check duplicati. Gia presenti nelle funzioni
 		//vanno solamente aggiunti
 
@@ -36,7 +36,7 @@ module.exports = function(app) {
 	//necessario per accedere a /oauth/login, che fornisce token JWT
 	//per utilizzo applicazione. se andato senza problemi redirige a 
 	//home
-	app.post('/oauth/signup', async (req, res) => {
+	app.post('/oauth/signup', [functions.reverseSessionCheck], async (req, res) => {
 		await controller.signUp(req,res);
 		res.redirect('/oauth');
 	});
@@ -55,11 +55,21 @@ module.exports = function(app) {
 	//Necessita un campo uname e pword validi e gia presenti nel DB
 	//Se non incontra problemi, manda utente a pagina account, 
 	//aggiunge cookie user id
-	app.post('/oauth/login', async (req, res) => {
+	app.post('/oauth/login', [functions.reverseSessionCheck], async (req, res) => {
 		session = req.session
 		var data = await controller.signIn(req,res);
 		res.cookie('user_id',data.user_id);	
-		res.render(href='partials/logged_in', {Dati: data});
+		res.redirect('/user/data');
+	})
+
+	app.get('/user/data', [functions.sessionCheck], async (req,res) => {
+		var data = await controller.getData(req,res);
+		res.render(href='partials/user_data', {Dati: data});
+	})
+
+	app.get('/user/data/api', [functions.tokenCheck], async (req,res) =>  {
+		var data = await controller.getData(req,res)
+		res.status(200).send(data);
 	})
 
 	//Necessita campo uname e pword validi e gia presenti nel DB
