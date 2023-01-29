@@ -9,8 +9,7 @@
   "scripts": {
     "dev": "nodemon -L index.js",
     "start": "node index.js",
-    "test": "mocha",
-    "test_spotify": "mocha -g spotify"
+    "test": "mocha --exit"
   },
   "keywords": [],
   "author": "",
