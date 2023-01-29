@@ -84,7 +84,6 @@ module.exports = function(app) {
 	//se non incontra problemi redirige a home, per FRONTEND
 	app.post('/oauth/delete', [functions.sessionCheck] ,async (req,res) => {
 		var data = await controller.deleteUserFrontend(req,res);
-		console.log("Dati utente cancellati");
 		res.redirect('/');
 	});
 	

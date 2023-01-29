@@ -54,7 +54,6 @@ module.exports = {
 					message: 'password non valida'
 				});
 			}
-			
 			var token = jwt.sign({id: user._id}, process.env.SECRET, {
 				expiresIn: 3600
 			});
@@ -247,17 +246,9 @@ module.exports = {
 					message: 'password non valida'
 				});
 			}		
-
-			UserV2.deleteOne({id: user._id}), function(err,data) {
-				if (err) {
-					return res.status(500).send({message: 'errore cancellazione account'});
-				}
-				console.log('account cancellato correttamente');
-				return;
-			}
+			let userDelete = await UserV2.deleteOne({uname: user.uname})
 		} catch(error) {			
-			console.log(error, 'fallimento sign in');
-			throw new Error(error.message);
+			return res.status(500).send({message: 'errore cancellazione account'});
 		}
 
 	},
