@@ -42,24 +42,7 @@ app.use(express.static(path.join(__dirname, '/public/css')));
 app.use(express.static(__dirname + 'public'));
 app.use(express.static('public'));
 app.use(express.static('models'));
-const oneDay = 1000 * 60 * 60 * 24;
-app.use(sessions({
-//	genid: (req) => {
-//		return uuidv4()
-//	},
-	secret: 'keyboard cat',
-	store: MongoStore.create({
-		mongoUrl: MONGO_URI,
-		dbName: process.env.MONGO_DB_NAME,
-		collectionName: "sessions",
-		stringify: false,
-		autoRemove: "interval",
-		autoRemoveInterval: 1
-	}),
-  	resave: true,
-  	saveUninitialized: false,
-  	cookie: { secure: true , maxAge: oneDay}
-}));
+
 
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, '/views/partials')));
@@ -89,7 +72,9 @@ mongoose
 	});
 
 async function initialize() {
+	console.log('index breakpoint 1')
 	userModel.estimatedDocumentCount((err, count) => {
+		console.log('index breakpoint 2')
 		if (!err && count === 0) {
 			new userModel({
 				uname: "dev",
@@ -101,7 +86,24 @@ async function initialize() {
 		}
 	});
 }
-
+const oneDay = 1000 * 60 * 60 * 24;
+app.use(sessions({
+//	genid: (req) => {
+//		return uuidv4()
+//	},
+	secret: 'keyboard cat',
+	store: MongoStore.create({
+		mongoUrl: MONGO_URI,
+		dbName: process.env.MONGO_DB_NAME,
+		collectionName: "sessions",
+		stringify: false,
+		autoRemove: "interval",
+		autoRemoveInterval: 1
+	}),
+  	resave: true,
+  	saveUninitialized: false,
+  	cookie: { secure: true , maxAge: oneDay}
+}));
 /* get root path */
 app.get('/', async (req, res) => {
 	res.render('index', { title: 'SongLify' });

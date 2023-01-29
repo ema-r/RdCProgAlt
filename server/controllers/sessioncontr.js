@@ -65,7 +65,7 @@ module.exports = {
 			};
 		} catch(error) {
 			console.log(error, 'fallimento sign in');
-			throw new Error(error.message)
+			return res.status(500).send({message: 'errore login'})
 		}
 		
 	},	
