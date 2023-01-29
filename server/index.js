@@ -17,7 +17,7 @@ const bcrypt = require('bcryptjs');
 const GoogleContr = require('./controllers/googlecontr');
 const authFunction = require("./functions/jwtfun");
 const INSTANCE = process.env.INSTANCE || '';
-const MONGO_URI = process.env.MONGO_URI || '';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongo:27017/';
 const PORT = process.env.PORT || 3001;
 const SPOT_TOKEN = process.env.SPOTIFY_OAUTH_TOKEN;
 
