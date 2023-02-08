@@ -14,7 +14,6 @@ module.exports = function(app) {
 	});
 	//front end "home" funzioni login
 	app.get('/oauth',[functions.reverseSessionCheck], (req,res) => {
-		console.log(functions)
 		if (functions.tokenCheck === 200) {
 			res.redirect("https://localhost:8443");
 		} else {

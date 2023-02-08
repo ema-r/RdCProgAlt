@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 	async updatePermissions(req, res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			{$set: { spotify_has_permission: true }},
 			function(err, data) {
 			if (err) {
@@ -19,7 +19,7 @@ module.exports = {
 	},
 	async getPermissions(req,res) {
 		try {
-			var spotData = await userv2.findOne({id: req.body.user_id});
+			var spotData = await userv2.findOne({_id: req.body.user_id});
 
 			if (!spotData) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
@@ -32,7 +32,7 @@ module.exports = {
 	},
 	async deleteData(req,res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			{$set: {spotify_has_permission: false}, $unset: {spotify_access_token: '', spotify_expires_in: '', spotify_refresh_token: ''}},
 			function(err, data) {
 				if (err) {
@@ -49,7 +49,7 @@ module.exports = {
 	async updateAccessToken(req, res) {
 		console.log('[ACCESS TOKEN UPDATE] ACCESS TOKEN: '+req.body.access_token);
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {spotify_access_token: req.body.access_token,
 				spotify_expires_in: ((new Date().getTime() / 1000) + req.body.expires_in)}},
@@ -68,7 +68,7 @@ module.exports = {
 	async updateRefreshToken(req,res) {
 		console.log('sono in updateRefreshToken')
 		userv2.updateOne({
-		id: req.body.user_id},
+		_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {spotify_refresh_token: req.body.refresh_token}},
 			function(err, data) {
@@ -89,7 +89,7 @@ module.exports = {
 	},
 	async getAccessToken(req,res) {
 		try {
-			var spotData = await userv2.findOne({id: req.body.user_id})		
+			var spotData = await userv2.findOne({_id: req.body.user_id})		
 
 			if (!spotData || !spotData.spotify_access_token) {
 				return res.status(404).send({message: 'dati spotify relativi ad user non trovati'});
@@ -105,7 +105,7 @@ module.exports = {
 		}
 	},
 	async getRefreshToken(req,res) {
-		userv2.findOne({id: req.body.user_id}).exec((err,spotData) => {
+		userv2.findOne({_id: req.body.user_id}).exec((err,spotData) => {
 			if (err) {
 				return res.status(500).send({message: err});
 			}

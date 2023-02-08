@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 	async updatePermissions(req, res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			{$set: { youtube_has_permission: true }},
 			function(err, data) {
 			if (err) {
@@ -19,7 +19,7 @@ module.exports = {
 	},	
 	async getPermissions(req,res) {
 		try {
-			var ytData = await userv2.findOne({id: req.body.user_id});
+			var ytData = await userv2.findOne({_id: req.body.user_id});
 
 			if (!ytData) {
 				return res.status(404).send({message: 'dati youtube relativi ad user non trovati'});
@@ -32,7 +32,7 @@ module.exports = {
 	},	
 	async deleteData(req,res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			{$set: {youtube_has_permission: false}, $unset: {youtube_access_token: '', youtube_expires_in: '', youtube_refresh_token: '', youtube_id_token: ''}},
 			function(err, data) {
 				if (err) {
@@ -47,7 +47,7 @@ module.exports = {
 	},
 	async updateAccessToken(req, res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {youtube_access_token: req.body.google_access_token,
 				expires_in: ((new Date().getTime() / 1000) + req.body.google_expires_in)}},
@@ -65,7 +65,7 @@ module.exports = {
 
 	async updateData(req, res) {
 		userv2.updateOne({
-			id: req.body.user_id},
+			_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {san_crispino: true}},
 			function(err, data) {
@@ -82,7 +82,7 @@ module.exports = {
 
 	async updateRefreshToken(req,res) {
 		userv2.updateOne({
-		id: req.body.user_id},
+		_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {youtube_refresh_token: req.body.google_refresh_token}},
 			function(err, data) {
@@ -98,7 +98,7 @@ module.exports = {
 	},	
 	async updateIdToken(req,res) {
 		userv2.updateOne({
-		id: req.body.user_id},
+		_id: req.body.user_id},
 			//IMPLEMENTARE CRITTATURA TRAMITE CRYPTO
 			{$set: {youtube_id_token: req.body.google_id_token}},
 			function(err, data) {
@@ -114,7 +114,7 @@ module.exports = {
 	},
 	async getAccessToken(req,res) {
 		try {
-			var spotData  = await userv2.findOne({id: req.body.user_id})
+			var spotData  = await userv2.findOne({_id: req.body.user_id})
 			if (!spotData) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
@@ -127,7 +127,7 @@ module.exports = {
 	},
 	async getRefreshToken(req,res) {
 		try {
-			var user = userv2.findOne({id: req.body.user_id});
+			var user = userv2.findOne({_id: req.body.user_id});
 			if (!spotData || !spotData.youtube_access_token) {
 				return res.status(404).send({message: 'dati google relativi ad user non trovati'});
 			}
@@ -138,7 +138,7 @@ module.exports = {
 	},
 	async getIdToken(req,res) {
 		try {
-			var user = userv2.findOne({id: req.body.user_id})
+			var user = userv2.findOne({_id: req.body.user_id})
 			if (err) {
 				return res.status(500).send({message: err});
 			}

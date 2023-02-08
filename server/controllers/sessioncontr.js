@@ -35,6 +35,7 @@ module.exports = {
 			return;
 		} catch(error) {
 			console.log('errore iscrizione: '+error);
+			
 			res.status(500).send({message: 'errore iscrizione, probabilmente nome account è gia preso', err: error.code});
 		}
 
@@ -70,8 +71,8 @@ module.exports = {
 	},	
 	async getData(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id});
-
+			var user = await UserV2.findOne({_id: req.body.user_id});
+			console.log('[LOGIN DATA] '+user)
 			if (!user) {
 				return res.status(404).send({message: 'dati user non trovati'});
 			}
@@ -83,8 +84,7 @@ module.exports = {
 	},
 	async spotifyGetPermission(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id});
-
+			var user = await UserV2.findOne({_id: req.body.user_id});
 			if (!user) {
 				return res.status(403).send({message:'dati user non trovati'});
 			}
@@ -96,7 +96,7 @@ module.exports = {
 	},	
 	async youtubeGetPermission(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id});
+			var user = await UserV2.findOne({_id: req.body.user_id});
 
 			if (!user) {
 				return res.status(403).send({message:'dati user non trovati'});
@@ -109,28 +109,21 @@ module.exports = {
 	},
 	async requestJWT(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id})
-			console.log('breakpoint 1')
+			var user = await UserV2.findOne({_id: req.body.user_id})
 			if (!user) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
 			}
-			console.log(user.uname);
-			console.log(req.body.api_sc)
-			console.log(user.api_sc)
 			var apiSecretIsValid = bcrypt.compareSync(req.body.api_sc, user.api_sc)
-			console.log('breakpoint 3')
 			if (!apiSecretIsValid) {
 				return res.status(401).send({
 					accessToken: null,
 					message: 'forbidden'
 				});
 			}
-			console.log('breakpoint 4')
 			var token = jwt.sign({ id: user._id }, process.env.SECRET, {
 				expiresIn: 3600
 			});
-			console.log('breakout 5');
 			res.status(200).send({
 				'accessToken': token
 			})
@@ -158,7 +151,7 @@ module.exports = {
 	},
 	async updateSpotifyTokens(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id})
+			var user = await UserV2.findOne({_id: req.body.user_id})
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
@@ -182,7 +175,7 @@ module.exports = {
 	},
 	async getSpotifyData (req, res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id})
+			var user = await UserV2.findOne({_id: req.body.user_id})
 			if (!user) {
 				return res.status(404).send({message: 'user non trovato'});
 			}
@@ -195,7 +188,7 @@ module.exports = {
 	},
 	async getGoogleTokens(req, res) {
 		try {
-			var user = UserV2.findOne({id: req.body.user_id})
+			var user = UserV2.findOne({_id: req.body.user_id})
 			if (!user || user === undefined) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
@@ -211,7 +204,7 @@ module.exports = {
 	},
 	async getSpotifyTokens(req,res) {
 		try {
-			var user = await UserV2.findOne({id: req.body.user_id})
+			var user = await UserV2.findOne({_id: req.body.user_id})
 			if (!user || user === undefined) {
 				res.status(404).send({message: 'user non trovato'});
 				return;
@@ -254,7 +247,7 @@ module.exports = {
 	},
 	async deleteUserFrontend(req,res) {
 		try {
-			UserV2.deleteOne({id: req.body.user_id}), function(err,data) {
+			UserV2.deleteOne({_id: req.body.user_id}), function(err,data) {
 				if (err) {
 					return res.status(500).send({message: 'errore cancellazione account'});
 				}

@@ -72,9 +72,7 @@ mongoose
 	});
 
 async function initialize() {
-	console.log('index breakpoint 1')
 	userModel.estimatedDocumentCount((err, count) => {
-		console.log('index breakpoint 2')
 		if (!err && count === 0) {
 			new userModel({
 				uname: "dev",

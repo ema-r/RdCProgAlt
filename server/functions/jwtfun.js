@@ -24,6 +24,7 @@ module.exports = {
 	},
 	sessionCheck(req,res,next) {
 		if(req.cookies.user_id !== undefined ){
+			console.log('COOKIE USER ID '+req.cookies.user_id);
 			req.body.user_id = req.cookies.user_id;
 			next();
 		} else {
