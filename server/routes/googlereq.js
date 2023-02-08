@@ -29,27 +29,24 @@ module.exports = function(app) {
 	//db
 	app.get('/oauth/google/login', async (req, res) => {
 		const code = req.query.code;
-		console.log('[GOOGLE CALLBACK ROUTE] code: '+code)
 		var tokens = await handlerGoogleOAuth(code);
 	
+
 		const id_token = tokens.id_token;
 		const access_token = tokens.access_token;
 		const refresh_token = tokens.refres_token;
 		const expires_in = tokens.expires_in
-	
-		console.log("[GOOGLE CALLBACK ROUTE] "+id_token);
-		console.log("[GOOGLE CALLBACK ROUTE] "+access_token);
-		console.log("[GOOGLE CALLBACK ROUTE] "+refresh_token);
 	
 		req.body.google_id_token = id_token;
 		req.body.google_access_token = access_token;
 		req.body.google_refresh_token = refresh_token;
 		req.body.google_expires_in = expires_in;
 
-		var result = await userController.updateGoogleTokens(req,res);
-	
+
 		//solo per test, puo essere tranquillamente rimosso piu avanti
 		req.body.user_id = req.cookies.user_id;
+		var result = await userController.updateGoogleTokens(req,res);
+	
 	
 		//aggiorna permessi nel nostro db
 		await googleController.updatePermissions(req,res);
@@ -63,7 +60,7 @@ module.exports = function(app) {
 	//accessibile solo tramite chiamate api con token jwt valido, necessario accesso a google
 	app.post('/youtube/scrub_playlist/api',  [functions.tokenCheck, functions.hasGivenYoutubePerm], async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
-
+		
 		rabbitfun.sendAPIData('youtube:'+req.body.playlist_id+':'+tokenData.accessToken);
 
 
@@ -73,6 +70,8 @@ module.exports = function(app) {
 
 	app.post('/youtube/scrub_playlist', [functions.sessionCheck, functions.hasGivenYoutubePerm] ,async (req, res) => {
 		var tokenData = await userController.getGoogleTokens(req,res);
+		var userData = await userController.getData(req,res);
+		console.log('USERDATA '+userData);
 		rabbitfun.sendAPIData('youtube:'+req.body.formUrl1+':'+tokenData.accessToken);
 		res.status(202).send({message: 'richiesta API accettata'});
 		
@@ -120,9 +119,6 @@ function getGoogleOAuthURL() {
 
 async function handlerGoogleOAuth(code) {
 	var tokens = await getGoogleOAuthToken(code);
-	console.log('[HANDLER]: '+ tokens.id_token);
-	console.log('[HANDLER]: '+ tokens.access_token);
-	console.log('[HANDLER]: '+ tokens.refresh_token);
 	const data = {
 		id_token: tokens.id_token,
 		access_token: tokens.access_token,

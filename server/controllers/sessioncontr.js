@@ -134,13 +134,13 @@ module.exports = {
 	},
 	async updateGoogleTokens(req,res) {
 		try {
-			if (req.body.refresh_token !== null) {
+			if (req.body.google_refresh_token !== null) {
 				googlecontr.updateRefreshToken(req,res);
 			}
-			if (req.body.access_token !== null) {
+			if (req.body.google_access_token !== null) {
 				googlecontr.updateAccessToken(req,res);
 			}
-			if (req.body.id_token !== null) {
+			if (req.body.google_id_token !== null) {
 				googlecontr.updateIdToken(req,res);
 			}
 			return;

@@ -7,7 +7,7 @@
 ## Caratteristiche del progetto
 Effettuando l'accesso con il proprio profilo Google o Spotify tramite OAUTH, e' possibile, inserendo il link di una playlist eliminare da quella stessa playlist tutti i video o le canzoni non disponibili.
 
-Le API rese disponibili da questo progetto sono documentate [qui](// inserisci file in questo percorso /server/public/docs/index.html).
+Le API rese disponibili da questo progetto sono documentate [qui](https://github.com/ema-r/RdCProgAlt/blob/main/docs.txt).
 
 ## Requisiti
 - [docker](https://www.docker.com/) 
