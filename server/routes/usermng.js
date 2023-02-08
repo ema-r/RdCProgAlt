@@ -83,7 +83,7 @@ module.exports = function(app) {
 	//se non incontra problemi redirige a home, per FRONTEND
 	app.post('/oauth/delete', [functions.sessionCheck] ,async (req,res) => {
 		var data = await controller.deleteUserFrontend(req,res);
-		res.redirect('/');
+		res.redirect('/oauth/logout');
 	});
 	
 	//Necessita campo uname e pword validi, gia presenti nel DB
